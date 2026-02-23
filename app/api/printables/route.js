@@ -68,7 +68,7 @@ export async function GET(request) {
 export async function POST(request) {
   try {
     const body = await request.json();
-    const { title, slug, description, tags, image, pdfPath, webpPath, categoryId, price, isFree, gallery, printLength, language, dimensions, customFields } = body;
+    const { title, slug, description, tags, image, pdfPath, webpPath, categoryId, price, isFree, gallery, printLength, language, dimensions, customFields, downloads, views } = body;
     
     if (!title || !slug || !categoryId) {
       return NextResponse.json(
@@ -106,7 +106,8 @@ export async function POST(request) {
         dimensions: dimensions || null,
         customFields: customFields || null,
         isActive: true,
-        downloads: 0
+        downloads: downloads || 0,
+        views: views || 0
       }
     });
     
