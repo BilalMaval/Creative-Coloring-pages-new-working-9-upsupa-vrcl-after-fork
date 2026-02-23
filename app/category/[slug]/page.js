@@ -5,7 +5,8 @@ import { Download, ArrowLeft, Grid3x3, Star, Heart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import prisma from '@/lib/prisma';
 
-export const dynamic = 'force-dynamic';
+// Revalidate every 60 seconds for faster page loads
+export const revalidate = 60;
 
 // Star rating component
 function StarRating({ rating }) {
