@@ -550,6 +550,37 @@ export default function AdminProductsPage() {
                 )}
               </div>
 
+              {/* Downloads and Views - Initial numbers */}
+              <div className="border-2 border-green-200 rounded-lg p-4 bg-green-50">
+                <Label className="text-green-800 font-bold mb-3 block">📊 Initial Stats (Will increment from these values)</Label>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="downloads">Downloads Count</Label>
+                    <Input
+                      id="downloads"
+                      type="number"
+                      min="0"
+                      value={formData.downloads}
+                      onChange={(e) => setFormData({ ...formData, downloads: e.target.value })}
+                      placeholder="0"
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">Set initial download count</p>
+                  </div>
+                  <div>
+                    <Label htmlFor="views">Views Count</Label>
+                    <Input
+                      id="views"
+                      type="number"
+                      min="0"
+                      value={formData.views}
+                      onChange={(e) => setFormData({ ...formData, views: e.target.value })}
+                      placeholder="0"
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">Set initial view count</p>
+                  </div>
+                </div>
+              </div>
+
               {/* Book Parameters - Only for Bookshop */}
               {isBookshopSelected() && (
                 <div className="border-2 border-purple-200 rounded-lg p-4 bg-purple-50">
