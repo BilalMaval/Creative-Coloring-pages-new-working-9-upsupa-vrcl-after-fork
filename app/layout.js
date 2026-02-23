@@ -30,10 +30,17 @@ export default function RootLayout({ children }) {
             })
           }}
         />
+        <style>{`
+          /* Prevent white flash during page transitions */
+          html, body {
+            background: linear-gradient(to bottom, #eff6ff, #faf5ff, #fdf2f8);
+            min-height: 100vh;
+          }
+        `}</style>
       </head>
-      <body className="antialiased">
+      <body className="antialiased flex flex-col min-h-screen bg-gradient-to-b from-blue-50 via-purple-50 to-pink-50">
         <Header />
-        <main className="flex-1 min-h-screen">
+        <main className="flex-1 flex flex-col">
           {children}
         </main>
         <Footer />
