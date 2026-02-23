@@ -12,7 +12,7 @@ import time
 from urllib.parse import urljoin
 
 # Configuration
-BASE_URL = "https://vercel-perf-boost.preview.emergentagent.com"
+BASE_URL = "https://coloring-perf-fix.preview.emergentagent.com"
 API_BASE = f"{BASE_URL}/api"
 
 def test_homepage_loads():

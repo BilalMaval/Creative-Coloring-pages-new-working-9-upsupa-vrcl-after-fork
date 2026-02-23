@@ -6,7 +6,7 @@ Targeted test for download count increment functionality
 import requests
 import time
 
-BASE_URL = "https://vercel-perf-boost.preview.emergentagent.com"
+BASE_URL = "https://coloring-perf-fix.preview.emergentagent.com"
 API_BASE = f"{BASE_URL}/api"
 
 def test_download_count_with_real_product():
