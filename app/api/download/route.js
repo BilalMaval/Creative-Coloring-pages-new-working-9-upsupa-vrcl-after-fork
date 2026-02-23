@@ -19,13 +19,14 @@ export async function GET(request) {
     if (productId) {
       try {
         await prisma.product.update({
-          where: { id: Number(productId) },
+          where: { id: productId }, // UUID string, not Number
           data: {
-            downloadCount: {
+            downloads: { // Correct field name from schema
               increment: 1,
             },
           },
         });
+        console.log('Download count incremented for product:', productId);
       } catch (err) {
         console.error('Failed to increment download count:', err);
       }
