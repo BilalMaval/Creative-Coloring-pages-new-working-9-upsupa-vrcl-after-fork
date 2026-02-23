@@ -157,14 +157,17 @@ frontend:
     file: "app/page.js"
     stuck_count: 0
     priority: "high"
-    needs_retesting: false
+    needs_retesting: true
     status_history:
         - working: true
         - agent: "main"
-        - comment: "Homepage loads with collections, optimized with revalidate=60 for faster loads"
+        - comment: "Homepage loads with collections, optimized with revalidate=120 for faster loads"
         - working: true
         - agent: "testing"
         - comment: "VERIFIED: Homepage loads successfully (200 OK) with expected 'Creative Coloring Pages' content. All collections displayed correctly with proper navigation."
+        - working: true
+        - agent: "main"
+        - comment: "Updated loading.js with animated shimmer skeletons, min-height to prevent footer showing early"
 
   - task: "Category Pages Performance"
     implemented: true
@@ -172,14 +175,17 @@ frontend:
     file: "app/category/[slug]/page.js"
     stuck_count: 0
     priority: "high"
-    needs_retesting: false
+    needs_retesting: true
     status_history:
         - working: true
         - agent: "main"
-        - comment: "Changed from force-dynamic to revalidate=60 for faster page loads"
+        - comment: "Changed from force-dynamic to revalidate=120 for faster page loads"
         - working: true
         - agent: "testing"
         - comment: "VERIFIED: Category page routing works correctly. Tested Animals & Pets category - loads with proper title, breadcrumbs, and product listings. Shows 7 items with correct download counts displayed."
+        - working: true
+        - agent: "main"
+        - comment: "Fixed Decimal serialization, updated loading skeleton with animated shimmer"
 
   - task: "Collection Pages Performance"
     implemented: true
@@ -187,11 +193,14 @@ frontend:
     file: "app/collection/[slug]/page.js"
     stuck_count: 0
     priority: "high"
-    needs_retesting: false
+    needs_retesting: true
     status_history:
         - working: true
         - agent: "main"
-        - comment: "Changed from force-dynamic to revalidate=60 for faster page loads"
+        - comment: "Changed from force-dynamic to revalidate=120 for faster page loads"
+        - working: true
+        - agent: "main"
+        - comment: "Updated loading skeleton with animated shimmer, min-height viewport fill"
 
   - task: "Product Pages Performance"
     implemented: true
@@ -199,11 +208,14 @@ frontend:
     file: "app/product/[slug]/page.js"
     stuck_count: 0
     priority: "high"
-    needs_retesting: false
+    needs_retesting: true
     status_history:
         - working: true
         - agent: "main"
-        - comment: "Changed from force-dynamic to revalidate=60 for faster page loads"
+        - comment: "Changed from force-dynamic to revalidate=120 for faster page loads"
+        - working: true
+        - agent: "main"
+        - comment: "Fixed Decimal serialization for price field, updated loading skeleton"
 
   - task: "Download Count Display"
     implemented: true
@@ -216,6 +228,18 @@ frontend:
         - working: true
         - agent: "main"
         - comment: "Download count displays correctly in product stats section"
+
+  - task: "Loading UX - Animated Skeletons"
+    implemented: true
+    working: true
+    file: "app/loading.js, app/*/loading.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: true
+        - agent: "main"
+        - comment: "Implemented animated shimmer skeletons matching page layouts, added min-height to prevent footer showing before content"
 
 metadata:
   created_by: "main_agent"
