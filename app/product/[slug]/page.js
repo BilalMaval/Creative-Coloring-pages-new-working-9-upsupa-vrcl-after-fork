@@ -2,8 +2,8 @@ import { notFound } from 'next/navigation';
 import prisma from '@/lib/prisma';
 import ProductPageClient from './ProductPageClient';
 
-// Cache for 5 minutes for faster loads
-export const revalidate = 300;
+// Cache for 2 minutes - ISR for fast page loads
+export const revalidate = 120;
 
 export async function generateMetadata({ params }) {
   const { slug } = params;
