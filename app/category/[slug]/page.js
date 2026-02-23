@@ -5,8 +5,8 @@ import { Download, ArrowLeft, Grid3x3, Star, Heart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import prisma from '@/lib/prisma';
 
-// Revalidate every 60 seconds for faster page loads
-export const revalidate = 60;
+// Cache for 5 minutes for faster loads
+export const revalidate = 300;
 
 // Star rating component
 function StarRating({ rating }) {
@@ -32,12 +32,10 @@ export async function generateMetadata({ params }) {
   try {
     const category = await prisma.category.findFirst({
       where: { slug },
-      include: { parent: true }
+      select: { name: true, description: true, parent: { select: { name: true } } }
     });
     
-    if (!category) {
-      return {};
-    }
+    if (!category) return {};
     
     return {
       title: `${category.name} - Creative Coloring Pages`,
@@ -50,49 +48,45 @@ export async function generateMetadata({ params }) {
 
 async function getCategoryData(slug) {
   try {
+    // Single query to get category with parent
     const category = await prisma.category.findFirst({
-      where: {
-        slug,
-        isActive: true
-      },
-      include: {
-        parent: true,
-        _count: {
-          select: { products: true }
-        }
+      where: { slug, isActive: true },
+      select: {
+        id: true,
+        name: true,
+        slug: true,
+        description: true,
+        parent: { select: { id: true, name: true, slug: true } }
       }
     });
     
     if (!category) return null;
     
-    // Get products that have this category as primary OR in additionalCategories
-    const allProducts = await prisma.product.findMany({
+    // Optimized: Only get products for THIS category directly
+    const products = await prisma.product.findMany({
       where: {
+        categoryId: category.id,
         isActive: true
       },
       orderBy: [
         { isFeatured: 'desc' },
         { createdAt: 'desc' }
       ],
-      include: {
+      select: {
+        id: true,
+        title: true,
+        slug: true,
+        webpPath: true,
+        isFree: true,
+        isFeatured: true,
+        price: true,
+        downloads: true,
         reviews: {
           where: { isApproved: true },
           select: { rating: true }
         }
-      }
-    });
-    
-    // Filter products that belong to this category (primary or additional)
-    const products = allProducts.filter(product => {
-      // Check primary category
-      if (product.categoryId === category.id) return true;
-      
-      // Check additional categories in customFields
-      if (product.customFields && product.customFields.additionalCategories) {
-        return product.customFields.additionalCategories.includes(category.id);
-      }
-      
-      return false;
+      },
+      take: 50 // Limit for performance
     });
     
     // Calculate average rating for each product
@@ -109,8 +103,8 @@ async function getCategoryData(slug) {
     });
     
     return {
-      category: JSON.parse(JSON.stringify(category)),
-      products: JSON.parse(JSON.stringify(productsWithRating))
+      category,
+      products: productsWithRating
     };
   } catch (error) {
     console.error('Error fetching category:', error);
