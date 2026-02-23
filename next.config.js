@@ -1,27 +1,34 @@
+/** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: 'standalone',
+  // Vercel optimized - no standalone needed for Vercel
   images: {
-    unoptimized: true,
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: '**.supabase.co',
+      },
+      {
+        protocol: 'https',
+        hostname: 'customer-assets.emergentagent.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'vfiyffogstwmeudvnasp.supabase.co',
+      },
+    ],
+    // Enable image optimization for Vercel
+    unoptimized: false,
   },
-  experimental: {
-    // Remove if not using Server Components
-    serverComponentsExternalPackages: ['mongodb'],
-  },
-  webpack(config, { dev }) {
-    if (dev) {
-      // Reduce CPU/memory from file watching
-      config.watchOptions = {
-        poll: 2000, // check every 2 seconds
-        aggregateTimeout: 300, // wait before rebuilding
-        ignored: ['**/node_modules'],
-      };
-    }
-    return config;
-  },
-  onDemandEntries: {
-    maxInactiveAge: 10000,
-    pagesBufferLength: 2,
-  },
+  // Vercel handles external packages automatically
+  serverExternalPackages: ['@prisma/client'],
+  // Faster builds on Vercel
+  swcMinify: true,
+  // Enable React strict mode for better development
+  reactStrictMode: true,
+  // Compression handled by Vercel
+  compress: true,
+  // Powered by header
+  poweredByHeader: false,
   async headers() {
     return [
       {
