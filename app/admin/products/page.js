@@ -353,7 +353,9 @@ export default function AdminProductsPage() {
       gallery: product.gallery || [],
       printLength: product.printLength || '',
       language: product.language || '',
-      dimensions: product.dimensions || ''
+      dimensions: product.dimensions || '',
+      downloads: String(product.downloads || 0),
+      views: String(product.views || 0)
     });
     setDialogOpen(true);
   };
