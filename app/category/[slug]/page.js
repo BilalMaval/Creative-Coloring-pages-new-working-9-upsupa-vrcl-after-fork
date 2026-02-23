@@ -89,7 +89,7 @@ async function getCategoryData(slug) {
       take: 50 // Limit for performance
     });
     
-    // Calculate average rating for each product
+    // Calculate average rating for each product and serialize
     const productsWithRating = products.map(product => {
       const ratings = product.reviews || [];
       const avgRating = ratings.length > 0 
@@ -97,6 +97,7 @@ async function getCategoryData(slug) {
         : 0;
       return {
         ...product,
+        price: product.price ? Number(product.price) : 0,
         averageRating: Math.round(avgRating * 10) / 10,
         reviewCount: ratings.length
       };
