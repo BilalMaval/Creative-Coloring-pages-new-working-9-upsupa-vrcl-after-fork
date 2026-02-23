@@ -102,7 +102,7 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "Import project from GitHub, fix cold start/page delays, and fix download counting not working on frontend UI"
+user_problem_statement: "Import project from GitHub, fix cold start/page delays, fix download counting, and improve loading UX"
 
 backend:
   - task: "Supabase PostgreSQL Database Connection"
