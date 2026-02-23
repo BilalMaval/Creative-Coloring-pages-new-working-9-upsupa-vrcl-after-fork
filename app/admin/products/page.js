@@ -270,6 +270,8 @@ export default function AdminProductsPage() {
         price,
         isFree,
         gallery: formData.gallery,
+        downloads: parseInt(formData.downloads) || 0,
+        views: parseInt(formData.views) || 0,
         printLength: formData.printLength || null,
         language: formData.language || null,
         dimensions: formData.dimensions || null,
