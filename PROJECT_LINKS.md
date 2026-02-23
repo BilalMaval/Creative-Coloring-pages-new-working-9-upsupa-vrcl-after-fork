@@ -2,28 +2,28 @@
 
 ## 🚀 Quick Start
 
-**Live Website:** https://data-reconnect-1.preview.emergentagent.com
+**Live Website:** https://vercel-perf-boost.preview.emergentagent.com
 
 ## 📋 All Working Links
 
 ### Public Website
-- **Homepage:** https://data-reconnect-1.preview.emergentagent.com
-- **Collection Page (Coloring Pages):** https://data-reconnect-1.preview.emergentagent.com/collection/coloring-pages
-- **Collection Page (Calendars):** https://data-reconnect-1.preview.emergentagent.com/collection/calendars
-- **Collection Page (Printables):** https://data-reconnect-1.preview.emergentagent.com/collection/printables
-- **Category Page (Animals & Pets):** https://data-reconnect-1.preview.emergentagent.com/category/animals-pets
-- **Product Page (Cute Cat):** https://data-reconnect-1.preview.emergentagent.com/product/cute-cat-coloring-page
-- **Product Page (Dog):** https://data-reconnect-1.preview.emergentagent.com/product/happy-dog-coloring-page
-- **Product Page (Butterfly):** https://data-reconnect-1.preview.emergentagent.com/product/butterfly-garden-coloring
-- **Product Page (Rabbit):** https://data-reconnect-1.preview.emergentagent.com/product/cute-rabbit-coloring
+- **Homepage:** https://vercel-perf-boost.preview.emergentagent.com
+- **Collection Page (Coloring Pages):** https://vercel-perf-boost.preview.emergentagent.com/collection/coloring-pages
+- **Collection Page (Calendars):** https://vercel-perf-boost.preview.emergentagent.com/collection/calendars
+- **Collection Page (Printables):** https://vercel-perf-boost.preview.emergentagent.com/collection/printables
+- **Category Page (Animals & Pets):** https://vercel-perf-boost.preview.emergentagent.com/category/animals-pets
+- **Product Page (Cute Cat):** https://vercel-perf-boost.preview.emergentagent.com/product/cute-cat-coloring-page
+- **Product Page (Dog):** https://vercel-perf-boost.preview.emergentagent.com/product/happy-dog-coloring-page
+- **Product Page (Butterfly):** https://vercel-perf-boost.preview.emergentagent.com/product/butterfly-garden-coloring
+- **Product Page (Rabbit):** https://vercel-perf-boost.preview.emergentagent.com/product/cute-rabbit-coloring
 
 ### Admin Panel
-- **Admin Login:** https://data-reconnect-1.preview.emergentagent.com/admin/login
+- **Admin Login:** https://vercel-perf-boost.preview.emergentagent.com/admin/login
   - **Email:** admin@printables.com
   - **Password:** admin123
-- **Admin Dashboard:** https://data-reconnect-1.preview.emergentagent.com/admin
-- **Manage Categories:** https://data-reconnect-1.preview.emergentagent.com/admin/categories
-- **Manage Products:** https://data-reconnect-1.preview.emergentagent.com/admin/printables
+- **Admin Dashboard:** https://vercel-perf-boost.preview.emergentagent.com/admin
+- **Manage Categories:** https://vercel-perf-boost.preview.emergentagent.com/admin/categories
+- **Manage Products:** https://vercel-perf-boost.preview.emergentagent.com/admin/printables
 
 ## 🗄️ Database Information
 

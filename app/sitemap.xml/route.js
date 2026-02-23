@@ -3,7 +3,7 @@ import prisma from '@/lib/prisma';
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://data-reconnect-1.preview.emergentagent.com';
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://vercel-perf-boost.preview.emergentagent.com';
   
   try {
     // Fetch all active products
