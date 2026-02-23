@@ -32,9 +32,9 @@ export default function RootLayout({ children }) {
         />
       </head>
       <body className="antialiased">
-        <div className="flex flex-col min-h-screen">
+        <div className="min-h-screen flex flex-col">
           <Header />
-          <main className="flex-1">
+          <main className="flex-1 flex flex-col" style={{ minHeight: 'calc(100vh - 160px)' }}>
             {children}
           </main>
           <Footer />
