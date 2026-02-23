@@ -4,20 +4,19 @@ import { Sparkles, Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import prisma from '@/lib/prisma';
 
-// Revalidate every 60 seconds for faster page loads
-export const revalidate = 60;
+// Cache for 5 minutes for faster loads
+export const revalidate = 300;
 
 export async function generateMetadata({ params }) {
   const { slug } = params;
   
   try {
     const collection = await prisma.category.findFirst({
-      where: { slug, parentId: null }
+      where: { slug, parentId: null },
+      select: { name: true, description: true }
     });
     
-    if (!collection) {
-      return {};
-    }
+    if (!collection) return {};
     
     return {
       title: `${collection.name} - Creative Coloring Pages`,
@@ -30,29 +29,37 @@ export async function generateMetadata({ params }) {
 
 async function getCollectionData(slug) {
   try {
+    // Single query - get collection and its categories
     const collection = await prisma.category.findFirst({
-      where: {
-        slug,
-        parentId: null,
-        isActive: true
+      where: { slug, parentId: null, isActive: true },
+      select: {
+        id: true,
+        name: true,
+        slug: true,
+        description: true,
+        children: {
+          where: { isActive: true },
+          orderBy: { order: 'asc' },
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+            description: true
+          }
+        }
       }
     });
     
     if (!collection) return null;
     
-    const categories = await prisma.category.findMany({
-      where: {
-        parentId: collection.id,
-        isActive: true
-      },
-      orderBy: {
-        order: 'asc'
-      }
-    });
-    
     return {
-      collection: JSON.parse(JSON.stringify(collection)),
-      categories: JSON.parse(JSON.stringify(categories))
+      collection: { 
+        id: collection.id, 
+        name: collection.name, 
+        slug: collection.slug, 
+        description: collection.description 
+      },
+      categories: collection.children
     };
   } catch (error) {
     console.error('Error fetching collection:', error);
