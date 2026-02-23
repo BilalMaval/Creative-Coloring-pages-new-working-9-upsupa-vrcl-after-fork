@@ -19,8 +19,10 @@ const nextConfig = {
     // Enable image optimization for Vercel
     unoptimized: false,
   },
-  // Vercel handles external packages automatically
-  serverExternalPackages: ['@prisma/client'],
+  experimental: {
+    // Vercel handles external packages automatically
+    serverComponentsExternalPackages: ['@prisma/client'],
+  },
   // Faster builds on Vercel
   swcMinify: true,
   // Enable React strict mode for better development
