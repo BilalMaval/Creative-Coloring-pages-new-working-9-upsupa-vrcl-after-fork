@@ -2,7 +2,8 @@ import { notFound } from 'next/navigation';
 import prisma from '@/lib/prisma';
 import ProductPageClient from './ProductPageClient';
 
-export const dynamic = 'force-dynamic';
+// Revalidate every 60 seconds for faster page loads
+export const revalidate = 60;
 
 export async function generateMetadata({ params }) {
   const { slug } = params;
