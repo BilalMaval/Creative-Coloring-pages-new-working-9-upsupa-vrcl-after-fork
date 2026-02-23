@@ -5,56 +5,40 @@ import SearchBar from '@/components/SearchBar';
 import { Sparkles, Star, Heart, Download, Palette, Smile } from 'lucide-react';
 import prisma from '@/lib/prisma';
 
-// Revalidate every 60 seconds for near-instant page loads
-export const revalidate = 60;
+// Cache for 5 minutes - page will be pre-rendered and served instantly
+export const revalidate = 300;
 
+// Single optimized query - fetch all data at once
 async function getHomeData() {
   try {
-    // Get all main collections (Coloring Pages, Calendars, Printables, Bookshop)
-    const collections = await prisma.category.findMany({
-      where: {
-        parentId: null,
-        isActive: true
-      },
-      orderBy: {
-        order: 'asc'
-      },
-      take: 4
+    // Single query to get all categories with their children
+    const allCategories = await prisma.category.findMany({
+      where: { isActive: true },
+      orderBy: { order: 'asc' },
+      select: {
+        id: true,
+        name: true,
+        slug: true,
+        description: true,
+        parentId: true,
+      }
     });
 
-    // Get categories for each collection
-    const collectionsWithCategories = await Promise.all(
-      collections.map(async (collection) => {
-        const categories = await prisma.category.findMany({
-          where: {
-            parentId: collection.id,
-            isActive: true
-          },
-          orderBy: {
-            order: 'asc'
-          },
-          take: 12
-        });
-        
-        return {
-          ...collection,
-          categories
-        };
-      })
-    );
+    // Process in memory (much faster than multiple DB queries)
+    const collections = allCategories
+      .filter(c => c.parentId === null)
+      .slice(0, 4)
+      .map(collection => ({
+        ...collection,
+        categories: allCategories
+          .filter(c => c.parentId === collection.id)
+          .slice(0, 12)
+      }));
 
-    // Get product count
-    const productCount = await prisma.product.count({
-      where: { isActive: true }
-    });
-
-    return {
-      collections: JSON.parse(JSON.stringify(collectionsWithCategories)),
-      productCount
-    };
+    return { collections };
   } catch (error) {
     console.error('Error fetching home data:', error);
-    return { collections: [], productCount: 0 };
+    return { collections: [] };
   }
 }
 
