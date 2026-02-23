@@ -177,6 +177,9 @@ frontend:
         - working: true
         - agent: "main"
         - comment: "Changed from force-dynamic to revalidate=60 for faster page loads"
+        - working: true
+        - agent: "testing"
+        - comment: "VERIFIED: Category page routing works correctly. Tested Animals & Pets category - loads with proper title, breadcrumbs, and product listings. Shows 7 items with correct download counts displayed."
 
   - task: "Collection Pages Performance"
     implemented: true
