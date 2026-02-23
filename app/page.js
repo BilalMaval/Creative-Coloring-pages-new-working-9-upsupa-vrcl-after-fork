@@ -43,7 +43,7 @@ async function getHomeData() {
 }
 
 export default async function Home() {
-  const { collections, productCount } = await getHomeData();
+  const { collections } = await getHomeData();
 
   return (
     <div className="bg-gradient-to-b from-blue-50 via-purple-50 to-pink-50 min-h-screen">
