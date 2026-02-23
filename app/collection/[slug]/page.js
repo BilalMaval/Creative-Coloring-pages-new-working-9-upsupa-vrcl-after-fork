@@ -4,8 +4,8 @@ import { Sparkles, Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import prisma from '@/lib/prisma';
 
-// Cache for 5 minutes for faster loads
-export const revalidate = 300;
+// Cache for 2 minutes - ISR for fast page loads
+export const revalidate = 120;
 
 export async function generateMetadata({ params }) {
   const { slug } = params;
