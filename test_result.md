@@ -102,7 +102,7 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "Connect project to Supabase and restore data. Add Supabase DATABASE_URL, run Prisma migrations, restore backup, and verify frontend/backend works with persistent data."
+user_problem_statement: "Import project from GitHub, fix cold start/page delays, and fix download counting not working on frontend UI"
 
 backend:
   - task: "Supabase PostgreSQL Database Connection"
@@ -116,18 +116,24 @@ backend:
         - working: true
         - agent: "main"
         - comment: "Connected to Supabase PostgreSQL via connection pooler (aws-1-ap-southeast-1.pooler.supabase.com:6543)"
+        - working: true
+        - agent: "main"
+        - comment: "Re-verified connection with new .env file - 13 products, 52 categories in database"
 
-  - task: "Database Data Restoration to Supabase"
+  - task: "Download Count API Fix"
     implemented: true
     working: true
-    file: "backups/database_backup_latest.sql"
+    file: "app/api/download/route.js"
     stuck_count: 0
     priority: "high"
     needs_retesting: false
     status_history:
+        - working: false
+        - agent: "main"
+        - comment: "FIXED: API had two bugs - 1) Using Number(productId) for UUID strings 2) Wrong field name 'downloadCount' instead of 'downloads'"
         - working: true
         - agent: "main"
-        - comment: "Data restored to Supabase - 52 categories, 4 products, 12 reviews, 1 admin user"
+        - comment: "Tested via Node script - download count increments correctly from 0 to 1"
 
   - task: "Environment Variables Setup"
     implemented: true
@@ -139,19 +145,7 @@ backend:
     status_history:
         - working: true
         - agent: "main"
-        - comment: "Created .env with Supabase DATABASE_URL (pooler connection with pgbouncer=true)"
-
-  - task: "Admin Authentication"
-    implemented: true
-    working: true
-    file: "app/api/auth/login/route.js"
-    stuck_count: 0
-    priority: "high"
-    needs_retesting: false
-    status_history:
-        - working: true
-        - agent: "main"
-        - comment: "Admin login working with credentials: admin@printables.com / admin123"
+        - comment: "Created .env with DATABASE_URL, NEXT_PUBLIC_SUPABASE_URL/KEY, BREVO_API_KEY, JWT_SECRET"
 
 frontend:
   - task: "Homepage"
@@ -164,9 +158,9 @@ frontend:
     status_history:
         - working: true
         - agent: "main"
-        - comment: "Homepage loads correctly with all 3 collections displayed"
+        - comment: "Homepage loads with collections, optimized with revalidate=60 for faster loads"
 
-  - task: "Category Pages"
+  - task: "Category Pages Performance"
     implemented: true
     working: true
     file: "app/category/[slug]/page.js"
@@ -176,9 +170,21 @@ frontend:
     status_history:
         - working: true
         - agent: "main"
-        - comment: "Category page shows 4 products in Animals & Pets"
+        - comment: "Changed from force-dynamic to revalidate=60 for faster page loads"
 
-  - task: "Product Detail Pages"
+  - task: "Collection Pages Performance"
+    implemented: true
+    working: true
+    file: "app/collection/[slug]/page.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+        - agent: "main"
+        - comment: "Changed from force-dynamic to revalidate=60 for faster page loads"
+
+  - task: "Product Pages Performance"
     implemented: true
     working: true
     file: "app/product/[slug]/page.js"
@@ -188,19 +194,19 @@ frontend:
     status_history:
         - working: true
         - agent: "main"
-        - comment: "Product pages load with images, tags, and download button"
+        - comment: "Changed from force-dynamic to revalidate=60 for faster page loads"
 
-  - task: "Admin Dashboard"
+  - task: "Download Count Display"
     implemented: true
     working: true
-    file: "app/admin/page.js"
+    file: "app/product/[slug]/ProductPageClient.js"
     stuck_count: 0
     priority: "high"
     needs_retesting: false
     status_history:
         - working: true
         - agent: "main"
-        - comment: "Admin dashboard shows stats - 39 categories, 4 products"
+        - comment: "Download count displays correctly in product stats section"
 
 metadata:
   created_by: "main_agent"
