@@ -1,6 +1,6 @@
 export default function Loading() {
   return (
-    <div className="bg-gradient-to-b from-blue-50 via-purple-50 to-pink-50" style={{ minHeight: 'calc(100vh - 80px)' }}>
+    <div className="bg-gradient-to-b from-blue-50 via-purple-50 to-pink-50 flex-1">
       <div className="container mx-auto px-4 py-8">
         {/* Breadcrumbs skeleton */}
         <div className="flex items-center space-x-2 mb-8">
