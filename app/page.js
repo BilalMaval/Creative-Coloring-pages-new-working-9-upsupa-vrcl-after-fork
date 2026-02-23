@@ -5,7 +5,8 @@ import SearchBar from '@/components/SearchBar';
 import { Sparkles, Star, Heart, Download, Palette, Smile } from 'lucide-react';
 import prisma from '@/lib/prisma';
 
-export const dynamic = 'force-dynamic';
+// Revalidate every 60 seconds for near-instant page loads
+export const revalidate = 60;
 
 async function getHomeData() {
   try {
