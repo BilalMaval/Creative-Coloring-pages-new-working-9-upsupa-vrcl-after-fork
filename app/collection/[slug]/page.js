@@ -103,7 +103,7 @@ export default async function CollectionPage({ params }) {
   const style = collectionStyles[slug] || collectionStyles['coloring-pages'];
 
   return (
-    <div className="bg-gradient-to-b from-blue-50 via-purple-50 to-pink-50 min-h-screen">
+    <div className="bg-gradient-to-b from-blue-50 via-purple-50 to-pink-50 flex-1">
       <div className="container mx-auto px-4 py-8">
         <div className={`bg-gradient-to-r ${style.gradient} rounded-3xl p-8 md:p-12 shadow-2xl mb-8`}>
           <div className="text-center space-y-4">
