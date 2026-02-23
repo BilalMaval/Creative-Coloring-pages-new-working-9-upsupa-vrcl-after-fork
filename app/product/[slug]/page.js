@@ -85,7 +85,19 @@ async function getProductData(slug) {
       data: { views: { increment: 1 } }
     }).catch(() => {});
     
-    return { product, relatedProducts };
+    // Serialize data for client components (convert Decimal to number)
+    const serializedProduct = {
+      ...product,
+      price: product.price ? Number(product.price) : 0,
+      createdAt: product.createdAt.toISOString()
+    };
+    
+    const serializedRelated = relatedProducts.map(p => ({
+      ...p,
+      price: p.price ? Number(p.price) : 0
+    }));
+    
+    return { product: serializedProduct, relatedProducts: serializedRelated };
   } catch (error) {
     console.error('Error fetching product:', error);
     return null;
