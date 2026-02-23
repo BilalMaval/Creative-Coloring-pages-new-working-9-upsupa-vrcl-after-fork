@@ -2,8 +2,8 @@ import { notFound } from 'next/navigation';
 import prisma from '@/lib/prisma';
 import ProductPageClient from './ProductPageClient';
 
-// Revalidate every 60 seconds for faster page loads
-export const revalidate = 60;
+// Cache for 5 minutes for faster loads
+export const revalidate = 300;
 
 export async function generateMetadata({ params }) {
   const { slug } = params;
@@ -11,12 +11,10 @@ export async function generateMetadata({ params }) {
   try {
     const product = await prisma.product.findFirst({
       where: { slug },
-      include: { category: true }
+      select: { title: true, description: true, category: { select: { name: true } } }
     });
     
-    if (!product) {
-      return {};
-    }
+    if (!product) return {};
     
     return {
       title: `${product.title} - Free Download | Creative Coloring Pages`,
@@ -29,15 +27,32 @@ export async function generateMetadata({ params }) {
 
 async function getProductData(slug) {
   try {
+    // Single optimized query with select
     const product = await prisma.product.findFirst({
-      where: {
-        slug,
-        isActive: true
-      },
-      include: {
+      where: { slug, isActive: true },
+      select: {
+        id: true,
+        title: true,
+        slug: true,
+        description: true,
+        webpPath: true,
+        pdfPath: true,
+        price: true,
+        isFree: true,
+        isFeatured: true,
+        downloads: true,
+        views: true,
+        createdAt: true,
+        categoryId: true,
+        customFields: true,
         category: {
-          include: {
-            parent: true
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+            parent: {
+              select: { id: true, name: true, slug: true }
+            }
           }
         }
       }
@@ -45,7 +60,7 @@ async function getProductData(slug) {
     
     if (!product) return null;
     
-    // Get related products from same category
+    // Get related products - simpler query
     const relatedProducts = await prisma.product.findMany({
       where: {
         categoryId: product.categoryId,
@@ -53,22 +68,24 @@ async function getProductData(slug) {
         id: { not: product.id }
       },
       take: 6,
-      orderBy: [
-        { isFeatured: 'desc' },
-        { downloads: 'desc' }
-      ]
+      orderBy: { downloads: 'desc' },
+      select: {
+        id: true,
+        title: true,
+        slug: true,
+        webpPath: true,
+        isFree: true,
+        price: true
+      }
     });
     
-    // Increment view count
-    await prisma.product.update({
+    // Increment view count in background (don't wait)
+    prisma.product.update({
       where: { id: product.id },
       data: { views: { increment: 1 } }
-    });
+    }).catch(() => {});
     
-    return {
-      product: JSON.parse(JSON.stringify(product)),
-      relatedProducts: JSON.parse(JSON.stringify(relatedProducts))
-    };
+    return { product, relatedProducts };
   } catch (error) {
     console.error('Error fetching product:', error);
     return null;
