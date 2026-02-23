@@ -20,7 +20,7 @@ function HomeSkeleton() {
       <section className="container mx-auto px-4 py-8 md:py-16">
         <div className="text-center space-y-6">
           <div className="flex flex-col items-center gap-6 mb-8">
-            <div className="relative w-48 h-48 md:w-64 md:h-64 bg-gradient-to-br from-blue-100 to-purple-100 rounded-full flex items-center justify-center">
+            <div className="relative w-48 h-48 md:w-64 md:h-64">
               <Image
                 src="https://customer-assets.emergentagent.com/job_mandala-maker-2/artifacts/xyc9pvqy_Coloringpages%20logo%20%281%29.png"
                 alt="Creative Coloring Pages Logo"
