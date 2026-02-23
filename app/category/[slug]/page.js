@@ -235,10 +235,13 @@ export default async function CategoryPage({ params }) {
                         <span className="text-xs text-gray-500">({product.reviewCount})</span>
                       )}
                     </div>
-                    <div className="flex items-center justify-center gap-1 text-xs text-gray-600">
-                      <Download className="h-3 w-3" />
-                      <span>{product.downloads || 0}</span>
-                    </div>
+                    {/* Only show downloads when >= 1000 */}
+                    {product.downloads >= 1000 && (
+                      <div className="flex items-center justify-center gap-1 text-xs text-gray-600">
+                        <Download className="h-3 w-3" />
+                        <span>{product.downloads}</span>
+                      </div>
+                    )}
                   </div>
                 </Link>
               ))}
