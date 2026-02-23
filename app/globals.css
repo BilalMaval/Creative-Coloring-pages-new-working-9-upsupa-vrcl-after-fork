@@ -139,3 +139,24 @@ code {
     @apply bg-background text-foreground;
     }
 }
+
+
+/* Custom animation for loading shimmer effect */
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+.animate-shimmer {
+  animation: shimmer 1.5s infinite;
+}
+
+/* Ensure smooth page transitions */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Prevent layout shifts during navigation */
+main {
+  min-height: calc(100vh - 5rem);
+}
