@@ -46,7 +46,7 @@ export default async function Home() {
   const { collections } = await getHomeData();
 
   return (
-    <div className="bg-gradient-to-b from-blue-50 via-purple-50 to-pink-50 min-h-screen">
+    <div className="bg-gradient-to-b from-blue-50 via-purple-50 to-pink-50 flex-1">
       {/* Hero Section */}
       <section className="container mx-auto px-4 py-8 md:py-16">
         <div className="text-center space-y-6">
