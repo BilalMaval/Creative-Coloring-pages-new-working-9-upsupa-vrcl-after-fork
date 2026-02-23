@@ -318,7 +318,9 @@ export default function AdminProductsPage() {
       gallery: [],
       printLength: '',
       language: '',
-      dimensions: ''
+      dimensions: '',
+      downloads: '0',
+      views: '0'
     });
     setSelectedCollection('');
     setSelectedCategories([]);
