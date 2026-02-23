@@ -64,25 +64,19 @@ export default function ProductPageClient({ product, relatedProducts, gradient }
               title={product.title}
             />
             
-            {/* Stats - Only show when downloads >= 1000 */}
-            {(product.downloads >= 1000 || product.views >= 1000) && (
-              <div className="grid grid-cols-2 gap-4 mt-4">
-                {product.downloads >= 1000 && (
-                  <div className="text-center bg-blue-50 rounded-xl p-3">
-                    <Download className="h-6 w-6 text-blue-600 mx-auto mb-1" />
-                    <p className="text-2xl font-black text-gray-800">{product.downloads || 0}</p>
-                    <p className="text-xs text-gray-600 font-bold">Downloads</p>
-                  </div>
-                )}
-                {product.views >= 1000 && (
-                  <div className="text-center bg-purple-50 rounded-xl p-3">
-                    <Eye className="h-6 w-6 text-purple-600 mx-auto mb-1" />
-                    <p className="text-2xl font-black text-gray-800">{product.views || 0}</p>
-                    <p className="text-xs text-gray-600 font-bold">Views</p>
-                  </div>
-                )}
+            {/* Stats - Downloads and Views */}
+            <div className="grid grid-cols-2 gap-4 mt-4">
+              <div className="text-center bg-blue-50 rounded-xl p-3">
+                <Download className="h-6 w-6 text-blue-600 mx-auto mb-1" />
+                <p className="text-2xl font-black text-gray-800">{product.downloads || 0}</p>
+                <p className="text-xs text-gray-600 font-bold">Downloads</p>
               </div>
-            )}
+              <div className="text-center bg-purple-50 rounded-xl p-3">
+                <Eye className="h-6 w-6 text-purple-600 mx-auto mb-1" />
+                <p className="text-2xl font-black text-gray-800">{product.views || 0}</p>
+                <p className="text-xs text-gray-600 font-bold">Views</p>
+              </div>
+            </div>
           </div>
 
           {/* Details Section */}
