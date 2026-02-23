@@ -15,6 +15,14 @@ const nextConfig = {
         protocol: 'https',
         hostname: 'vfiyffogstwmeudvnasp.supabase.co',
       },
+      {
+        protocol: 'https',
+        hostname: 'images.unsplash.com',
+      },
+      {
+        protocol: 'https',
+        hostname: '*.unsplash.com',
+      },
     ],
     // Enable image optimization for Vercel
     unoptimized: false,
