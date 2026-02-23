@@ -127,7 +127,7 @@ export async function POST(request) {
 export async function PUT(request) {
   try {
     const body = await request.json();
-    const { id, title, slug, description, tags, image, pdfPath, webpPath, categoryId, price, isFree, gallery, printLength, language, dimensions, customFields } = body;
+    const { id, title, slug, description, tags, image, pdfPath, webpPath, categoryId, price, isFree, gallery, printLength, language, dimensions, customFields, downloads, views } = body;
     
     if (!id) {
       return NextResponse.json(
@@ -152,6 +152,8 @@ export async function PUT(request) {
     if (language !== undefined) updateData.language = language;
     if (dimensions !== undefined) updateData.dimensions = dimensions;
     if (customFields !== undefined) updateData.customFields = customFields;
+    if (downloads !== undefined) updateData.downloads = downloads;
+    if (views !== undefined) updateData.views = views;
     
     const updatedProduct = await prisma.product.update({
       where: { id },
