@@ -249,7 +249,11 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Verify all restored functionality"
+    - "Loading UX - Animated Skeletons"
+    - "Homepage"
+    - "Category Pages Performance"
+    - "Collection Pages Performance"
+    - "Product Pages Performance"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
@@ -259,3 +263,5 @@ agent_communication:
     - message: "Project successfully restored from GitHub repository. PostgreSQL database connected, schema applied, data restored from backup. All pages working."
     - agent: "testing"
     - message: "Backend testing completed successfully. Download API is fully functional - accepts GET requests with file, name, and productId parameters, correctly increments downloads field in PostgreSQL database using UUID strings (not numbers), and properly handles Supabase storage integration. Verified with real product (Lion King) - download count incremented from 0 to 4 during testing. Homepage and category pages load correctly. External access via Cloudflare shows 520 errors but local testing confirms all functionality works properly."
+    - agent: "main"
+    - message: "LOADING UX IMPROVEMENTS IMPLEMENTED: 1) Updated all loading.js files with animated shimmer skeletons matching page layouts 2) Added min-height calc(100vh-5rem) to prevent footer from showing before content 3) Fixed Decimal serialization warnings in product and category pages 4) Added shimmer animation CSS to globals.css 5) ISR caching set to 120 seconds for all pages. Please test navigation between pages and verify smooth loading transitions without blank screens or premature footer display."
