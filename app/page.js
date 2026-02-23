@@ -5,8 +5,8 @@ import SearchBar from '@/components/SearchBar';
 import { Sparkles, Star, Heart, Download, Palette, Smile } from 'lucide-react';
 import prisma from '@/lib/prisma';
 
-// Cache for 5 minutes - page will be pre-rendered and served instantly
-export const revalidate = 300;
+// Cache for 2 minutes - ISR for fast page loads
+export const revalidate = 120;
 
 // Single optimized query - fetch all data at once
 async function getHomeData() {
