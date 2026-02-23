@@ -5,8 +5,8 @@ import { Download, Eye } from 'lucide-react';
 
 export default function Loading() {
   return (
-    <div className="flex-1 bg-gradient-to-b from-blue-50 via-purple-50 to-pink-50">
-      <div className="container mx-auto px-4 py-8">
+    <div className="flex-1 flex flex-col min-h-[calc(100vh-5rem)] bg-gradient-to-b from-blue-50 via-purple-50 to-pink-50">
+      <div className="container mx-auto px-4 py-8 flex-1">
         {/* Breadcrumbs */}
         <div className="flex items-center space-x-2 mb-8">
           <Link href="/" className="text-gray-500 hover:text-purple-600 font-bold text-sm">Home</Link>
@@ -22,7 +22,7 @@ export default function Loading() {
           {/* Image Section */}
           <div className="bg-white rounded-3xl p-6 shadow-2xl">
             <div className="aspect-[3/4] bg-gradient-to-br from-gray-100 to-gray-200 rounded-xl flex items-center justify-center relative overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full animate-[shimmer_2s_infinite]"></div>
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full animate-shimmer"></div>
               <div className="text-6xl opacity-30">🎨</div>
             </div>
             
@@ -44,7 +44,7 @@ export default function Loading() {
           {/* Details Section */}
           <div className="space-y-6">
             <div className="bg-white rounded-3xl p-8 shadow-2xl relative overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-gray-100/50 to-transparent -translate-x-full animate-[shimmer_2s_infinite]"></div>
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-gray-100/50 to-transparent -translate-x-full animate-shimmer"></div>
               
               {/* Title */}
               <div className="h-10 bg-gray-200 rounded-xl w-3/4 mb-4 animate-pulse"></div>
@@ -92,6 +92,9 @@ export default function Loading() {
       <style jsx>{`
         @keyframes shimmer {
           100% { transform: translateX(200%); }
+        }
+        .animate-shimmer {
+          animation: shimmer 2s infinite;
         }
       `}</style>
     </div>

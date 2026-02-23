@@ -7,7 +7,7 @@ import { Star, Download, Palette } from 'lucide-react';
 // This loading component matches the exact layout of the homepage
 export default function Loading() {
   return (
-    <div className="flex-1 bg-gradient-to-b from-blue-50 via-purple-50 to-pink-50">
+    <div className="flex-1 flex flex-col min-h-[calc(100vh-5rem)] bg-gradient-to-b from-blue-50 via-purple-50 to-pink-50">
       {/* Hero Section - Same structure as actual page */}
       <section className="container mx-auto px-4 py-8 md:py-16">
         <div className="text-center space-y-6">
@@ -59,7 +59,7 @@ export default function Loading() {
       </section>
 
       {/* Collections Section - Skeleton matching actual layout */}
-      <section className="container mx-auto px-4 mb-16">
+      <section className="container mx-auto px-4 mb-16 flex-1">
         <div className="bg-gradient-to-r from-yellow-400 via-orange-400 to-red-400 rounded-3xl p-8 shadow-2xl mb-8">
           <h2 className="text-3xl md:text-5xl font-black text-white text-center mb-2">
             🎨 Choose Your Collection! 🌈
@@ -81,7 +81,7 @@ export default function Loading() {
               key={i} 
               className={`bg-gradient-to-br ${item.color} rounded-3xl p-8 shadow-2xl border-4 border-white relative overflow-hidden`}
             >
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full animate-[shimmer_2s_infinite]"></div>
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full animate-shimmer"></div>
               <div className="text-center space-y-4">
                 <div className="text-8xl mb-4">{item.emoji}</div>
                 <h3 className="text-3xl md:text-4xl font-black text-white">{item.name}</h3>
@@ -98,6 +98,9 @@ export default function Loading() {
       <style jsx>{`
         @keyframes shimmer {
           100% { transform: translateX(100%); }
+        }
+        .animate-shimmer {
+          animation: shimmer 2s infinite;
         }
       `}</style>
     </div>

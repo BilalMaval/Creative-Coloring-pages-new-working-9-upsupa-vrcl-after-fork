@@ -5,11 +5,11 @@ import { Star } from 'lucide-react';
 
 export default function Loading() {
   return (
-    <div className="flex-1 bg-gradient-to-b from-blue-50 via-purple-50 to-pink-50">
-      <div className="container mx-auto px-4 py-8">
+    <div className="flex-1 flex flex-col min-h-[calc(100vh-5rem)] bg-gradient-to-b from-blue-50 via-purple-50 to-pink-50">
+      <div className="container mx-auto px-4 py-8 flex-1 flex flex-col">
         {/* Header banner - Same as actual page */}
         <div className="bg-gradient-to-r from-purple-500 to-pink-500 rounded-3xl p-8 md:p-12 shadow-2xl mb-8 relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full animate-[shimmer_2s_infinite]"></div>
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full animate-shimmer"></div>
           <div className="text-center space-y-4">
             <div className="h-12 md:h-16 bg-white/30 rounded-xl w-48 md:w-64 mx-auto animate-pulse"></div>
             <div className="h-5 md:h-6 bg-white/30 rounded-xl w-64 md:w-96 mx-auto animate-pulse"></div>
@@ -34,27 +34,32 @@ export default function Loading() {
         <p className="text-gray-600 mb-6">Click any product to view details and download</p>
 
         {/* Products grid - Skeleton matching actual layout */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4 md:gap-6">
-          {[...Array(12)].map((_, i) => (
-            <div key={i} className="group bg-white rounded-2xl overflow-hidden shadow-lg border-2 border-gray-100 hover:border-purple-300 hover:shadow-xl transition-all duration-300">
-              <div className="aspect-[3/4] bg-gradient-to-br from-gray-100 to-gray-200 relative overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent -translate-x-full animate-[shimmer_2s_infinite]"></div>
-                <div className="absolute top-2 left-2 bg-green-500 text-white text-xs font-bold px-2 py-1 rounded-full">
-                  FREE
+        <div className="flex-1">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4 md:gap-6">
+            {[...Array(12)].map((_, i) => (
+              <div key={i} className="group bg-white rounded-2xl overflow-hidden shadow-lg border-2 border-gray-100 hover:border-purple-300 hover:shadow-xl transition-all duration-300">
+                <div className="aspect-[3/4] bg-gradient-to-br from-gray-100 to-gray-200 relative overflow-hidden">
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent -translate-x-full animate-shimmer"></div>
+                  <div className="absolute top-2 left-2 bg-green-500 text-white text-xs font-bold px-2 py-1 rounded-full">
+                    FREE
+                  </div>
+                </div>
+                <div className="p-3">
+                  <div className="h-4 bg-gray-200 rounded w-full mb-2 animate-pulse"></div>
+                  <div className="h-3 bg-gray-100 rounded w-2/3 mx-auto animate-pulse"></div>
                 </div>
               </div>
-              <div className="p-3">
-                <div className="h-4 bg-gray-200 rounded w-full mb-2 animate-pulse"></div>
-                <div className="h-3 bg-gray-100 rounded w-2/3 mx-auto animate-pulse"></div>
-              </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </div>
 
       <style jsx>{`
         @keyframes shimmer {
           100% { transform: translateX(200%); }
+        }
+        .animate-shimmer {
+          animation: shimmer 2s infinite;
         }
       `}</style>
     </div>
