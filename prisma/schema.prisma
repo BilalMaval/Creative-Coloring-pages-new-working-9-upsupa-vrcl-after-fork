@@ -39,6 +39,7 @@ model Category {
   slug        String      @unique
   description String?
   image       String?
+  iconImage   String?     @map("icon_image")  // Icon image for display on homepage
   parentId    String?     @map("parent_id")
   parent      Category?   @relation("CategoryToCategory", fields: [parentId], references: [id])
   children    Category[]  @relation("CategoryToCategory")
