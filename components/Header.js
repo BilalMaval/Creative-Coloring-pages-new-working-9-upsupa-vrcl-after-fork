@@ -51,12 +51,13 @@ export default function Header() {
         <div className="flex h-20 items-center justify-between">
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-3 group">
-            <div className="relative h-14 w-14">
+            <div className="relative h-16 w-16">
               <Image
                 src="https://customer-assets.emergentagent.com/job_mandala-maker-2/artifacts/xyc9pvqy_Coloringpages%20logo%20%281%29.png"
                 alt="CCP Logo"
                 fill
                 className="object-contain group-hover:scale-110 transition-transform"
+                priority
               />
             </div>
             <div className="hidden lg:block">

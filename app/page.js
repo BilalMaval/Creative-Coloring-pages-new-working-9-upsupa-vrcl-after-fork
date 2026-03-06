@@ -21,16 +21,27 @@ async function getHomeData() {
         slug: true,
         description: true,
         parentId: true,
+        // iconImage may not exist in older databases, handle gracefully
       }
     });
+    
+    // Try to get iconImage if column exists (graceful handling)
+    let categoriesWithIcons = allCategories.map(c => ({ ...c, iconImage: null }));
+    try {
+      const withIcons = await prisma.$queryRaw`SELECT id, icon_image FROM categories WHERE icon_image IS NOT NULL`;
+      const iconMap = new Map(withIcons.map(r => [r.id, r.icon_image]));
+      categoriesWithIcons = allCategories.map(c => ({ ...c, iconImage: iconMap.get(c.id) || null }));
+    } catch (e) {
+      // Column doesn't exist, continue without icons
+    }
 
     // Process in memory (much faster than multiple DB queries)
-    const collections = allCategories
+    const collections = categoriesWithIcons
       .filter(c => c.parentId === null)
       .slice(0, 4)
       .map(collection => ({
         ...collection,
-        categories: allCategories
+        categories: categoriesWithIcons
           .filter(c => c.parentId === collection.id)
           .slice(0, 12)
       }));
@@ -165,12 +176,17 @@ export default async function Home() {
             {collections[0].categories.map((category, idx) => {
               const colors = ['blue', 'pink', 'green', 'purple', 'orange', 'yellow'];
               const color = colors[idx % colors.length];
+              const defaultEmojis = ['🐾', '👑', '🎮', '📺', '🦄', '🎄', '📚', '🌸', '🌳', '🚗', '⚽', '🍦'];
               
               return (
                 <Link key={category.id} href={`/category/${category.slug}`}>
                   <div className={`bg-white rounded-2xl p-4 shadow-lg hover:shadow-2xl transform hover:scale-105 transition-all duration-300 cursor-pointer border-4 border-${color}-400`}>
-                    <div className="aspect-square bg-gradient-to-br from-${color}-100 to-${color}-200 rounded-xl mb-3 flex items-center justify-center">
-                      <span className="text-5xl">{['🐾', '👑', '🎮', '📺', '🦄', '🎄', '📚', '🌸', '🌳', '🚗', '⚽', '🍦'][idx]}</span>
+                    <div className={`aspect-square bg-gradient-to-br from-${color}-100 to-${color}-200 rounded-xl mb-3 flex items-center justify-center overflow-hidden`}>
+                      {category.iconImage ? (
+                        <img src={category.iconImage} alt={category.name} className="w-full h-full object-cover" />
+                      ) : (
+                        <span className="text-5xl">{defaultEmojis[idx] || '🎨'}</span>
+                      )}
                     </div>
                     <h3 className="font-black text-center text-gray-800 text-sm md:text-base">
                       {category.name}
@@ -213,12 +229,17 @@ export default async function Home() {
             {collections[1].categories.map((category, idx) => {
               const colors = ['green', 'teal', 'blue', 'indigo', 'purple', 'pink'];
               const color = colors[idx % colors.length];
+              const defaultEmojis = ['📅', '📆', '📋', '📝', '🎓', '🎂', '🍽️', '✅', '🎯', '💪', '💰', '📄'];
               
               return (
                 <Link key={category.id} href={`/category/${category.slug}`}>
                   <div className={`bg-white rounded-2xl p-4 shadow-lg hover:shadow-2xl transform hover:scale-105 transition-all duration-300 cursor-pointer border-4 border-${color}-400`}>
-                    <div className="aspect-square bg-gradient-to-br from-${color}-100 to-${color}-200 rounded-xl mb-3 flex items-center justify-center">
-                      <span className="text-5xl">{['📅', '📆', '📋', '📝', '🎓', '🎂', '🍽️', '✅', '🎯', '💪', '💰', '📄'][idx]}</span>
+                    <div className={`aspect-square bg-gradient-to-br from-${color}-100 to-${color}-200 rounded-xl mb-3 flex items-center justify-center overflow-hidden`}>
+                      {category.iconImage ? (
+                        <img src={category.iconImage} alt={category.name} className="w-full h-full object-cover" />
+                      ) : (
+                        <span className="text-5xl">{defaultEmojis[idx] || '📅'}</span>
+                      )}
                     </div>
                     <h3 className="font-black text-center text-gray-800 text-sm md:text-base">
                       {category.name}
@@ -261,12 +282,17 @@ export default async function Home() {
             {collections[2].categories.map((category, idx) => {
               const colors = ['orange', 'red', 'pink', 'purple', 'blue', 'green'];
               const color = colors[idx % colors.length];
+              const defaultEmojis = ['📝', '🃏', '🏆', '💌', '🏷️', '🎉', '🏷️', '🔖', '🖼️', '✓', '🎈', '🎲'];
               
               return (
                 <Link key={category.id} href={`/category/${category.slug}`}>
                   <div className={`bg-white rounded-2xl p-4 shadow-lg hover:shadow-2xl transform hover:scale-105 transition-all duration-300 cursor-pointer border-4 border-${color}-400`}>
-                    <div className="aspect-square bg-gradient-to-br from-${color}-100 to-${color}-200 rounded-xl mb-3 flex items-center justify-center">
-                      <span className="text-5xl">{['📝', '🃏', '🏆', '💌', '🏷️', '🎉', '🏷️', '🔖', '🖼️', '✓', '🎈', '🎲'][idx]}</span>
+                    <div className={`aspect-square bg-gradient-to-br from-${color}-100 to-${color}-200 rounded-xl mb-3 flex items-center justify-center overflow-hidden`}>
+                      {category.iconImage ? (
+                        <img src={category.iconImage} alt={category.name} className="w-full h-full object-cover" />
+                      ) : (
+                        <span className="text-5xl">{defaultEmojis[idx] || '📄'}</span>
+                      )}
                     </div>
                     <h3 className="font-black text-center text-gray-800 text-sm md:text-base">
                       {category.name}
@@ -309,12 +335,17 @@ export default async function Home() {
             {collections[3].categories.map((category, idx) => {
               const colors = ['indigo', 'purple', 'blue', 'pink', 'violet', 'fuchsia'];
               const color = colors[idx % colors.length];
+              const defaultEmojis = ['📖', '🧒', '📚', '🎨', '🍳', '💪', '📈', '🔮', '💕', '🎭', '🌍', '📓'];
               
               return (
                 <Link key={category.id} href={`/category/${category.slug}`}>
                   <div className={`bg-white rounded-2xl p-4 shadow-lg hover:shadow-2xl transform hover:scale-105 transition-all duration-300 cursor-pointer border-4 border-${color}-400`}>
-                    <div className="aspect-square bg-gradient-to-br from-${color}-100 to-${color}-200 rounded-xl mb-3 flex items-center justify-center">
-                      <span className="text-5xl">{['📖', '🧒', '📚', '🎨', '🍳', '💪', '📈', '🔮', '💕', '🎭', '🌍', '📓'][idx]}</span>
+                    <div className={`aspect-square bg-gradient-to-br from-${color}-100 to-${color}-200 rounded-xl mb-3 flex items-center justify-center overflow-hidden`}>
+                      {category.iconImage ? (
+                        <img src={category.iconImage} alt={category.name} className="w-full h-full object-cover" />
+                      ) : (
+                        <span className="text-5xl">{defaultEmojis[idx] || '📚'}</span>
+                      )}
                     </div>
                     <h3 className="font-black text-center text-gray-800 text-sm md:text-base">
                       {category.name}

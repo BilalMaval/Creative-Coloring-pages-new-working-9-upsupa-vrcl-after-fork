@@ -9,7 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Plus, Edit, Trash2, Loader2, FolderOpen } from 'lucide-react';
+import { Plus, Edit, Trash2, Loader2, FolderOpen, Search } from 'lucide-react';
 
 export default function AdminCategoriesPage() {
   const [categories, setCategories] = useState([]);
@@ -18,12 +18,15 @@ export default function AdminCategoriesPage() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState(null);
   const [uploading, setUploading] = useState(false);
+  const [uploadingIcon, setUploadingIcon] = useState(false);
   const [filterCollection, setFilterCollection] = useState('all');
+  const [searchQuery, setSearchQuery] = useState('');
   const [formData, setFormData] = useState({
     name: '',
     slug: '',
     description: '',
     image: '',
+    iconImage: '',
     parentId: ''
   });
 
@@ -92,6 +95,34 @@ export default function AdminCategoriesPage() {
     }
   };
 
+  const handleIconUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadingIcon(true);
+    try {
+      const formDataUpload = new FormData();
+      formDataUpload.append('file', file);
+      formDataUpload.append('type', 'image');
+
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        body: formDataUpload
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        setFormData(prev => ({ ...prev, iconImage: data.url }));
+      } else {
+        alert(data.error || 'Upload failed');
+      }
+    } catch (error) {
+      alert('Upload failed');
+    } finally {
+      setUploadingIcon(false);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     
@@ -132,6 +163,7 @@ export default function AdminCategoriesPage() {
       slug: category.slug,
       description: category.description || '',
       image: category.image || '',
+      iconImage: category.iconImage || '',
       parentId: category.parentId || ''
     });
     setDialogOpen(true);
@@ -155,13 +187,25 @@ export default function AdminCategoriesPage() {
 
   const openNewDialog = () => {
     setEditingCategory(null);
-    setFormData({ name: '', slug: '', description: '', image: '', parentId: collections[0]?.id || '' });
+    setFormData({ name: '', slug: '', description: '', image: '', iconImage: '', parentId: collections[0]?.id || '' });
     setDialogOpen(true);
   };
 
-  const filteredCategories = filterCollection === 'all' 
-    ? categories 
-    : categories.filter(cat => cat.parentId === filterCollection);
+  const filteredCategories = categories.filter(cat => {
+    // Search filter
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      const matchesSearch = 
+        cat.name?.toLowerCase().includes(query) ||
+        cat.slug?.toLowerCase().includes(query) ||
+        cat.description?.toLowerCase().includes(query);
+      if (!matchesSearch) return false;
+    }
+    
+    // Collection filter
+    if (filterCollection !== 'all' && cat.parentId !== filterCollection) return false;
+    return true;
+  });
 
   const getCollectionName = (parentId) => {
     const collection = collections.find(c => c.id === parentId);
@@ -241,7 +285,7 @@ export default function AdminCategoriesPage() {
               </div>
 
               <div>
-                <Label htmlFor="image">Category Image</Label>
+                <Label htmlFor="image">Category Image (Cover)</Label>
                 <Input
                   id="image"
                   type="file"
@@ -255,6 +299,25 @@ export default function AdminCategoriesPage() {
                   </div>
                 )}
                 {uploading && <p className="text-sm text-muted-foreground mt-2">Uploading...</p>}
+              </div>
+
+              <div className="border-2 border-purple-200 rounded-lg p-4 bg-purple-50">
+                <Label htmlFor="iconImage" className="text-purple-800 font-bold">🎨 Category Icon (Display on homepage)</Label>
+                <p className="text-xs text-muted-foreground mb-2">This icon appears on the homepage and collection pages. Recommended: 128x128px square image.</p>
+                <Input
+                  id="iconImage"
+                  type="file"
+                  accept="image/*"
+                  onChange={handleIconUpload}
+                  disabled={uploadingIcon}
+                />
+                {formData.iconImage && (
+                  <div className="mt-2 flex items-center gap-3">
+                    <img src={formData.iconImage} alt="Icon Preview" className="h-16 w-16 rounded-lg object-cover border-2 border-purple-400" />
+                    <span className="text-green-600 text-sm font-medium">✓ Icon uploaded</span>
+                  </div>
+                )}
+                {uploadingIcon && <p className="text-sm text-muted-foreground mt-2">Uploading icon...</p>}
               </div>
 
               <div className="flex gap-2">
@@ -282,21 +345,35 @@ export default function AdminCategoriesPage() {
 
       {/* Filter by Collection */}
       {collections.length > 0 && (
-        <div className="mb-6">
-          <Label>Filter by Collection</Label>
-          <Select value={filterCollection} onValueChange={setFilterCollection}>
-            <SelectTrigger className="w-64">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Collections</SelectItem>
-              {collections.map((collection) => (
-                <SelectItem key={collection.id} value={collection.id}>
-                  {collection.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+        <div className="flex flex-wrap gap-4 mb-6">
+          <div className="flex-1 min-w-[200px]">
+            <Label>Search Categories</Label>
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search by name, slug, or description..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-9"
+              />
+            </div>
+          </div>
+          <div>
+            <Label>Filter by Collection</Label>
+            <Select value={filterCollection} onValueChange={setFilterCollection}>
+              <SelectTrigger className="w-64">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Collections</SelectItem>
+                {collections.map((collection) => (
+                  <SelectItem key={collection.id} value={collection.id}>
+                    {collection.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         </div>
       )}
 

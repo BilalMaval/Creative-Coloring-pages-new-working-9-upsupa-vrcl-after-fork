@@ -52,6 +52,19 @@ async function getCollectionData(slug) {
     
     if (!collection) return null;
     
+    // Try to get iconImage if column exists
+    let categoriesWithIcons = collection.children.map(c => ({ ...c, iconImage: null }));
+    try {
+      const categoryIds = collection.children.map(c => c.id);
+      if (categoryIds.length > 0) {
+        const withIcons = await prisma.$queryRaw`SELECT id, icon_image FROM categories WHERE id = ANY(${categoryIds}::uuid[]) AND icon_image IS NOT NULL`;
+        const iconMap = new Map(withIcons.map(r => [r.id, r.icon_image]));
+        categoriesWithIcons = collection.children.map(c => ({ ...c, iconImage: iconMap.get(c.id) || null }));
+      }
+    } catch (e) {
+      // Column doesn't exist, continue without icons
+    }
+    
     return {
       collection: { 
         id: collection.id, 
@@ -59,7 +72,7 @@ async function getCollectionData(slug) {
         slug: collection.slug, 
         description: collection.description 
       },
-      categories: collection.children
+      categories: categoriesWithIcons
     };
   } catch (error) {
     console.error('Error fetching collection:', error);
@@ -148,8 +161,12 @@ export default async function CollectionPage({ params }) {
                 return (
                   <Link key={category.id} href={`/category/${category.slug}`}>
                     <div className={`bg-white rounded-2xl p-4 shadow-lg hover:shadow-2xl transform hover:scale-105 transition-all duration-300 cursor-pointer border-4 border-${color}-400`}>
-                      <div className={`aspect-square bg-gradient-to-br from-${color}-100 to-${color}-200 rounded-xl mb-3 flex items-center justify-center`}>
-                        <span className="text-5xl">{style.categoryEmojis[idx] || '🎨'}</span>
+                      <div className={`aspect-square bg-gradient-to-br from-${color}-100 to-${color}-200 rounded-xl mb-3 flex items-center justify-center overflow-hidden`}>
+                        {category.iconImage ? (
+                          <img src={category.iconImage} alt={category.name} className="w-full h-full object-cover" />
+                        ) : (
+                          <span className="text-5xl">{style.categoryEmojis[idx] || '🎨'}</span>
+                        )}
                       </div>
                       <h3 className="font-black text-center text-gray-800 text-sm md:text-base">
                         {category.name}

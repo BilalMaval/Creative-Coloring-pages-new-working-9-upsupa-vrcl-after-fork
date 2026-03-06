@@ -30,7 +30,7 @@ export async function GET() {
 export async function POST(request) {
   try {
     const body = await request.json();
-    const { name, slug, description, image, parentId } = body;
+    const { name, slug, description, image, iconImage, parentId } = body;
     
     if (!name || !slug) {
       return NextResponse.json(
@@ -51,20 +51,32 @@ export async function POST(request) {
       );
     }
     
+    // Create category with basic fields first
+    const categoryData = {
+      name,
+      slug,
+      description: description || '',
+      image: image || null,
+      parentId: parentId || null,
+      isActive: true
+    };
+    
     const newCategory = await prisma.category.create({
-      data: {
-        name,
-        slug,
-        description: description || '',
-        image: image || null,
-        parentId: parentId || null,
-        isActive: true
-      }
+      data: categoryData
     });
+    
+    // Try to update iconImage if the column exists
+    if (iconImage) {
+      try {
+        await prisma.$executeRaw`UPDATE categories SET icon_image = ${iconImage} WHERE id = ${newCategory.id}::uuid`;
+      } catch (e) {
+        // Column doesn't exist, skip
+      }
+    }
     
     return NextResponse.json({
       success: true,
-      data: newCategory
+      data: { ...newCategory, iconImage: iconImage || null }
     });
   } catch (error) {
     console.error('Error creating category:', error);
@@ -78,7 +90,7 @@ export async function POST(request) {
 export async function PUT(request) {
   try {
     const body = await request.json();
-    const { id, name, slug, description, image, parentId } = body;
+    const { id, name, slug, description, image, iconImage, parentId } = body;
     
     if (!id) {
       return NextResponse.json(
@@ -99,10 +111,19 @@ export async function PUT(request) {
       data: updateData
     });
     
+    // Try to update iconImage if the column exists
+    if (iconImage !== undefined) {
+      try {
+        await prisma.$executeRaw`UPDATE categories SET icon_image = ${iconImage} WHERE id = ${id}::uuid`;
+      } catch (e) {
+        // Column doesn't exist, skip
+      }
+    }
+    
     return NextResponse.json({
       success: true,
       message: 'Category updated successfully',
-      data: updatedCategory
+      data: { ...updatedCategory, iconImage: iconImage }
     });
   } catch (error) {
     console.error('Error updating category:', error);

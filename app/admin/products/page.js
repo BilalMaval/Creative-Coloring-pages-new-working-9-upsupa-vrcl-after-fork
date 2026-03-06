@@ -11,7 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Checkbox } from '@/components/ui/checkbox';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Plus, Edit, Trash2, Loader2, Package, Star, X, Image as ImageIcon } from 'lucide-react';
+import { Plus, Edit, Trash2, Loader2, Package, Star, X, Image as ImageIcon, Search } from 'lucide-react';
 
 export default function AdminProductsPage() {
   const [products, setProducts] = useState([]);
@@ -25,6 +25,7 @@ export default function AdminProductsPage() {
   // Filter states
   const [filterCollection, setFilterCollection] = useState('all');
   const [filterCategory, setFilterCategory] = useState('all');
+  const [searchQuery, setSearchQuery] = useState('');
   
   // Form states - Single collection, multiple categories
   const [selectedCollection, setSelectedCollection] = useState('');
@@ -389,6 +390,17 @@ export default function AdminProductsPage() {
     : childCategories.filter(cat => cat.parentId === filterCollection);
   
   const filteredProducts = products.filter(product => {
+    // Search filter
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      const matchesSearch = 
+        product.title?.toLowerCase().includes(query) ||
+        product.slug?.toLowerCase().includes(query) ||
+        product.description?.toLowerCase().includes(query) ||
+        product.tags?.some(tag => tag.toLowerCase().includes(query));
+      if (!matchesSearch) return false;
+    }
+    
     if (filterCollection !== 'all') {
       const category = allCategories.find(c => c.id === product.categoryId);
       if (!category || category.parentId !== filterCollection) return false;
@@ -738,7 +750,19 @@ export default function AdminProductsPage() {
 
       {/* Filters */}
       {collections.length > 0 && (
-        <div className="flex gap-4 mb-6">
+        <div className="flex flex-wrap gap-4 mb-6">
+          <div className="flex-1 min-w-[200px]">
+            <Label>Search Products</Label>
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search by title, slug, description, or tags..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-9"
+              />
+            </div>
+          </div>
           <div>
             <Label>Filter by Collection</Label>
             <Select value={filterCollection} onValueChange={(val) => { setFilterCollection(val); setFilterCategory('all'); }}>

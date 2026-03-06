@@ -20,12 +20,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Package, Eye, RefreshCw } from 'lucide-react';
+import { Package, Eye, RefreshCw, Search } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
 export default function AdminOrdersPage() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState('all');
+  const [searchQuery, setSearchQuery] = useState('');
   const [pagination, setPagination] = useState({ page: 1, pages: 1, total: 0 });
 
   const fetchOrders = async (page = 1, status = null) => {
@@ -112,8 +115,21 @@ export default function AdminOrdersPage() {
           <CardTitle>Filter Orders</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex gap-4">
+          <div className="flex flex-wrap gap-4">
+            <div className="flex-1 min-w-[200px]">
+              <Label>Search Orders</Label>
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search by order #, customer name, or email..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-9"
+                />
+              </div>
+            </div>
             <div className="w-48">
+              <Label>Filter by Status</Label>
               <Select value={statusFilter} onValueChange={setStatusFilter}>
                 <SelectTrigger>
                   <SelectValue placeholder="Filter by status" />
@@ -128,7 +144,7 @@ export default function AdminOrdersPage() {
                 </SelectContent>
               </Select>
             </div>
-            <div className="text-sm text-muted-foreground self-center">
+            <div className="text-sm text-muted-foreground self-end pb-2">
               Total: {pagination.total} orders
             </div>
           </div>
@@ -162,7 +178,17 @@ export default function AdminOrdersPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {orders.map((order) => (
+                {orders
+                  .filter(order => {
+                    if (!searchQuery) return true;
+                    const query = searchQuery.toLowerCase();
+                    return (
+                      order.orderNumber?.toLowerCase().includes(query) ||
+                      order.customerName?.toLowerCase().includes(query) ||
+                      order.email?.toLowerCase().includes(query)
+                    );
+                  })
+                  .map((order) => (
                   <TableRow key={order.id}>
                     <TableCell className="font-mono text-sm">{order.orderNumber}</TableCell>
                     <TableCell>

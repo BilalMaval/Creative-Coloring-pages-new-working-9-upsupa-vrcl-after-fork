@@ -186,6 +186,32 @@ export async function DELETE(request) {
       );
     }
     
+    // First delete related records to avoid foreign key constraints
+    // Delete reviews
+    await prisma.review.deleteMany({
+      where: { productId: id }
+    });
+    
+    // Delete bundle items
+    await prisma.bundleItem.deleteMany({
+      where: { productId: id }
+    });
+    
+    // Delete cart items
+    await prisma.cartItem.deleteMany({
+      where: { productId: id }
+    });
+    
+    // Delete download logs (but don't fail if there are none)
+    try {
+      await prisma.download.deleteMany({
+        where: { productId: id }
+      });
+    } catch (e) {
+      // Ignore if no downloads exist
+    }
+    
+    // Now delete the product
     await prisma.product.delete({
       where: { id }
     });
@@ -197,7 +223,7 @@ export async function DELETE(request) {
   } catch (error) {
     console.error('Error deleting printable:', error);
     return NextResponse.json(
-      { success: false, error: 'Failed to delete printable' },
+      { success: false, error: 'Failed to delete printable: ' + error.message },
       { status: 500 }
     );
   }

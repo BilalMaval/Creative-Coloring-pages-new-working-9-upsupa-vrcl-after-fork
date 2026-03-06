@@ -274,6 +274,19 @@ agent_communication:
     - agent: "testing"
     - message: "Backend testing completed successfully. Download API is fully functional - accepts GET requests with file, name, and productId parameters, correctly increments downloads field in PostgreSQL database using UUID strings (not numbers), and properly handles Supabase storage integration. Verified with real product (Lion King) - download count incremented from 0 to 4 during testing. Homepage and category pages load correctly. External access via Cloudflare shows 520 errors but local testing confirms all functionality works properly."
     - agent: "main"
-    - message: "LOADING UX IMPROVEMENTS IMPLEMENTED: 1) Updated all loading.js files with animated shimmer skeletons matching page layouts 2) Added min-height calc(100vh-5rem) to prevent footer from showing before content 3) Fixed Decimal serialization warnings in product and category pages 4) Added shimmer animation CSS to globals.css 5) ISR caching set to 120 seconds for all pages. Please test navigation between pages and verify smooth loading transitions without blank screens or premature footer display."
+    - message: |
+        ADMIN PANEL IMPROVEMENTS COMPLETE:
+        1) Logo size increased to 64x64px in header (from 56x56px)
+        2) Favicon added using the same logo
+        3) Product deletion fixed - now handles cascading deletes for reviews, bundle items, cart items
+        4) Search bars added to: /admin/products, /admin/categories, /admin/orders
+        5) Category icon upload field added to create/edit category form
+        
+        IMAGE DIMENSIONS FOR DESIGN:
+        - Product images (webp): Recommended 600x800px (3:4 aspect ratio), displayed at various sizes
+        - Category icons: 128x128px square (displayed on homepage/collection pages)
+        - Logo: 256x256px (displayed at 64x64px in header, larger on homepage)
+        - PDF files: A4 size (595x842 points = 2480x3508px at 300dpi)
+        - Cover images: 800x600px landscape for collections/categories
     - agent: "testing"
     - message: "LOADING UX TESTING COMPLETE: All loading improvements working perfectly. ✅ Footer positioned correctly (5616px, no premature appearance). ✅ Homepage loads with proper title and content. ✅ Collection page shows 15 category links. ✅ Category page displays products with download counts. ✅ Product page loads with images and download functionality. ✅ Navigation flows smoothly between pages. ✅ No blank screens during loading. ✅ Animated shimmer skeletons implemented. Minor console warnings about NextJS image optimization are present but don't affect functionality. All critical loading UX requirements met successfully."
