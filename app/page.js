@@ -21,27 +21,17 @@ async function getHomeData() {
         slug: true,
         description: true,
         parentId: true,
-        // iconImage may not exist in older databases, handle gracefully
+        iconImage: true,
       }
     });
-    
-    // Try to get iconImage if column exists (graceful handling)
-    let categoriesWithIcons = allCategories.map(c => ({ ...c, iconImage: null }));
-    try {
-      const withIcons = await prisma.$queryRaw`SELECT id, icon_image FROM categories WHERE icon_image IS NOT NULL`;
-      const iconMap = new Map(withIcons.map(r => [r.id, r.icon_image]));
-      categoriesWithIcons = allCategories.map(c => ({ ...c, iconImage: iconMap.get(c.id) || null }));
-    } catch (e) {
-      // Column doesn't exist, continue without icons
-    }
 
     // Process in memory (much faster than multiple DB queries)
-    const collections = categoriesWithIcons
+    const collections = allCategories
       .filter(c => c.parentId === null)
       .slice(0, 4)
       .map(collection => ({
         ...collection,
-        categories: categoriesWithIcons
+        categories: allCategories
           .filter(c => c.parentId === collection.id)
           .slice(0, 12)
       }));

@@ -44,26 +44,14 @@ async function getCollectionData(slug) {
             id: true,
             name: true,
             slug: true,
-            description: true
+            description: true,
+            iconImage: true
           }
         }
       }
     });
     
     if (!collection) return null;
-    
-    // Try to get iconImage if column exists
-    let categoriesWithIcons = collection.children.map(c => ({ ...c, iconImage: null }));
-    try {
-      const categoryIds = collection.children.map(c => c.id);
-      if (categoryIds.length > 0) {
-        const withIcons = await prisma.$queryRaw`SELECT id, icon_image FROM categories WHERE id = ANY(${categoryIds}::uuid[]) AND icon_image IS NOT NULL`;
-        const iconMap = new Map(withIcons.map(r => [r.id, r.icon_image]));
-        categoriesWithIcons = collection.children.map(c => ({ ...c, iconImage: iconMap.get(c.id) || null }));
-      }
-    } catch (e) {
-      // Column doesn't exist, continue without icons
-    }
     
     return {
       collection: { 
@@ -72,7 +60,7 @@ async function getCollectionData(slug) {
         slug: collection.slug, 
         description: collection.description 
       },
-      categories: categoriesWithIcons
+      categories: collection.children
     };
   } catch (error) {
     console.error('Error fetching collection:', error);

@@ -51,32 +51,21 @@ export async function POST(request) {
       );
     }
     
-    // Create category with basic fields first
-    const categoryData = {
-      name,
-      slug,
-      description: description || '',
-      image: image || null,
-      parentId: parentId || null,
-      isActive: true
-    };
-    
     const newCategory = await prisma.category.create({
-      data: categoryData
-    });
-    
-    // Try to update iconImage if the column exists
-    if (iconImage) {
-      try {
-        await prisma.$executeRaw`UPDATE categories SET icon_image = ${iconImage} WHERE id = ${newCategory.id}::uuid`;
-      } catch (e) {
-        // Column doesn't exist, skip
+      data: {
+        name,
+        slug,
+        description: description || '',
+        image: image || null,
+        iconImage: iconImage || null,
+        parentId: parentId || null,
+        isActive: true
       }
-    }
+    });
     
     return NextResponse.json({
       success: true,
-      data: { ...newCategory, iconImage: iconImage || null }
+      data: newCategory
     });
   } catch (error) {
     console.error('Error creating category:', error);
@@ -104,6 +93,7 @@ export async function PUT(request) {
     if (slug !== undefined) updateData.slug = slug;
     if (description !== undefined) updateData.description = description;
     if (image !== undefined) updateData.image = image;
+    if (iconImage !== undefined) updateData.iconImage = iconImage;
     if (parentId !== undefined) updateData.parentId = parentId;
     
     const updatedCategory = await prisma.category.update({
@@ -111,19 +101,10 @@ export async function PUT(request) {
       data: updateData
     });
     
-    // Try to update iconImage if the column exists
-    if (iconImage !== undefined) {
-      try {
-        await prisma.$executeRaw`UPDATE categories SET icon_image = ${iconImage} WHERE id = ${id}::uuid`;
-      } catch (e) {
-        // Column doesn't exist, skip
-      }
-    }
-    
     return NextResponse.json({
       success: true,
       message: 'Category updated successfully',
-      data: { ...updatedCategory, iconImage: iconImage }
+      data: updatedCategory
     });
   } catch (error) {
     console.error('Error updating category:', error);
