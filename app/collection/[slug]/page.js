@@ -152,9 +152,7 @@ export default async function CollectionPage({ params }) {
                     <div className={`bg-white rounded-2xl p-4 shadow-lg hover:shadow-2xl transform hover:scale-105 transition-all duration-300 cursor-pointer border-4 border-${color}-400`}>
                       <div className={`aspect-square bg-gradient-to-br from-${color}-100 to-${color}-200 rounded-xl mb-3 flex items-center justify-center overflow-hidden`}>
                         {category.iconImage ? (
-                          <div className="w-16 h-16 md:w-20 md:h-20 rounded-full overflow-hidden shadow-lg">
-                            <img src={category.iconImage} alt={category.name} className="w-full h-full object-cover" />
-                          </div>
+                          <img src={category.iconImage} alt={category.name} className="w-16 h-16 md:w-20 md:h-20 object-contain" />
                         ) : (
                           <span className="text-5xl">{category.emoji || '🎨'}</span>
                         )}
