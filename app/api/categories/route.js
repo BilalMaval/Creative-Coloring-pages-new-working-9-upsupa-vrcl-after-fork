@@ -30,7 +30,7 @@ export async function GET() {
 export async function POST(request) {
   try {
     const body = await request.json();
-    const { name, slug, description, image, iconImage, parentId } = body;
+    const { name, slug, description, image, iconImage, emoji, parentId, showOnHomepage, homepageOrder } = body;
     
     if (!name || !slug) {
       return NextResponse.json(
@@ -58,7 +58,10 @@ export async function POST(request) {
         description: description || '',
         image: image || null,
         iconImage: iconImage || null,
+        emoji: emoji || '🎨',
         parentId: parentId || null,
+        showOnHomepage: showOnHomepage || false,
+        homepageOrder: homepageOrder || 0,
         isActive: true
       }
     });
@@ -79,7 +82,7 @@ export async function POST(request) {
 export async function PUT(request) {
   try {
     const body = await request.json();
-    const { id, name, slug, description, image, iconImage, parentId } = body;
+    const { id, name, slug, description, image, iconImage, emoji, parentId, showOnHomepage, homepageOrder } = body;
     
     if (!id) {
       return NextResponse.json(
@@ -94,7 +97,10 @@ export async function PUT(request) {
     if (description !== undefined) updateData.description = description;
     if (image !== undefined) updateData.image = image;
     if (iconImage !== undefined) updateData.iconImage = iconImage;
+    if (emoji !== undefined) updateData.emoji = emoji;
     if (parentId !== undefined) updateData.parentId = parentId;
+    if (showOnHomepage !== undefined) updateData.showOnHomepage = showOnHomepage;
+    if (homepageOrder !== undefined) updateData.homepageOrder = homepageOrder;
     
     const updatedCategory = await prisma.category.update({
       where: { id },

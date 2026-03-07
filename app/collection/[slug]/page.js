@@ -39,13 +39,14 @@ async function getCollectionData(slug) {
         description: true,
         children: {
           where: { isActive: true },
-          orderBy: { order: 'asc' },
+          orderBy: [{ homepageOrder: 'asc' }, { order: 'asc' }],
           select: {
             id: true,
             name: true,
             slug: true,
             description: true,
-            iconImage: true
+            iconImage: true,
+            emoji: true
           }
         }
       }
@@ -151,9 +152,11 @@ export default async function CollectionPage({ params }) {
                     <div className={`bg-white rounded-2xl p-4 shadow-lg hover:shadow-2xl transform hover:scale-105 transition-all duration-300 cursor-pointer border-4 border-${color}-400`}>
                       <div className={`aspect-square bg-gradient-to-br from-${color}-100 to-${color}-200 rounded-xl mb-3 flex items-center justify-center overflow-hidden`}>
                         {category.iconImage ? (
-                          <img src={category.iconImage} alt={category.name} className="w-full h-full object-cover" />
+                          <div className="w-16 h-16 md:w-20 md:h-20 rounded-full overflow-hidden shadow-lg">
+                            <img src={category.iconImage} alt={category.name} className="w-full h-full object-cover" />
+                          </div>
                         ) : (
-                          <span className="text-5xl">{style.categoryEmojis[idx] || '🎨'}</span>
+                          <span className="text-5xl">{category.emoji || '🎨'}</span>
                         )}
                       </div>
                       <h3 className="font-black text-center text-gray-800 text-sm md:text-base">

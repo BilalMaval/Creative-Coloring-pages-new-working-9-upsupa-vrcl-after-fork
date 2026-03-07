@@ -27,6 +27,7 @@ export default function AdminCategoriesPage() {
     description: '',
     image: '',
     iconImage: '',
+    emoji: '🎨',
     parentId: ''
   });
 
@@ -146,7 +147,7 @@ export default function AdminCategoriesPage() {
       if (data.success) {
         setDialogOpen(false);
         setEditingCategory(null);
-        setFormData({ name: '', slug: '', description: '', image: '', parentId: '' });
+        setFormData({ name: '', slug: '', description: '', image: '', iconImage: '', emoji: '🎨', parentId: '' });
         fetchData();
       } else {
         alert(data.error || 'Failed to save category');
@@ -164,6 +165,7 @@ export default function AdminCategoriesPage() {
       description: category.description || '',
       image: category.image || '',
       iconImage: category.iconImage || '',
+      emoji: category.emoji || '🎨',
       parentId: category.parentId || ''
     });
     setDialogOpen(true);
@@ -187,7 +189,7 @@ export default function AdminCategoriesPage() {
 
   const openNewDialog = () => {
     setEditingCategory(null);
-    setFormData({ name: '', slug: '', description: '', image: '', iconImage: '', parentId: collections[0]?.id || '' });
+    setFormData({ name: '', slug: '', description: '', image: '', iconImage: '', emoji: '🎨', parentId: collections[0]?.id || '' });
     setDialogOpen(true);
   };
 
@@ -318,6 +320,19 @@ export default function AdminCategoriesPage() {
                   </div>
                 )}
                 {uploadingIcon && <p className="text-sm text-muted-foreground mt-2">Uploading icon...</p>}
+              </div>
+
+              <div className="border-2 border-yellow-200 rounded-lg p-4 bg-yellow-50">
+                <Label htmlFor="emoji" className="text-yellow-800 font-bold">😀 Emoji Icon (Fallback)</Label>
+                <p className="text-xs text-muted-foreground mb-2">This emoji shows if no icon image is uploaded. Click the field and use emoji picker.</p>
+                <Input
+                  id="emoji"
+                  value={formData.emoji}
+                  onChange={(e) => setFormData({ ...formData, emoji: e.target.value })}
+                  placeholder="🎨"
+                  maxLength={2}
+                  className="text-2xl text-center w-20"
+                />
               </div>
 
               <div className="flex gap-2">

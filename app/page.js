@@ -12,10 +12,23 @@ export const revalidate = 120;
 // Single optimized query - fetch all data at once
 async function getHomeData() {
   try {
-    // Single query to get all categories with their children
+    // Get homepage category limit from settings
+    let categoryLimit = 12;
+    try {
+      const limitSetting = await prisma.setting.findUnique({
+        where: { key: 'homepage_category_limit' }
+      });
+      if (limitSetting) {
+        categoryLimit = parseInt(limitSetting.value) || 12;
+      }
+    } catch (e) {
+      // Settings table might not exist yet
+    }
+
+    // Get all categories with new fields
     const allCategories = await prisma.category.findMany({
       where: { isActive: true },
-      orderBy: { order: 'asc' },
+      orderBy: [{ homepageOrder: 'asc' }, { order: 'asc' }],
       select: {
         id: true,
         name: true,
@@ -23,24 +36,28 @@ async function getHomeData() {
         description: true,
         parentId: true,
         iconImage: true,
+        emoji: true,
+        showOnHomepage: true,
+        homepageOrder: true,
       }
     });
 
-    // Process in memory (much faster than multiple DB queries)
+    // Process in memory - only show categories marked for homepage
     const collections = allCategories
       .filter(c => c.parentId === null)
       .slice(0, 4)
       .map(collection => ({
         ...collection,
         categories: allCategories
-          .filter(c => c.parentId === collection.id)
-          .slice(0, 12)
+          .filter(c => c.parentId === collection.id && c.showOnHomepage)
+          .sort((a, b) => a.homepageOrder - b.homepageOrder)
+          .slice(0, categoryLimit)
       }));
 
-    return { collections };
+    return { collections, categoryLimit };
   } catch (error) {
     console.error('Error fetching home data:', error);
-    return { collections: [] };
+    return { collections: [], categoryLimit: 12 };
   }
 }
 
@@ -158,16 +175,17 @@ export default async function Home() {
             {collections[0].categories.map((category, idx) => {
               const colors = ['blue', 'pink', 'green', 'purple', 'orange', 'yellow'];
               const color = colors[idx % colors.length];
-              const defaultEmojis = ['🐾', '👑', '🎮', '📺', '🦄', '🎄', '📚', '🌸', '🌳', '🚗', '⚽', '🍦'];
               
               return (
                 <Link key={category.id} href={`/category/${category.slug}`}>
                   <div className={`bg-white rounded-2xl p-4 shadow-lg hover:shadow-2xl transform hover:scale-105 transition-all duration-300 cursor-pointer border-4 border-${color}-400`}>
                     <div className={`aspect-square bg-gradient-to-br from-${color}-100 to-${color}-200 rounded-xl mb-3 flex items-center justify-center overflow-hidden`}>
                       {category.iconImage ? (
-                        <img src={category.iconImage} alt={category.name} className="w-full h-full object-cover" />
+                        <div className="w-16 h-16 md:w-20 md:h-20 rounded-full overflow-hidden shadow-lg">
+                          <img src={category.iconImage} alt={category.name} className="w-full h-full object-cover" />
+                        </div>
                       ) : (
-                        <span className="text-5xl">{defaultEmojis[idx] || '🎨'}</span>
+                        <span className="text-5xl">{category.emoji || '🎨'}</span>
                       )}
                     </div>
                     <h3 className="font-black text-center text-gray-800 text-sm md:text-base">
@@ -211,16 +229,17 @@ export default async function Home() {
             {collections[1].categories.map((category, idx) => {
               const colors = ['green', 'teal', 'blue', 'indigo', 'purple', 'pink'];
               const color = colors[idx % colors.length];
-              const defaultEmojis = ['📅', '📆', '📋', '📝', '🎓', '🎂', '🍽️', '✅', '🎯', '💪', '💰', '📄'];
               
               return (
                 <Link key={category.id} href={`/category/${category.slug}`}>
                   <div className={`bg-white rounded-2xl p-4 shadow-lg hover:shadow-2xl transform hover:scale-105 transition-all duration-300 cursor-pointer border-4 border-${color}-400`}>
                     <div className={`aspect-square bg-gradient-to-br from-${color}-100 to-${color}-200 rounded-xl mb-3 flex items-center justify-center overflow-hidden`}>
                       {category.iconImage ? (
-                        <img src={category.iconImage} alt={category.name} className="w-full h-full object-cover" />
+                        <div className="w-16 h-16 md:w-20 md:h-20 rounded-full overflow-hidden shadow-lg">
+                          <img src={category.iconImage} alt={category.name} className="w-full h-full object-cover" />
+                        </div>
                       ) : (
-                        <span className="text-5xl">{defaultEmojis[idx] || '📅'}</span>
+                        <span className="text-5xl">{category.emoji || '📅'}</span>
                       )}
                     </div>
                     <h3 className="font-black text-center text-gray-800 text-sm md:text-base">
@@ -264,16 +283,17 @@ export default async function Home() {
             {collections[2].categories.map((category, idx) => {
               const colors = ['orange', 'red', 'pink', 'purple', 'blue', 'green'];
               const color = colors[idx % colors.length];
-              const defaultEmojis = ['📝', '🃏', '🏆', '💌', '🏷️', '🎉', '🏷️', '🔖', '🖼️', '✓', '🎈', '🎲'];
               
               return (
                 <Link key={category.id} href={`/category/${category.slug}`}>
                   <div className={`bg-white rounded-2xl p-4 shadow-lg hover:shadow-2xl transform hover:scale-105 transition-all duration-300 cursor-pointer border-4 border-${color}-400`}>
                     <div className={`aspect-square bg-gradient-to-br from-${color}-100 to-${color}-200 rounded-xl mb-3 flex items-center justify-center overflow-hidden`}>
                       {category.iconImage ? (
-                        <img src={category.iconImage} alt={category.name} className="w-full h-full object-cover" />
+                        <div className="w-16 h-16 md:w-20 md:h-20 rounded-full overflow-hidden shadow-lg">
+                          <img src={category.iconImage} alt={category.name} className="w-full h-full object-cover" />
+                        </div>
                       ) : (
-                        <span className="text-5xl">{defaultEmojis[idx] || '📄'}</span>
+                        <span className="text-5xl">{category.emoji || '📄'}</span>
                       )}
                     </div>
                     <h3 className="font-black text-center text-gray-800 text-sm md:text-base">
@@ -317,16 +337,17 @@ export default async function Home() {
             {collections[3].categories.map((category, idx) => {
               const colors = ['indigo', 'purple', 'blue', 'pink', 'violet', 'fuchsia'];
               const color = colors[idx % colors.length];
-              const defaultEmojis = ['📖', '🧒', '📚', '🎨', '🍳', '💪', '📈', '🔮', '💕', '🎭', '🌍', '📓'];
               
               return (
                 <Link key={category.id} href={`/category/${category.slug}`}>
                   <div className={`bg-white rounded-2xl p-4 shadow-lg hover:shadow-2xl transform hover:scale-105 transition-all duration-300 cursor-pointer border-4 border-${color}-400`}>
                     <div className={`aspect-square bg-gradient-to-br from-${color}-100 to-${color}-200 rounded-xl mb-3 flex items-center justify-center overflow-hidden`}>
                       {category.iconImage ? (
-                        <img src={category.iconImage} alt={category.name} className="w-full h-full object-cover" />
+                        <div className="w-16 h-16 md:w-20 md:h-20 rounded-full overflow-hidden shadow-lg">
+                          <img src={category.iconImage} alt={category.name} className="w-full h-full object-cover" />
+                        </div>
                       ) : (
-                        <span className="text-5xl">{defaultEmojis[idx] || '📚'}</span>
+                        <span className="text-5xl">{category.emoji || '📚'}</span>
                       )}
                     </div>
                     <h3 className="font-black text-center text-gray-800 text-sm md:text-base">
