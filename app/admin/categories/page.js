@@ -225,7 +225,7 @@ export default function AdminCategoriesPage() {
               New Category
             </Button>
           </DialogTrigger>
-          <DialogContent>
+          <DialogContent className="max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>{editingCategory ? 'Edit Category' : 'New Category'}</DialogTitle>
               <DialogDescription>
