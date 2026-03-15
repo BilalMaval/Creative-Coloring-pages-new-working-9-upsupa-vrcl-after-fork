@@ -364,23 +364,6 @@ export default async function Home() {
         </section>
       )}
 
-      {/* Subscribe Section */}
-      <section className="container mx-auto px-4 pb-16">
-        <div className="bg-gradient-to-r from-purple-500 via-pink-500 to-orange-400 rounded-3xl p-8 md:p-12 shadow-2xl">
-          <div className="text-center space-y-6">
-            <h2 className="text-3xl md:text-4xl font-black text-white">
-              📬 Never Miss New Coloring Pages!
-            </h2>
-            <p className="text-white font-bold text-lg md:text-xl max-w-2xl mx-auto">
-              Join thousands of families getting FREE coloring pages & creative activities delivered to their inbox!
-            </p>
-            <div className="pt-4">
-              <SubscribeButton />
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* Features Section */}
       <section className="container mx-auto px-4 pb-16">
         <div className="bg-white rounded-3xl p-8 md:p-12 shadow-2xl border-4 border-purple-300">
@@ -408,6 +391,23 @@ export default async function Home() {
               <p className="text-white font-bold">
                 One click to download, print, and start coloring!
               </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Subscribe Section */}
+      <section className="container mx-auto px-4 pb-16">
+        <div className="bg-gradient-to-r from-purple-500 via-pink-500 to-orange-400 rounded-3xl p-8 md:p-12 shadow-2xl">
+          <div className="text-center space-y-6">
+            <h2 className="text-3xl md:text-4xl font-black text-white">
+              📬 Never Miss New Coloring Pages!
+            </h2>
+            <p className="text-white font-bold text-lg md:text-xl max-w-2xl mx-auto">
+              Join thousands of families getting FREE coloring pages & creative activities delivered to their inbox!
+            </p>
+            <div className="pt-4">
+              <SubscribeButton />
             </div>
           </div>
         </div>
