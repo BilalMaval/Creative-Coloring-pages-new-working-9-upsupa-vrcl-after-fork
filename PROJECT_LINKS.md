@@ -2,28 +2,28 @@
 
 ## 🚀 Quick Start
 
-**Live Website:** https://coloring-perf-fix.preview.emergentagent.com
+**Live Website:** https://design-shop-35.preview.emergentagent.com
 
 ## 📋 All Working Links
 
 ### Public Website
-- **Homepage:** https://coloring-perf-fix.preview.emergentagent.com
-- **Collection Page (Coloring Pages):** https://coloring-perf-fix.preview.emergentagent.com/collection/coloring-pages
-- **Collection Page (Calendars):** https://coloring-perf-fix.preview.emergentagent.com/collection/calendars
-- **Collection Page (Printables):** https://coloring-perf-fix.preview.emergentagent.com/collection/printables
-- **Category Page (Animals & Pets):** https://coloring-perf-fix.preview.emergentagent.com/category/animals-pets
-- **Product Page (Cute Cat):** https://coloring-perf-fix.preview.emergentagent.com/product/cute-cat-coloring-page
-- **Product Page (Dog):** https://coloring-perf-fix.preview.emergentagent.com/product/happy-dog-coloring-page
-- **Product Page (Butterfly):** https://coloring-perf-fix.preview.emergentagent.com/product/butterfly-garden-coloring
-- **Product Page (Rabbit):** https://coloring-perf-fix.preview.emergentagent.com/product/cute-rabbit-coloring
+- **Homepage:** https://design-shop-35.preview.emergentagent.com
+- **Collection Page (Coloring Pages):** https://design-shop-35.preview.emergentagent.com/collection/coloring-pages
+- **Collection Page (Calendars):** https://design-shop-35.preview.emergentagent.com/collection/calendars
+- **Collection Page (Printables):** https://design-shop-35.preview.emergentagent.com/collection/printables
+- **Category Page (Animals & Pets):** https://design-shop-35.preview.emergentagent.com/category/animals-pets
+- **Product Page (Cute Cat):** https://design-shop-35.preview.emergentagent.com/product/cute-cat-coloring-page
+- **Product Page (Dog):** https://design-shop-35.preview.emergentagent.com/product/happy-dog-coloring-page
+- **Product Page (Butterfly):** https://design-shop-35.preview.emergentagent.com/product/butterfly-garden-coloring
+- **Product Page (Rabbit):** https://design-shop-35.preview.emergentagent.com/product/cute-rabbit-coloring
 
 ### Admin Panel
-- **Admin Login:** https://coloring-perf-fix.preview.emergentagent.com/admin/login
+- **Admin Login:** https://design-shop-35.preview.emergentagent.com/admin/login
   - **Email:** admin@printables.com
   - **Password:** admin123
-- **Admin Dashboard:** https://coloring-perf-fix.preview.emergentagent.com/admin
-- **Manage Categories:** https://coloring-perf-fix.preview.emergentagent.com/admin/categories
-- **Manage Products:** https://coloring-perf-fix.preview.emergentagent.com/admin/printables
+- **Admin Dashboard:** https://design-shop-35.preview.emergentagent.com/admin
+- **Manage Categories:** https://design-shop-35.preview.emergentagent.com/admin/categories
+- **Manage Products:** https://design-shop-35.preview.emergentagent.com/admin/printables
 
 ## 🗄️ Database Information
 

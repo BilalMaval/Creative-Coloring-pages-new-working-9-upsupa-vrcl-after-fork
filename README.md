@@ -125,7 +125,7 @@ sudo supervisorctl restart nextjs
 DATABASE_URL="postgresql://postgres:postgres@localhost:5432/coloring_pages?schema=public"
 
 # Next.js
-NEXT_PUBLIC_BASE_URL=https://coloring-perf-fix.preview.emergentagent.com
+NEXT_PUBLIC_BASE_URL=https://design-shop-35.preview.emergentagent.com
 
 # Authentication
 JWT_SECRET=creative-coloring-pages-secret-key-2024

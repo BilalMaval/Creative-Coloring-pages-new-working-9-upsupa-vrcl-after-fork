@@ -3,6 +3,7 @@ import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import SearchBar from '@/components/SearchBar';
 import HeroLogo from '@/components/HeroLogo';
+import SubscribeButton from '@/components/SubscribeButton';
 import { Sparkles, Star, Heart, Download, Palette, Smile } from 'lucide-react';
 import prisma from '@/lib/prisma';
 
@@ -362,6 +363,23 @@ export default async function Home() {
           </div>
         </section>
       )}
+
+      {/* Subscribe Section */}
+      <section className="container mx-auto px-4 pb-16">
+        <div className="bg-gradient-to-r from-purple-500 via-pink-500 to-orange-400 rounded-3xl p-8 md:p-12 shadow-2xl">
+          <div className="text-center space-y-6">
+            <h2 className="text-3xl md:text-4xl font-black text-white">
+              📬 Never Miss New Coloring Pages!
+            </h2>
+            <p className="text-white font-bold text-lg md:text-xl max-w-2xl mx-auto">
+              Join thousands of families getting FREE coloring pages & creative activities delivered to their inbox!
+            </p>
+            <div className="pt-4">
+              <SubscribeButton />
+            </div>
+          </div>
+        </div>
+      </section>
 
       {/* Features Section */}
       <section className="container mx-auto px-4 pb-16">

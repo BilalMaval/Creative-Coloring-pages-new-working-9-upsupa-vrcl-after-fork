@@ -11,41 +11,41 @@ I have completely restored your project with all features working. I sincerely a
 ### 🏠 **PUBLIC WEBSITE**
 
 1. **Homepage (Main Page)**
-   - https://coloring-perf-fix.preview.emergentagent.com
+   - https://design-shop-35.preview.emergentagent.com
    - Shows all 3 collections with categories
 
 2. **Collection Pages**
-   - Coloring Pages: https://coloring-perf-fix.preview.emergentagent.com/collection/coloring-pages
-   - Calendars: https://coloring-perf-fix.preview.emergentagent.com/collection/calendars
-   - Printables: https://coloring-perf-fix.preview.emergentagent.com/collection/printables
+   - Coloring Pages: https://design-shop-35.preview.emergentagent.com/collection/coloring-pages
+   - Calendars: https://design-shop-35.preview.emergentagent.com/collection/calendars
+   - Printables: https://design-shop-35.preview.emergentagent.com/collection/printables
 
 3. **Category Page (with Products)**
-   - Animals & Pets: https://coloring-perf-fix.preview.emergentagent.com/category/animals-pets
+   - Animals & Pets: https://design-shop-35.preview.emergentagent.com/category/animals-pets
    - *(Shows all 4 test products)*
 
 4. **Product Pages (Individual Products)**
-   - Cute Cat: https://coloring-perf-fix.preview.emergentagent.com/product/cute-cat-coloring-page
-   - Happy Dog: https://coloring-perf-fix.preview.emergentagent.com/product/happy-dog-coloring-page
-   - Butterfly: https://coloring-perf-fix.preview.emergentagent.com/product/butterfly-garden-coloring
-   - Rabbit: https://coloring-perf-fix.preview.emergentagent.com/product/cute-rabbit-coloring
+   - Cute Cat: https://design-shop-35.preview.emergentagent.com/product/cute-cat-coloring-page
+   - Happy Dog: https://design-shop-35.preview.emergentagent.com/product/happy-dog-coloring-page
+   - Butterfly: https://design-shop-35.preview.emergentagent.com/product/butterfly-garden-coloring
+   - Rabbit: https://design-shop-35.preview.emergentagent.com/product/cute-rabbit-coloring
 
 ### 🔐 **ADMIN PANEL**
 
 1. **Admin Login**
-   - https://coloring-perf-fix.preview.emergentagent.com/admin/login
+   - https://design-shop-35.preview.emergentagent.com/admin/login
    - **Email:** `admin@printables.com`
    - **Password:** `admin123`
 
 2. **Admin Dashboard**
-   - https://coloring-perf-fix.preview.emergentagent.com/admin
+   - https://design-shop-35.preview.emergentagent.com/admin
    - View statistics and manage content
 
 3. **Manage Categories**
-   - https://coloring-perf-fix.preview.emergentagent.com/admin/categories
+   - https://design-shop-35.preview.emergentagent.com/admin/categories
    - Create, edit, delete categories (36 categories currently)
 
 4. **Manage Products**
-   - https://coloring-perf-fix.preview.emergentagent.com/admin/printables
+   - https://design-shop-35.preview.emergentagent.com/admin/printables
    - Create, edit, delete products (4 products currently)
 
 ---
