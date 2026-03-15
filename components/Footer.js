@@ -2,6 +2,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Heart, Star } from 'lucide-react';
 import { Facebook, Instagram } from 'lucide-react';
+import SubscribeForm from './SubscribeForm';
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
@@ -133,6 +134,13 @@ export default function Footer() {
                 <span>Pinterest</span>
               </a>
             </div>
+          </div>
+        </div>
+
+        {/* Subscribe Section */}
+        <div className="mt-8">
+          <div className="max-w-md mx-auto">
+            <SubscribeForm />
           </div>
         </div>
 
