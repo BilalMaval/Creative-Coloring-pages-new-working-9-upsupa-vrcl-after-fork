@@ -11,7 +11,7 @@ export const brands = {
 };
 
 // Default brand for unknown domains
-export const defaultBrand = colorkiddy;
+export const defaultBrand = creativecoloringpages;
 
 // Get brand by domain
 export function getBrandByDomain(domain) {
