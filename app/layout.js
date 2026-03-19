@@ -1,72 +1,137 @@
 import "./globals.css";
+import { headers } from 'next/headers';
+import { getBrandByDomain } from '@/config/brands';
+import { BrandProvider } from '@/components/BrandProvider';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
-import { generateMetadata as genMeta } from '@/lib/seo';
 
-export const metadata = genMeta({
-  title: 'Free Printable Coloring Pages & Mandalas',
-  description: 'Download and print free coloring pages, mandalas, and printable activities for kids and adults. New designs added regularly!',
-  keywords: 'coloring pages, printable coloring pages, mandalas, free printables, coloring sheets, kids coloring, adult coloring, mandala designs'
-});
+// Dynamic metadata based on brand
+export async function generateMetadata() {
+  const headersList = await headers();
+  const host = headersList.get('host') || '';
+  const brand = getBrandByDomain(host);
+  
+  return {
+    title: brand.seo.defaultTitle,
+    description: brand.description,
+    keywords: brand.keywords,
+    icons: {
+      icon: brand.favicon,
+      apple: brand.favicon,
+    },
+    openGraph: {
+      title: brand.seo.defaultTitle,
+      description: brand.description,
+      images: [brand.seo.ogImage],
+      siteName: brand.name,
+    },
+  };
+}
 
-export default function RootLayout({ children }) {
+export default async function RootLayout({ children }) {
+  // Get brand from request headers
+  const headersList = await headers();
+  const host = headersList.get('host') || '';
+  const protocol = headersList.get('x-forwarded-proto') || 'https';
+  const brand = getBrandByDomain(host);
+  const baseUrl = `${protocol}://${host}`;
+  
+  // Serialize brand for client components (remove functions and env vars)
+  const clientBrand = {
+    domain: brand.domain,
+    name: brand.name,
+    shortName: brand.shortName,
+    tagline: brand.tagline,
+    description: brand.description,
+    logo: brand.logo,
+    favicon: brand.favicon,
+    colors: brand.colors,
+    contact: brand.contact,
+    socialLinks: brand.socialLinks,
+    seo: brand.seo,
+  };
+
   return (
     <html lang="en">
       <head>
-        <link rel="icon" href="https://customer-assets.emergentagent.com/job_mandala-maker-2/artifacts/xyc9pvqy_Coloringpages%20logo%20%281%29.png" type="image/png" />
-        <link rel="apple-touch-icon" href="https://customer-assets.emergentagent.com/job_mandala-maker-2/artifacts/xyc9pvqy_Coloringpages%20logo%20%281%29.png" />
-        {/* Google Tag Manager */}
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+        <link rel="icon" href={brand.favicon} type="image/png" />
+        <link rel="apple-touch-icon" href={brand.favicon} />
+        
+        {/* Google Tag Manager - Only if GTM ID exists */}
+        {brand.analytics.gtmId && (
+          <script
+            dangerouslySetInnerHTML={{
+              __html: `(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
 new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
 j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-})(window,document,'script','dataLayer','GTM-KGTWF7HK');`
-          }}
-        />
-        {/* End Google Tag Manager */}
+})(window,document,'script','dataLayer','${brand.analytics.gtmId}');`
+            }}
+          />
+        )}
+        
+        {/* Google Analytics - Only if GA ID exists */}
+        {brand.analytics.gaId && (
+          <>
+            <script async src={`https://www.googletagmanager.com/gtag/js?id=${brand.analytics.gaId}`} />
+            <script
+              dangerouslySetInnerHTML={{
+                __html: `window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', '${brand.analytics.gaId}');`
+              }}
+            />
+          </>
+        )}
+        
+        {/* Structured Data */}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
             __html: JSON.stringify({
               '@context': 'https://schema.org',
               '@type': 'WebSite',
-              name: 'Free Printable Coloring Pages & Mandalas',
-              description: 'Download free printable coloring pages and mandalas for kids and adults',
-              url: process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000',
+              name: brand.seo.defaultTitle,
+              description: brand.description,
+              url: baseUrl,
               potentialAction: {
                 '@type': 'SearchAction',
-                target: `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/search?q={search_term_string}`,
+                target: `${baseUrl}/search?q={search_term_string}`,
                 'query-input': 'required name=search_term_string'
               }
             })
           }}
         />
+        
+        {/* Prevent white flash during page transitions */}
         <style>{`
-          /* Prevent white flash during page transitions */
           html, body {
             background: linear-gradient(to bottom, #eff6ff, #faf5ff, #fdf2f8);
             min-height: 100vh;
           }
         `}</style>
       </head>
-      <body className="antialiased flex flex-col min-h-screen bg-gradient-to-b from-blue-50 via-purple-50 to-pink-50">
+      <body className={`antialiased flex flex-col min-h-screen bg-gradient-to-b ${brand.colors.gradient}`}>
         {/* Google Tag Manager (noscript) */}
-        <noscript>
-          <iframe 
-            src="https://www.googletagmanager.com/ns.html?id=GTM-KGTWF7HK"
-            height="0" 
-            width="0" 
-            style={{display: 'none', visibility: 'hidden'}}
-          />
-        </noscript>
-        {/* End Google Tag Manager (noscript) */}
-        <Header />
-        <main className="flex-1 flex flex-col">
-          {children}
-        </main>
-        <Footer />
+        {brand.analytics.gtmId && (
+          <noscript>
+            <iframe 
+              src={`https://www.googletagmanager.com/ns.html?id=${brand.analytics.gtmId}`}
+              height="0" 
+              width="0" 
+              style={{display: 'none', visibility: 'hidden'}}
+            />
+          </noscript>
+        )}
+        
+        <BrandProvider brand={clientBrand}>
+          <Header />
+          <main className="flex-1 flex flex-col">
+            {children}
+          </main>
+          <Footer />
+        </BrandProvider>
       </body>
     </html>
   );

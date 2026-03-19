@@ -4,8 +4,10 @@ import { useState } from 'react';
 import { X, Mail, User, Sparkles, Heart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { useBrand } from '@/components/BrandProvider';
 
 export default function SubscribeModal({ isOpen, onClose }) {
+  const brand = useBrand();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
@@ -75,7 +77,7 @@ export default function SubscribeModal({ isOpen, onClose }) {
             Join Our Newsletter!
           </h2>
           <p className="text-gray-600 font-medium mt-2">
-            Get FREE coloring pages & updates delivered to your inbox! 🎨
+            Get FREE coloring pages & updates from {brand.name}! 🎨
           </p>
         </div>
 

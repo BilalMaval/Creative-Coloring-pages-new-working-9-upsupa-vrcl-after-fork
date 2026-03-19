@@ -5,8 +5,10 @@ import Image from 'next/image';
 import { useState, useEffect } from 'react';
 import { Menu, X, Sparkles, ShoppingCart, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useBrand } from '@/components/BrandProvider';
 
 export default function Header() {
+  const brand = useBrand();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [cartCount, setCartCount] = useState(0);
@@ -46,15 +48,15 @@ export default function Header() {
   }, []);
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b-4 border-yellow-400 bg-white shadow-lg">
+    <header className={`sticky top-0 z-50 w-full border-b-4 border-${brand.colors.headerBorder} bg-white shadow-lg`}>
       <div className="container mx-auto px-4">
         <div className="flex h-20 items-center justify-between">
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-3 group">
             <div className="relative h-16 w-16">
               <Image
-                src="https://customer-assets.emergentagent.com/job_mandala-maker-2/artifacts/xyc9pvqy_Coloringpages%20logo%20%281%29.png"
-                alt="CCP Logo"
+                src={brand.logo}
+                alt={`${brand.name} Logo`}
                 fill
                 className="object-contain group-hover:scale-110 transition-transform"
                 priority
@@ -62,10 +64,10 @@ export default function Header() {
             </div>
             <div className="hidden lg:block">
               <div className="font-black text-xl text-gray-800 flex items-center gap-2">
-                <Sparkles className="h-5 w-5 text-purple-500" />
-                Creative Coloring Pages
+                <Sparkles className={`h-5 w-5 text-${brand.colors.primary}-500`} />
+                {brand.name}
               </div>
-              <div className="text-xs text-purple-600 font-bold">Fun for Kids & Families!</div>
+              <div className={`text-xs text-${brand.colors.primary}-600 font-bold`}>{brand.tagline}</div>
             </div>
           </Link>
 
@@ -118,7 +120,7 @@ export default function Header() {
 
           {/* Mobile Menu Button */}
           <button
-            className="md:hidden bg-purple-500 rounded-xl p-3 shadow-lg"
+            className={`md:hidden bg-${brand.colors.primary}-500 rounded-xl p-3 shadow-lg`}
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           >
             {mobileMenuOpen ? (

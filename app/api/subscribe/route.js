@@ -1,10 +1,18 @@
 import { NextResponse } from 'next/server';
+import { headers } from 'next/headers';
 import prisma from '@/lib/prisma';
+import { sendSubscriptionWelcomeEmail } from '@/lib/email';
+import { getBrandByDomain } from '@/config/brands';
 
 export async function POST(request) {
   try {
     const body = await request.json();
     const { name, email } = body;
+    
+    // Get current domain for brand-specific emails
+    const headersList = await headers();
+    const host = headersList.get('host') || '';
+    const brand = getBrandByDomain(host);
     
     if (!name || !email) {
       return NextResponse.json(
@@ -55,42 +63,13 @@ export async function POST(request) {
       }
     });
     
-    // Send confirmation email using Brevo
+    // Send brand-specific welcome email
     try {
-      const brevoApiKey = process.env.BREVO_API_KEY;
-      if (brevoApiKey) {
-        await fetch('https://api.brevo.com/v3/smtp/email', {
-          method: 'POST',
-          headers: {
-            'accept': 'application/json',
-            'api-key': brevoApiKey,
-            'content-type': 'application/json'
-          },
-          body: JSON.stringify({
-            sender: { name: 'Creative Coloring Pages', email: 'noreply@creativecoloringpages.online' },
-            to: [{ email: email.toLowerCase(), name }],
-            subject: 'Welcome to Creative Coloring Pages! 🎨',
-            htmlContent: `
-              <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-                <div style="text-align: center; margin-bottom: 30px;">
-                  <h1 style="color: #8b5cf6;">🎨 Welcome to Creative Coloring Pages!</h1>
-                </div>
-                <p>Hi ${name},</p>
-                <p>Thank you for subscribing to our newsletter! You'll be the first to know about:</p>
-                <ul>
-                  <li>New coloring pages and printables</li>
-                  <li>Special offers and free downloads</li>
-                  <li>Creative tips and coloring techniques</li>
-                </ul>
-                <p>Happy coloring! 🌈</p>
-                <p style="margin-top: 30px; color: #666; font-size: 12px;">
-                  If you didn't subscribe, you can ignore this email.
-                </p>
-              </div>
-            `
-          })
-        });
-      }
+      await sendSubscriptionWelcomeEmail({
+        name,
+        email: email.toLowerCase(),
+        brandDomain: host
+      });
     } catch (emailError) {
       console.error('Error sending welcome email:', emailError);
       // Don't fail the subscription if email fails
@@ -98,7 +77,7 @@ export async function POST(request) {
     
     return NextResponse.json({
       success: true,
-      message: 'Thank you for subscribing! Check your email for confirmation.'
+      message: `Thank you for subscribing to ${brand.name}! Check your email for confirmation.`
     });
   } catch (error) {
     console.error('Error creating subscriber:', error);

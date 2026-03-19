@@ -1,20 +1,41 @@
 import { NextResponse } from 'next/server';
+import { headers } from 'next/headers';
+import { getBrandByDomain } from '@/config/brands';
+
+export const dynamic = 'force-dynamic';
 
 export async function GET() {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+  // Get the current domain from headers
+  const headersList = await headers();
+  const host = headersList.get('host') || '';
+  const protocol = headersList.get('x-forwarded-proto') || 'https';
+  const baseUrl = `${protocol}://${host}`;
   
-  const robots = `# https://www.robotstxt.org/robotstxt.html
+  // Get brand for this domain
+  const brand = getBrandByDomain(host);
+  
+  const robots = `# Robots.txt for ${brand.name}
+# Domain: ${brand.domain}
+# https://www.robotstxt.org/robotstxt.html
+
 User-agent: *
 Allow: /
 Disallow: /admin
 Disallow: /api
+Disallow: /cart
+Disallow: /checkout
 
-Sitemap: ${baseUrl}/sitemap.xml`;
+# Sitemaps
+Sitemap: ${baseUrl}/sitemap.xml
+
+# Crawl-delay for polite crawling
+Crawl-delay: 1`;
   
   return new NextResponse(robots, {
     status: 200,
     headers: {
-      'Content-Type': 'text/plain'
+      'Content-Type': 'text/plain',
+      'Cache-Control': 'public, max-age=3600, s-maxage=3600'
     }
   });
 }

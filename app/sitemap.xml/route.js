@@ -1,9 +1,18 @@
 import prisma from '@/lib/prisma';
+import { headers } from 'next/headers';
+import { getBrandByDomain } from '@/config/brands';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://design-shop-35.preview.emergentagent.com';
+  // Get the current domain from headers
+  const headersList = await headers();
+  const host = headersList.get('host') || '';
+  const protocol = headersList.get('x-forwarded-proto') || 'https';
+  const baseUrl = `${protocol}://${host}`;
+  
+  // Get brand for this domain (for potential brand-specific sitemap customization)
+  const brand = getBrandByDomain(host);
   
   try {
     // Fetch all active products
@@ -24,11 +33,16 @@ export async function GET() {
       { url: '/about', changefreq: 'monthly', priority: '0.6' },
       { url: '/privacy-policy', changefreq: 'monthly', priority: '0.3' },
       { url: '/terms-of-service', changefreq: 'monthly', priority: '0.3' },
+      { url: '/contact', changefreq: 'monthly', priority: '0.5' },
       { url: '/search', changefreq: 'weekly', priority: '0.7' },
     ];
     
+    const currentDate = new Date().toISOString();
+    
     const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <!-- Sitemap for ${brand.name} (${brand.domain}) -->
+  <!-- Generated: ${currentDate} -->
   ${staticPages.map(page => `
   <url>
     <loc>${baseUrl}${page.url}</loc>
@@ -59,6 +73,7 @@ export async function GET() {
     return new Response(sitemap, {
       headers: {
         'Content-Type': 'application/xml',
+        'Cache-Control': 'public, max-age=3600, s-maxage=3600'
       },
     });
   } catch (error) {

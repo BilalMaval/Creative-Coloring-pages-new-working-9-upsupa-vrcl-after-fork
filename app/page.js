@@ -3,6 +3,7 @@ import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import SearchBar from '@/components/SearchBar';
 import HeroLogo from '@/components/HeroLogo';
+import BrandTitle from '@/components/BrandTitle';
 import SubscribeButton from '@/components/SubscribeButton';
 import { Sparkles, Star, Heart, Download, Palette, Smile } from 'lucide-react';
 import prisma from '@/lib/prisma';
@@ -74,9 +75,7 @@ export default async function Home() {
           <div className="flex flex-col items-center gap-6 mb-8">
             <HeroLogo />
             <div className="space-y-3">
-              <h1 className="text-4xl md:text-6xl font-black text-gray-800">
-                Creative Coloring Pages
-              </h1>
+              <BrandTitle />
               <div className="inline-block bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500 text-white font-bold text-xl md:text-3xl py-3 px-8 rounded-full shadow-xl transform hover:scale-105 transition-transform">
                 <Palette className="inline-block mr-2 h-8 w-8" />
                 100% FREE Coloring Pages!

@@ -1,10 +1,15 @@
 import { NextResponse } from 'next/server';
+import { headers } from 'next/headers';
 import { sendContactEmail } from '@/lib/email';
 
 export async function POST(request) {
   try {
     const body = await request.json();
     const { name, email, message } = body;
+    
+    // Get current domain for brand-specific emails
+    const headersList = await headers();
+    const host = headersList.get('host') || '';
     
     if (!name || !email || !message) {
       return NextResponse.json(
@@ -13,8 +18,13 @@ export async function POST(request) {
       );
     }
     
-    // Send email notification
-    const emailResult = await sendContactEmail({ name, email, message });
+    // Send brand-specific email notification
+    const emailResult = await sendContactEmail({ 
+      name, 
+      email, 
+      message,
+      brandDomain: host 
+    });
     
     if (!emailResult.success) {
       console.error('Email send failed:', emailResult.error);

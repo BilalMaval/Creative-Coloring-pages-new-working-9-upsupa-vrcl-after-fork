@@ -1,13 +1,16 @@
 'use client';
 
 import Image from 'next/image';
+import { useBrand } from '@/components/BrandProvider';
 
 export default function HeroLogo() {
+  const brand = useBrand();
+  
   return (
     <div className="relative w-48 h-48 md:w-64 md:h-64">
       <Image
-        src="https://customer-assets.emergentagent.com/job_mandala-maker-2/artifacts/xyc9pvqy_Coloringpages%20logo%20%281%29.png"
-        alt="Creative Coloring Pages Logo"
+        src={brand.logo}
+        alt={`${brand.name} Logo`}
         fill
         className="object-contain drop-shadow-2xl"
         priority
