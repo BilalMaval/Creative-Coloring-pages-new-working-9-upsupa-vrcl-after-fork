@@ -43,6 +43,13 @@ const brand = {
     youtube: ''
   },
   
+  // Analytics (hardcoded - these are public anyway)
+  // TODO: Add your GTM/GA IDs here
+  analytics: {
+    gtmId: '',  // e.g., 'GTM-XXXXXXX'
+    gaId: '',   // e.g., 'G-XXXXXXX'
+  },
+  
   // Environment variable keys (actual values loaded at runtime)
   // These define WHICH env vars to read for this brand
   envKeys: {
@@ -51,10 +58,6 @@ const brand = {
     stripeSecretKey: 'COLORKIDDY_STRIPE_SECRET_KEY',
     paypalClientId: 'COLORKIDDY_PAYPAL_CLIENT_ID',
     paypalSecret: 'COLORKIDDY_PAYPAL_SECRET',
-    
-    // Analytics
-    gaId: 'COLORKIDDY_GA_ID',
-    gtmId: 'COLORKIDDY_GTM_ID',
     
     // Email Service
     brevoApiKey: 'COLORKIDDY_BREVO_API_KEY',

@@ -42,6 +42,12 @@ const brand = {
     youtube: ''
   },
   
+  // Analytics (hardcoded - these are public anyway)
+  analytics: {
+    gtmId: 'GTM-KGTWF7HK',
+    gaId: '',
+  },
+  
   // Environment variable keys (actual values loaded at runtime)
   // These define WHICH env vars to read for this brand
   envKeys: {
@@ -50,10 +56,6 @@ const brand = {
     stripeSecretKey: 'CCP_STRIPE_SECRET_KEY',
     paypalClientId: 'CCP_PAYPAL_CLIENT_ID',
     paypalSecret: 'CCP_PAYPAL_SECRET',
-    
-    // Analytics
-    gaId: 'CCP_GA_ID',
-    gtmId: 'CCP_GTM_ID',
     
     // Email Service
     brevoApiKey: 'CCP_BREVO_API_KEY',
