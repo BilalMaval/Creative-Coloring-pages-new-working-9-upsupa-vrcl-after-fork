@@ -1,6 +1,10 @@
-// Brand configuration for colorkiddy.com (DEFAULT FALLBACK)
+// Brand configuration for colorkiddy.com
+// Environment variables should be prefixed with COLORKIDDY_
 // TODO: Fill in your brand-specific values
+
 const brand = {
+  // Brand identifier (used for env var prefix)
+  id: 'COLORKIDDY',
   domain: 'colorkiddy.com',
   name: 'ColorKiddy',
   shortName: 'CK',
@@ -39,25 +43,31 @@ const brand = {
     youtube: ''
   },
   
-  // Payment Configuration - TODO: Update with your keys
+  // Environment variable keys (actual values loaded at runtime)
+  // These define WHICH env vars to read for this brand
+  envKeys: {
+    // Payment
+    stripePublicKey: 'COLORKIDDY_STRIPE_PUBLIC_KEY',
+    stripeSecretKey: 'COLORKIDDY_STRIPE_SECRET_KEY',
+    paypalClientId: 'COLORKIDDY_PAYPAL_CLIENT_ID',
+    paypalSecret: 'COLORKIDDY_PAYPAL_SECRET',
+    
+    // Analytics
+    gaId: 'COLORKIDDY_GA_ID',
+    gtmId: 'COLORKIDDY_GTM_ID',
+    
+    // Email Service
+    brevoApiKey: 'COLORKIDDY_BREVO_API_KEY',
+  },
+  
+  // Static values (not from env)
   payment: {
-    stripePublicKey: process.env.COLORKIDDY_STRIPE_PUBLIC_KEY || '',
-    stripeSecretKey: process.env.COLORKIDDY_STRIPE_SECRET_KEY || '',
-    paypalClientId: process.env.COLORKIDDY_PAYPAL_CLIENT_ID || '',
-    paypalSecret: process.env.COLORKIDDY_PAYPAL_SECRET || '',
     currency: 'USD'
   },
   
-  // Analytics - TODO: Update with your GTM/GA IDs
-  analytics: {
-    gaId: '',
-    gtmId: ''
-  },
-  
-  // Email Service Configuration - TODO: Update
+  // Email Service Configuration (static parts)
   emailService: {
     provider: 'brevo',
-    apiKey: process.env.COLORKIDDY_BREVO_API_KEY || process.env.BREVO_API_KEY || '',
     senderEmail: 'noreply@colorkiddy.com',
     senderName: 'ColorKiddy',
     replyToEmail: 'support@colorkiddy.com',

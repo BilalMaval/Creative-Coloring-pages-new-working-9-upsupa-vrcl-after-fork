@@ -1,42 +1,84 @@
 # Multi-Tenant Architecture Guide
 
 ## Overview
-This application supports multiple domains/brands sharing the same codebase and database. Each domain can have its own branding, analytics, email configuration, etc.
+This application supports multiple domains/brands sharing the same codebase and database. Each domain has its own branding, analytics, email service, and payment configuration.
+
+---
+
+## 🔑 Environment Variables Setup (VERCEL)
+
+Each brand has **prefixed environment variables**. Set these in your Vercel project settings:
+
+### For creativecoloringpages.online (prefix: `CCP_`)
+```bash
+# Email Service
+CCP_BREVO_API_KEY=your_brevo_api_key
+
+# Payment
+CCP_STRIPE_PUBLIC_KEY=pk_live_xxx
+CCP_STRIPE_SECRET_KEY=sk_live_xxx
+CCP_PAYPAL_CLIENT_ID=xxx
+CCP_PAYPAL_SECRET=xxx
+
+# Analytics
+CCP_GTM_ID=GTM-XXXXXXX
+CCP_GA_ID=G-XXXXXXX
+```
+
+### For colorkiddy.com (prefix: `COLORKIDDY_`)
+```bash
+# Email Service
+COLORKIDDY_BREVO_API_KEY=different_brevo_api_key
+
+# Payment
+COLORKIDDY_STRIPE_PUBLIC_KEY=pk_live_yyy
+COLORKIDDY_STRIPE_SECRET_KEY=sk_live_yyy
+COLORKIDDY_PAYPAL_CLIENT_ID=yyy
+COLORKIDDY_PAYPAL_SECRET=yyy
+
+# Analytics
+COLORKIDDY_GTM_ID=GTM-YYYYYYY
+COLORKIDDY_GA_ID=G-YYYYYYY
+```
+
+### Fallback Variables (Optional)
+If a brand-specific variable isn't set, the system falls back to non-prefixed versions:
+```bash
+BREVO_API_KEY=fallback_key
+STRIPE_PUBLIC_KEY=fallback_key
+GTM_ID=fallback_gtm
+```
 
 ---
 
 ## ⚠️ IMPORTANT: Never Hardcode These Values
 
-Instead of hardcoding, always use the brand configuration:
-
-| ❌ DON'T Hardcode | ✅ DO Use Brand Config |
-|-------------------|------------------------|
+| ❌ DON'T Hardcode | ✅ DO Use |
+|-------------------|-----------|
 | `"Creative Coloring Pages"` | `brand.name` |
-| `"CCP"` | `brand.shortName` |
-| `"Fun for Kids & Families!"` | `brand.tagline` |
-| Logo URLs | `brand.logo` / `brand.favicon` |
-| `"GTM-KGTWF7HK"` | `brand.analytics.gtmId` |
-| `"GA-XXXXXXXX"` | `brand.analytics.gaId` |
-| Email addresses | `brand.contact.email` / `brand.emailService.*` |
-| Social media URLs | `brand.socialLinks.facebook`, etc. |
-| Color values like `"purple"` | `brand.colors.primary` |
+| `"GTM-KGTWF7HK"` | `getBrandEnv(brand, 'gtmId')` |
+| `process.env.BREVO_API_KEY` | `getBrandEnv(brand, 'brevoApiKey')` |
+| `process.env.STRIPE_SECRET_KEY` | `getBrandEnv(brand, 'stripeSecretKey')` |
 
 ---
 
-## How to Access Brand in Different Contexts
+## How to Access Brand Configuration
 
-### 1. Server Components (page.js, layout.js, etc.)
+### 1. Server Components (page.js, layout.js)
 
 ```javascript
 import { headers } from 'next/headers';
 import { getBrandByDomain } from '@/config/brands';
+import { getBrandSecrets } from '@/lib/brandEnv';
 
 export default async function MyPage() {
   const headersList = await headers();
   const host = headersList.get('host') || '';
   const brand = getBrandByDomain(host);
+  const secrets = getBrandSecrets(brand);
   
-  return <h1>{brand.name}</h1>;
+  // Use brand.name, brand.logo, etc.
+  // Use secrets.gtmId, secrets.stripePublicKey, etc.
 }
 ```
 
@@ -48,8 +90,8 @@ import { useBrand } from '@/components/BrandProvider';
 
 export default function MyComponent() {
   const brand = useBrand();
-  
-  return <h1>{brand.name}</h1>;
+  // brand contains: name, logo, colors, contact, socialLinks, seo
+  // Does NOT contain secrets (API keys, etc.)
 }
 ```
 
@@ -58,93 +100,81 @@ export default function MyComponent() {
 ```javascript
 import { headers } from 'next/headers';
 import { getBrandByDomain } from '@/config/brands';
+import { getBrandEnv } from '@/lib/brandEnv';
 
 export async function POST(request) {
   const headersList = await headers();
   const host = headersList.get('host') || '';
   const brand = getBrandByDomain(host);
   
-  // Use brand.emailService, brand.payment, etc.
+  // Get brand-specific API key
+  const apiKey = getBrandEnv(brand, 'brevoApiKey', 'BREVO_API_KEY');
+  const stripeKey = getBrandEnv(brand, 'stripeSecretKey', 'STRIPE_SECRET_KEY');
 }
 ```
 
 ---
 
-## Brand Configuration Structure
+## Brand Configuration File Structure
 
-Each brand file in `/config/brands/` contains:
+Each brand file (`/config/brands/yourdomain.com.js`) contains:
 
 ```javascript
 const brand = {
-  // Identity
-  domain: 'example.com',
-  name: 'Brand Name',
-  shortName: 'BN',
-  tagline: 'Your tagline here',
-  description: 'SEO description',
-  keywords: 'seo, keywords',
+  // Brand identifier (used for logging)
+  id: 'MYBRAND',
+  domain: 'mybrand.com',
+  name: 'My Brand Name',
+  shortName: 'MB',
+  tagline: 'Your tagline',
   
-  // Branding
+  // Visual branding
   logo: 'https://...',
   favicon: 'https://...',
-  
-  // Colors (Tailwind class names)
   colors: {
-    primary: 'purple',      // Used as: text-${primary}-500, bg-${primary}-600
+    primary: 'purple',
     secondary: 'pink',
     accent: 'blue',
     headerBorder: 'yellow-400',
     gradient: 'from-blue-50 via-purple-50 to-pink-50'
   },
   
-  // Contact
+  // Contact info
   contact: {
-    email: 'admin@example.com',
-    supportEmail: 'support@example.com',
-    phone: '',
-    address: ''
+    email: 'admin@mybrand.com',
+    supportEmail: 'support@mybrand.com'
   },
   
-  // Social Media
+  // Social links
   socialLinks: {
-    facebook: 'https://facebook.com/...',
-    instagram: 'https://instagram.com/...',
-    tiktok: 'https://tiktok.com/@...',
-    pinterest: 'https://pinterest.com/...',
-    twitter: '',
-    youtube: ''
+    facebook: 'https://...',
+    instagram: 'https://...'
   },
   
-  // Payment (read from env vars)
-  payment: {
-    stripePublicKey: process.env.STRIPE_PUBLIC_KEY || '',
-    stripeSecretKey: process.env.STRIPE_SECRET_KEY || '',
-    paypalClientId: process.env.PAYPAL_CLIENT_ID || '',
-    currency: 'USD'
+  // ENV VAR KEYS - This is critical!
+  // Maps logical names to actual env var names
+  envKeys: {
+    stripePublicKey: 'MYBRAND_STRIPE_PUBLIC_KEY',
+    stripeSecretKey: 'MYBRAND_STRIPE_SECRET_KEY',
+    paypalClientId: 'MYBRAND_PAYPAL_CLIENT_ID',
+    paypalSecret: 'MYBRAND_PAYPAL_SECRET',
+    gaId: 'MYBRAND_GA_ID',
+    gtmId: 'MYBRAND_GTM_ID',
+    brevoApiKey: 'MYBRAND_BREVO_API_KEY',
   },
   
-  // Analytics
-  analytics: {
-    gaId: '',           // Google Analytics ID
-    gtmId: 'GTM-XXXXX'  // Google Tag Manager ID
-  },
-  
-  // Email Service
+  // Email service (static config)
   emailService: {
     provider: 'brevo',
-    apiKey: process.env.BREVO_API_KEY || '',
-    senderEmail: 'noreply@example.com',
-    senderName: 'Brand Name',
-    replyToEmail: 'support@example.com',
-    replyToName: 'Support',
-    contactRecipients: ['admin@example.com']  // Who receives contact form emails
+    senderEmail: 'noreply@mybrand.com',
+    senderName: 'My Brand',
+    contactRecipients: ['admin@mybrand.com']
   },
   
   // SEO
   seo: {
-    titleTemplate: '%s | Brand Name',
-    defaultTitle: 'Default Page Title',
-    ogImage: 'https://...'
+    titleTemplate: '%s | My Brand',
+    defaultTitle: 'My Brand - Homepage'
   }
 };
 
@@ -153,108 +183,73 @@ export default brand;
 
 ---
 
-## Adding a New Brand/Domain
+## Adding a New Brand
 
-1. **Create brand config file:**
-   ```
-   /config/brands/newdomain.com.js
-   ```
+### Step 1: Create brand config file
+```bash
+/config/brands/newdomain.com.js
+```
 
-2. **Register in index.js:**
-   ```javascript
-   // /config/brands/index.js
-   import newdomain from './newdomain.com.js';
-   
-   export const brands = {
-     // ... existing brands
-     'newdomain.com': newdomain,
-     'www.newdomain.com': newdomain,
-   };
-   ```
-
-3. **Point domain to deployment** (Vercel/hosting provider)
-
----
-
-## Available Brand Properties in Client Components
-
-The `useBrand()` hook returns a serialized version (no sensitive data):
-
+### Step 2: Define envKeys with your prefix
 ```javascript
-{
-  domain,
-  name,
-  shortName,
-  tagline,
-  description,
-  logo,
-  favicon,
-  colors,
-  contact,
-  socialLinks,
-  seo
+envKeys: {
+  stripePublicKey: 'NEWBRAND_STRIPE_PUBLIC_KEY',
+  stripeSecretKey: 'NEWBRAND_STRIPE_SECRET_KEY',
+  gtmId: 'NEWBRAND_GTM_ID',
+  brevoApiKey: 'NEWBRAND_BREVO_API_KEY',
 }
 ```
 
-**Note:** Payment keys and email API keys are NOT passed to client components for security.
-
----
-
-## Files Using Brand Configuration
-
-| File | How Brand is Used |
-|------|-------------------|
-| `/app/layout.js` | Metadata, favicon, GTM/GA scripts |
-| `/components/Header.js` | Logo, name, tagline, colors |
-| `/components/Footer.js` | Logo, name, tagline, social links |
-| `/components/HeroLogo.js` | Logo image |
-| `/components/BrandTitle.js` | Brand name in hero |
-| `/components/SubscribeModal.js` | Brand name in messages |
-| `/lib/email.js` | Email sender info, recipients |
-| `/app/api/subscribe/route.js` | Welcome email branding |
-| `/app/api/contact/route.js` | Contact email recipients |
-| `/app/robots.txt/route.js` | Domain-specific robots.txt |
-| `/app/sitemap.xml/route.js` | Domain-specific sitemap |
-
----
-
-## Quick Reference: Common Patterns
-
-### Display brand name:
-```jsx
-// Client component
-const brand = useBrand();
-<span>{brand.name}</span>
-```
-
-### Conditional social link:
-```jsx
-{brand.socialLinks.facebook && (
-  <a href={brand.socialLinks.facebook}>Facebook</a>
-)}
-```
-
-### Use brand color:
-```jsx
-<div className={`bg-${brand.colors.primary}-500`}>
-```
-
-### Send branded email (API route):
+### Step 3: Register in index.js
 ```javascript
-import { sendContactEmail } from '@/lib/email';
+// /config/brands/index.js
+import newbrand from './newdomain.com.js';
 
-await sendContactEmail({
-  name,
-  email,
-  message,
-  brandDomain: host  // Pass the domain!
-});
+export const brands = {
+  // ... existing
+  'newdomain.com': newbrand,
+  'www.newdomain.com': newbrand,
+};
 ```
+
+### Step 4: Set environment variables in Vercel
+```
+NEWBRAND_STRIPE_PUBLIC_KEY=pk_xxx
+NEWBRAND_STRIPE_SECRET_KEY=sk_xxx
+NEWBRAND_GTM_ID=GTM-XXX
+NEWBRAND_BREVO_API_KEY=xxx
+```
+
+### Step 5: Point domain to Vercel deployment
 
 ---
 
-## Default Brand
+## Key Files Reference
 
-If a domain is not recognized, the default brand is used:
-- Currently set to: `creativecoloringpages.online`
-- Change in: `/config/brands/index.js` → `defaultBrand`
+| File | Purpose |
+|------|---------|
+| `/config/brands/*.js` | Brand configurations |
+| `/config/brands/index.js` | Brand registry & domain mapping |
+| `/lib/brandEnv.js` | Environment variable helper |
+| `/lib/getBrand.js` | Domain detection utility |
+| `/components/BrandProvider.js` | React Context for client |
+
+---
+
+## Security Notes
+
+1. **Never expose secret keys to client** - Only `getBrandPublicConfig()` values are safe for browser
+2. **Use envKeys mapping** - Never hardcode env var names in application code
+3. **Fallback behavior** - System falls back to non-prefixed env vars if brand-specific not found
+
+---
+
+## Testing Multiple Brands Locally
+
+You can test by modifying your `/etc/hosts`:
+```
+127.0.0.1 colorkiddy.local
+127.0.0.1 creativecoloringpages.local
+```
+
+Then add these domains to the brands registry and access via `http://colorkiddy.local:3000`

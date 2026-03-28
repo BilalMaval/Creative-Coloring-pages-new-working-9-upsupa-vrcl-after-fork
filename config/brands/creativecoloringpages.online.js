@@ -1,5 +1,9 @@
 // Brand configuration for creativecoloringpages.online
+// Environment variables should be prefixed with CCP_
+
 const brand = {
+  // Brand identifier (used for env var prefix)
+  id: 'CCP',
   domain: 'creativecoloringpages.online',
   name: 'Creative Coloring Pages',
   shortName: 'CCP',
@@ -38,25 +42,31 @@ const brand = {
     youtube: ''
   },
   
-  // Payment Configuration
+  // Environment variable keys (actual values loaded at runtime)
+  // These define WHICH env vars to read for this brand
+  envKeys: {
+    // Payment
+    stripePublicKey: 'CCP_STRIPE_PUBLIC_KEY',
+    stripeSecretKey: 'CCP_STRIPE_SECRET_KEY',
+    paypalClientId: 'CCP_PAYPAL_CLIENT_ID',
+    paypalSecret: 'CCP_PAYPAL_SECRET',
+    
+    // Analytics
+    gaId: 'CCP_GA_ID',
+    gtmId: 'CCP_GTM_ID',
+    
+    // Email Service
+    brevoApiKey: 'CCP_BREVO_API_KEY',
+  },
+  
+  // Static values (not from env)
   payment: {
-    stripePublicKey: process.env.STRIPE_PUBLIC_KEY || '',
-    stripeSecretKey: process.env.STRIPE_SECRET_KEY || '',
-    paypalClientId: process.env.PAYPAL_CLIENT_ID || '',
-    paypalSecret: process.env.PAYPAL_SECRET || '',
     currency: 'USD'
   },
   
-  // Analytics
-  analytics: {
-    gaId: '',
-    gtmId: 'GTM-KGTWF7HK'
-  },
-  
-  // Email Service Configuration
+  // Email Service Configuration (static parts)
   emailService: {
     provider: 'brevo',
-    apiKey: process.env.BREVO_API_KEY || '',
     senderEmail: 'alisafyan1122@gmail.com',
     senderName: 'Creative Coloring Pages',
     replyToEmail: 'sufyan.afzalk@gmail.com',

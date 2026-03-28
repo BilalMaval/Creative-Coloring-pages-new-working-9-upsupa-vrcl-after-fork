@@ -1,6 +1,7 @@
 import "./globals.css";
 import { headers } from 'next/headers';
 import { getBrandByDomain } from '@/config/brands';
+import { getBrandSecrets } from '@/lib/brandEnv';
 import { BrandProvider } from '@/components/BrandProvider';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
@@ -36,7 +37,10 @@ export default async function RootLayout({ children }) {
   const brand = getBrandByDomain(host);
   const baseUrl = `${protocol}://${host}`;
   
-  // Serialize brand for client components (remove functions and env vars)
+  // Get brand-specific secrets (analytics IDs, etc.)
+  const secrets = getBrandSecrets(brand);
+  
+  // Serialize brand for client components (no sensitive data)
   const clientBrand = {
     domain: brand.domain,
     name: brand.name,
@@ -58,28 +62,28 @@ export default async function RootLayout({ children }) {
         <link rel="apple-touch-icon" href={brand.favicon} />
         
         {/* Google Tag Manager - Only if GTM ID exists */}
-        {brand.analytics.gtmId && (
+        {secrets.gtmId && (
           <script
             dangerouslySetInnerHTML={{
               __html: `(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
 new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
 j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-})(window,document,'script','dataLayer','${brand.analytics.gtmId}');`
+})(window,document,'script','dataLayer','${secrets.gtmId}');`
             }}
           />
         )}
         
         {/* Google Analytics - Only if GA ID exists */}
-        {brand.analytics.gaId && (
+        {secrets.gaId && (
           <>
-            <script async src={`https://www.googletagmanager.com/gtag/js?id=${brand.analytics.gaId}`} />
+            <script async src={`https://www.googletagmanager.com/gtag/js?id=${secrets.gaId}`} />
             <script
               dangerouslySetInnerHTML={{
                 __html: `window.dataLayer = window.dataLayer || [];
 function gtag(){dataLayer.push(arguments);}
 gtag('js', new Date());
-gtag('config', '${brand.analytics.gaId}');`
+gtag('config', '${secrets.gaId}');`
               }}
             />
           </>
@@ -114,10 +118,10 @@ gtag('config', '${brand.analytics.gaId}');`
       </head>
       <body className={`antialiased flex flex-col min-h-screen bg-gradient-to-b ${brand.colors.gradient}`}>
         {/* Google Tag Manager (noscript) */}
-        {brand.analytics.gtmId && (
+        {secrets.gtmId && (
           <noscript>
             <iframe 
-              src={`https://www.googletagmanager.com/ns.html?id=${brand.analytics.gtmId}`}
+              src={`https://www.googletagmanager.com/ns.html?id=${secrets.gtmId}`}
               height="0" 
               width="0" 
               style={{display: 'none', visibility: 'hidden'}}
