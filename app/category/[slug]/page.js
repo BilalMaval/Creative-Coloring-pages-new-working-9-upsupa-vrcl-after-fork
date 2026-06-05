@@ -41,7 +41,7 @@ export async function generateMetadata({ params }) {
       select: { 
         name: true, 
         description: true, 
-        coverImage: true,
+        image: true,
         parent: { select: { name: true, slug: true } } 
       }
     });
@@ -57,7 +57,7 @@ export async function generateMetadata({ params }) {
       title: `${category.name} - Free Printable ${titleParts}`,
       description: category.description || `Browse and download free ${category.name.toLowerCase()} printables. High-quality PDFs ready to print and color. ${brand.tagline}`,
       path: `/category/${slug}`,
-      image: category.coverImage || brand.logo,
+      image: category.image || brand.logo,
       keywords: `${category.name.toLowerCase()}, free ${category.name.toLowerCase()}, printable ${category.name.toLowerCase()}, ${category.name.toLowerCase()} coloring pages, download ${category.name.toLowerCase()}`
     });
   } catch (error) {
@@ -76,7 +76,7 @@ async function getCategoryData(slug) {
         name: true,
         slug: true,
         description: true,
-        coverImage: true,
+        image: true,
         parent: { select: { id: true, name: true, slug: true } }
       }
     });

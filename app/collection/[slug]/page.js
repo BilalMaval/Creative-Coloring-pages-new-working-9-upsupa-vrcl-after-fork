@@ -19,7 +19,7 @@ export async function generateMetadata({ params }) {
   try {
     const collection = await prisma.category.findFirst({
       where: { slug, parentId: null },
-      select: { name: true, description: true, coverImage: true }
+      select: { name: true, description: true, image: true }
     });
     
     if (!collection) return {};
@@ -28,7 +28,7 @@ export async function generateMetadata({ params }) {
       title: `${collection.name} - Free Printable ${collection.name}`,
       description: collection.description || `Browse our ${collection.name.toLowerCase()} collection. Find and download free printable ${collection.name.toLowerCase()} for kids and adults. ${brand.tagline}`,
       path: `/collection/${slug}`,
-      image: collection.coverImage || brand.logo,
+      image: collection.image || brand.logo,
       keywords: `${collection.name.toLowerCase()}, free ${collection.name.toLowerCase()}, printable ${collection.name.toLowerCase()}, download ${collection.name.toLowerCase()}`
     });
   } catch (error) {
@@ -47,7 +47,7 @@ async function getCollectionData(slug) {
         name: true,
         slug: true,
         description: true,
-        coverImage: true,
+        image: true,
         children: {
           where: { isActive: true },
           orderBy: [{ homepageOrder: 'asc' }, { order: 'asc' }],
@@ -71,7 +71,7 @@ async function getCollectionData(slug) {
         name: collection.name, 
         slug: collection.slug, 
         description: collection.description,
-        coverImage: collection.coverImage
+        coverImage: collection.image
       },
       categories: collection.children
     };
