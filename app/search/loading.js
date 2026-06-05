@@ -1,9 +1,9 @@
 'use client';
 
-// Simple loading state for search page
+// Search loading state - fills viewport to hide footer during load
 export default function Loading() {
   return (
-    <div className="flex-1 bg-gradient-to-b from-blue-50 via-purple-50 to-pink-50">
+    <div className="flex-1 bg-gradient-to-b from-blue-50 via-purple-50 to-pink-50 min-h-[calc(100vh-80px)]">
       <div className="container mx-auto px-4 py-8">
         {/* Search header skeleton */}
         <div className="bg-gradient-to-r from-pink-500 to-purple-600 rounded-3xl p-8 shadow-2xl mb-8">

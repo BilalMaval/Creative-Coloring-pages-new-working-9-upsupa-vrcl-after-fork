@@ -1,9 +1,9 @@
 'use client';
 
-// Simple loading state for product pages
+// Product loading state - fills viewport to hide footer during load
 export default function Loading() {
   return (
-    <div className="flex-1 bg-gradient-to-b from-blue-50 via-purple-50 to-pink-50">
+    <div className="flex-1 bg-gradient-to-b from-blue-50 via-purple-50 to-pink-50 min-h-[calc(100vh-80px)]">
       <div className="container mx-auto px-4 py-8">
         {/* Breadcrumb skeleton */}
         <div className="flex items-center space-x-2 mb-8">
@@ -30,7 +30,7 @@ export default function Loading() {
                 <div className="h-4 bg-gray-200 rounded w-full animate-pulse"></div>
                 <div className="h-4 bg-gray-200 rounded w-3/4 animate-pulse"></div>
               </div>
-              <div className="h-20 bg-gradient-to-r from-purple-400 to-pink-400 rounded-2xl animate-pulse"></div>
+              <div className="h-20 bg-gradient-to-r from-purple-200 to-pink-200 rounded-2xl animate-pulse"></div>
             </div>
           </div>
         </div>

@@ -1,9 +1,9 @@
 'use client';
 
-// Simple loading state for collection pages
+// Collection loading state - fills viewport to hide footer during load
 export default function Loading() {
   return (
-    <div className="flex-1 bg-gradient-to-b from-blue-50 via-purple-50 to-pink-50">
+    <div className="flex-1 bg-gradient-to-b from-blue-50 via-purple-50 to-pink-50 min-h-[calc(100vh-80px)]">
       <div className="container mx-auto px-4 py-8">
         {/* Header skeleton */}
         <div className="bg-gradient-to-r from-purple-500 to-pink-500 rounded-3xl p-8 md:p-12 shadow-2xl mb-8">

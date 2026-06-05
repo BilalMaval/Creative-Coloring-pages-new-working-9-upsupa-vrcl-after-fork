@@ -4,6 +4,7 @@ import { getBrandByDomain } from '@/config/brands';
 import { BrandProvider } from '@/components/BrandProvider';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import NavigationProgress from '@/components/NavigationProgress';
 
 // Dynamic metadata based on brand
 export async function generateMetadata() {
@@ -126,8 +127,9 @@ gtag('config', '${brand.analytics.gaId}');`
         )}
         
         <BrandProvider brand={clientBrand}>
+          <NavigationProgress />
           <Header />
-          <main className="flex-1 flex flex-col">
+          <main className="flex-1 flex flex-col min-h-[calc(100vh-80px)]">
             {children}
           </main>
           <Footer />
