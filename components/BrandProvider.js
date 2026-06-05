@@ -2,25 +2,48 @@
 
 import { createContext, useContext } from 'react';
 
-// Create brand context
-const BrandContext = createContext(null);
+// Default brand values to prevent errors during hydration
+const defaultBrand = {
+  domain: '',
+  name: 'Creative Coloring Pages',
+  shortName: 'CCP',
+  tagline: 'Fun for Kids & Families!',
+  description: '',
+  logo: '',
+  favicon: '',
+  colors: {
+    primary: 'purple',
+    secondary: 'pink',
+    accent: 'blue',
+    headerBorder: 'yellow-400',
+    gradient: 'from-blue-50 via-purple-50 to-pink-50'
+  },
+  contact: { email: '', supportEmail: '' },
+  socialLinks: {},
+  seo: { titleTemplate: '', defaultTitle: '', ogImage: '' }
+};
+
+// Create brand context with default value
+const BrandContext = createContext(defaultBrand);
 
 // Provider component
-export function BrandProvider({ brand, children }) {
+function BrandProvider({ brand, children }) {
+  // Merge with defaults to ensure all properties exist
+  const safeBrand = brand ? { ...defaultBrand, ...brand } : defaultBrand;
+  
   return (
-    <BrandContext.Provider value={brand}>
+    <BrandContext.Provider value={safeBrand}>
       {children}
     </BrandContext.Provider>
   );
 }
 
 // Hook to use brand in client components
-export function useBrand() {
+function useBrand() {
   const brand = useContext(BrandContext);
-  if (!brand) {
-    throw new Error('useBrand must be used within a BrandProvider');
-  }
-  return brand;
+  // Return default brand if context is not available (during SSR/hydration)
+  return brand || defaultBrand;
 }
 
+export { BrandProvider, useBrand };
 export default BrandProvider;
