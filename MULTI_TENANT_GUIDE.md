@@ -7,7 +7,7 @@ This application supports multiple domains/brands sharing the same codebase and 
 
 ## 🔑 Environment Variables Setup (VERCEL)
 
-Each brand has **prefixed environment variables**. Set these in your Vercel project settings:
+Each brand has **prefixed environment variables** for sensitive data like API keys. Set these in your Vercel project settings:
 
 ### For creativecoloringpages.online (prefix: `CCP_`)
 ```bash
@@ -19,10 +19,6 @@ CCP_STRIPE_PUBLIC_KEY=pk_live_xxx
 CCP_STRIPE_SECRET_KEY=sk_live_xxx
 CCP_PAYPAL_CLIENT_ID=xxx
 CCP_PAYPAL_SECRET=xxx
-
-# Analytics
-CCP_GTM_ID=GTM-XXXXXXX
-CCP_GA_ID=G-XXXXXXX
 ```
 
 ### For colorkiddy.com (prefix: `COLORKIDDY_`)
@@ -35,10 +31,6 @@ COLORKIDDY_STRIPE_PUBLIC_KEY=pk_live_yyy
 COLORKIDDY_STRIPE_SECRET_KEY=sk_live_yyy
 COLORKIDDY_PAYPAL_CLIENT_ID=yyy
 COLORKIDDY_PAYPAL_SECRET=yyy
-
-# Analytics
-COLORKIDDY_GTM_ID=GTM-YYYYYYY
-COLORKIDDY_GA_ID=G-YYYYYYY
 ```
 
 ### Fallback Variables (Optional)
@@ -46,8 +38,41 @@ If a brand-specific variable isn't set, the system falls back to non-prefixed ve
 ```bash
 BREVO_API_KEY=fallback_key
 STRIPE_PUBLIC_KEY=fallback_key
-GTM_ID=fallback_gtm
 ```
+
+---
+
+## 📊 Analytics (GTM/GA) - In Config Files, NOT Env Vars
+
+**GTM and GA IDs are stored directly in brand config files** (not environment variables) because:
+- They are public (visible in page source anyway)
+- Easier to manage per brand
+- No need to update Vercel env vars for analytics changes
+
+### Where to set GTM/GA IDs:
+```javascript
+// /config/brands/creativecoloringpages.online.js
+analytics: {
+  gtmId: 'GTM-KGTWF7HK',  // Google Tag Manager ID
+  gaId: '',               // Google Analytics ID (optional)
+},
+
+// /config/brands/colorkiddy.com.js
+analytics: {
+  gtmId: 'GTM-XXXXXXX',  // Your GTM ID
+  gaId: 'G-XXXXXXX',     // Your GA ID
+},
+```
+
+### Summary: What Goes Where
+
+| Setting | Location | Example |
+|---------|----------|---------|
+| GTM ID | Brand config file | `analytics: { gtmId: 'GTM-XXX' }` |
+| GA ID | Brand config file | `analytics: { gaId: 'G-XXX' }` |
+| Brevo API Key | Vercel env var | `CCP_BREVO_API_KEY=xxx` |
+| Stripe Keys | Vercel env var | `CCP_STRIPE_SECRET_KEY=sk_xxx` |
+| PayPal Keys | Vercel env var | `CCP_PAYPAL_CLIENT_ID=xxx` |
 
 ---
 
@@ -151,15 +176,19 @@ const brand = {
     instagram: 'https://...'
   },
   
-  // ENV VAR KEYS - This is critical!
-  // Maps logical names to actual env var names
+  // Analytics - STORED IN CONFIG FILE (not env vars)
+  analytics: {
+    gtmId: 'GTM-XXXXXXX',  // Google Tag Manager ID
+    gaId: 'G-XXXXXXX',     // Google Analytics ID
+  },
+  
+  // ENV VAR KEYS - Maps to Vercel environment variables
+  // Only for sensitive data (API keys, secrets)
   envKeys: {
     stripePublicKey: 'MYBRAND_STRIPE_PUBLIC_KEY',
     stripeSecretKey: 'MYBRAND_STRIPE_SECRET_KEY',
     paypalClientId: 'MYBRAND_PAYPAL_CLIENT_ID',
     paypalSecret: 'MYBRAND_PAYPAL_SECRET',
-    gaId: 'MYBRAND_GA_ID',
-    gtmId: 'MYBRAND_GTM_ID',
     brevoApiKey: 'MYBRAND_BREVO_API_KEY',
   },
   
@@ -190,14 +219,27 @@ export default brand;
 /config/brands/newdomain.com.js
 ```
 
-### Step 2: Define envKeys with your prefix
+### Step 2: Set up the config with analytics and envKeys
 ```javascript
-envKeys: {
-  stripePublicKey: 'NEWBRAND_STRIPE_PUBLIC_KEY',
-  stripeSecretKey: 'NEWBRAND_STRIPE_SECRET_KEY',
-  gtmId: 'NEWBRAND_GTM_ID',
-  brevoApiKey: 'NEWBRAND_BREVO_API_KEY',
-}
+const brand = {
+  id: 'NEWBRAND',
+  domain: 'newdomain.com',
+  name: 'New Brand',
+  // ... other config ...
+  
+  // Analytics - directly in config (public values)
+  analytics: {
+    gtmId: 'GTM-XXXXXXX',
+    gaId: 'G-XXXXXXX',
+  },
+  
+  // Env var keys - for secrets only
+  envKeys: {
+    stripePublicKey: 'NEWBRAND_STRIPE_PUBLIC_KEY',
+    stripeSecretKey: 'NEWBRAND_STRIPE_SECRET_KEY',
+    brevoApiKey: 'NEWBRAND_BREVO_API_KEY',
+  },
+};
 ```
 
 ### Step 3: Register in index.js
@@ -212,11 +254,10 @@ export const brands = {
 };
 ```
 
-### Step 4: Set environment variables in Vercel
+### Step 4: Set environment variables in Vercel (secrets only)
 ```
 NEWBRAND_STRIPE_PUBLIC_KEY=pk_xxx
 NEWBRAND_STRIPE_SECRET_KEY=sk_xxx
-NEWBRAND_GTM_ID=GTM-XXX
 NEWBRAND_BREVO_API_KEY=xxx
 ```
 
