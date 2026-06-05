@@ -1,151 +1,49 @@
-'use client';
+import { headers } from 'next/headers';
+import { generateMetadata as genMeta, getCurrentBrand } from '@/lib/seo';
+import { getBrandByDomain } from '@/config/brands';
+import ContactForm from './ContactForm';
 
-import { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Mail, Send, CheckCircle } from 'lucide-react';
-
-export default function ContactPage() {
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    message: ''
+export async function generateMetadata() {
+  const headersList = await headers();
+  const host = headersList.get('host') || '';
+  const brand = getBrandByDomain(host);
+  
+  return genMeta({
+    title: `Contact Us - ${brand.name}`,
+    description: `Get in touch with ${brand.name}. Have questions about our coloring pages or printables? We'd love to hear from you!`,
+    path: '/contact',
+    keywords: 'contact us, coloring pages support, help, feedback, suggestions'
   });
-  const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
-  const [error, setError] = useState('');
+}
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setError('');
-    setSuccess(false);
+export const revalidate = 86400;
 
-    try {
-      const res = await fetch('/api/contact', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
-      });
-
-      const data = await res.json();
-
-      if (data.success) {
-        setSuccess(true);
-        setFormData({ name: '', email: '', message: '' });
-      } else {
-        setError(data.error || 'Something went wrong');
-      }
-    } catch (err) {
-      setError('Failed to send message. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
-  };
+export default async function ContactPage() {
+  const brand = await getCurrentBrand();
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="max-w-2xl mx-auto">
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold mb-4">Contact Us</h1>
-          <p className="text-lg text-muted-foreground">
-            Have a question or suggestion? We'd love to hear from you!
-          </p>
-        </div>
+    <div className="bg-gradient-to-b from-blue-50 via-purple-50 to-pink-50 flex-1">
+      <div className="container mx-auto px-4 py-8">
+        <div className="max-w-2xl mx-auto">
+          {/* Header */}
+          <div className="bg-gradient-to-r from-pink-500 to-purple-600 rounded-3xl p-8 shadow-2xl mb-8 text-center">
+            <h1 className="text-4xl md:text-5xl font-black text-white mb-2">✉️ Contact Us</h1>
+            <p className="text-xl text-white/90">
+              Have a question or suggestion? We'd love to hear from you!
+            </p>
+          </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Mail className="h-5 w-5" />
-              Send us a message
-            </CardTitle>
-            <CardDescription>
-              Fill out the form below and we'll get back to you as soon as possible.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {success ? (
-              <div className="text-center py-8">
-                <CheckCircle className="h-16 w-16 text-green-500 mx-auto mb-4" />
-                <h3 className="text-xl font-semibold mb-2">Message Sent!</h3>
-                <p className="text-muted-foreground mb-4">
-                  Thank you for reaching out. We'll get back to you soon.
-                </p>
-                <Button onClick={() => setSuccess(false)}>Send Another Message</Button>
-              </div>
-            ) : (
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div>
-                  <Label htmlFor="name">Name *</Label>
-                  <Input
-                    id="name"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleChange}
-                    required
-                    placeholder="Your name"
-                  />
-                </div>
+          <div className="bg-white rounded-3xl p-8 shadow-xl">
+            <ContactForm brandEmail={brand.contact.email} />
+          </div>
 
-                <div>
-                  <Label htmlFor="email">Email *</Label>
-                  <Input
-                    id="email"
-                    name="email"
-                    type="email"
-                    value={formData.email}
-                    onChange={handleChange}
-                    required
-                    placeholder="your@email.com"
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="message">Message *</Label>
-                  <Textarea
-                    id="message"
-                    name="message"
-                    value={formData.message}
-                    onChange={handleChange}
-                    required
-                    placeholder="Your message..."
-                    rows={6}
-                  />
-                </div>
-
-                {error && (
-                  <div className="bg-destructive/10 text-destructive px-4 py-3 rounded">
-                    {error}
-                  </div>
-                )}
-
-                <Button type="submit" className="w-full" disabled={loading}>
-                  {loading ? (
-                    'Sending...'
-                  ) : (
-                    <>
-                      <Send className="h-4 w-4 mr-2" />
-                      Send Message
-                    </>
-                  )}
-                </Button>
-              </form>
-            )}
-          </CardContent>
-        </Card>
-
-        <div className="mt-8 text-center text-sm text-muted-foreground">
-          <p>You can also reach us at: <strong>sufyan.afzalk@gmail.com</strong></p>
+          <div className="mt-8 text-center">
+            <div className="bg-white rounded-2xl p-4 inline-block shadow-lg">
+              <p className="text-gray-600">
+                You can also reach us at: <strong className="text-purple-600">{brand.contact.email}</strong>
+              </p>
+            </div>
+          </div>
         </div>
       </div>
     </div>

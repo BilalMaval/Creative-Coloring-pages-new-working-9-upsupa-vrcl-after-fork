@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import Image from 'next/image';
+import { headers } from 'next/headers';
 import { Button } from '@/components/ui/button';
 import SearchBar from '@/components/SearchBar';
 import HeroLogo from '@/components/HeroLogo';
@@ -7,6 +8,23 @@ import BrandTitle from '@/components/BrandTitle';
 import SubscribeButton from '@/components/SubscribeButton';
 import { Sparkles, Star, Heart, Download, Palette, Smile } from 'lucide-react';
 import prisma from '@/lib/prisma';
+import { generateMetadata as genMeta, generateWebsiteSchema, getBaseUrl } from '@/lib/seo';
+import { getBrandByDomain } from '@/config/brands';
+
+// Generate homepage metadata
+export async function generateMetadata() {
+  const headersList = await headers();
+  const host = headersList.get('host') || '';
+  const brand = getBrandByDomain(host);
+  
+  return genMeta({
+    title: brand.seo.defaultTitle,
+    description: brand.description,
+    path: '',
+    image: brand.logo,
+    keywords: brand.keywords
+  });
+}
 
 // Cache for 2 minutes - ISR for fast page loads
 export const revalidate = 120;
@@ -65,9 +83,36 @@ async function getHomeData() {
 
 export default async function Home() {
   const { collections } = await getHomeData();
+  const baseUrl = await getBaseUrl();
+  const websiteSchema = await generateWebsiteSchema();
+  
+  // Collection list schema for SEO
+  const collectionsSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    name: 'Printable Collections',
+    numberOfItems: collections.length,
+    itemListElement: collections.map((collection, index) => ({
+      '@type': 'ListItem',
+      position: index + 1,
+      url: `${baseUrl}/collection/${collection.slug}`,
+      name: collection.name
+    }))
+  };
 
   return (
-    <div className="bg-gradient-to-b from-blue-50 via-purple-50 to-pink-50 flex-1">
+    <>
+      {/* Structured Data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(collectionsSchema) }}
+      />
+      
+      <div className="bg-gradient-to-b from-blue-50 via-purple-50 to-pink-50 flex-1">
       {/* Hero Section */}
       <section className="container mx-auto px-4 py-8 md:py-16">
         <div className="text-center space-y-6">
@@ -412,5 +457,6 @@ export default async function Home() {
         </div>
       </section>
     </div>
+    </>
   );
 }
