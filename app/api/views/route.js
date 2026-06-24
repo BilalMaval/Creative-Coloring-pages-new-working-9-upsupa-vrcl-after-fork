@@ -1,13 +1,7 @@
-import { createClient } from '@supabase/supabase-js';
 import { NextResponse } from 'next/server';
+import { admin } from '@/lib/supabaseClients';
 
 export const runtime = 'nodejs';
-
-const admin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY,
-  { auth: { persistSession: false } }
-);
 
 // POST /api/views  body: { productId }
 export async function POST(request) {

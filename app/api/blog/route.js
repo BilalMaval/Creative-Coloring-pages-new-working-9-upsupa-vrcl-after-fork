@@ -1,19 +1,5 @@
-import { createClient } from '@supabase/supabase-js';
 import { NextResponse } from 'next/server';
-
-// Public read
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
-  { auth: { persistSession: false } }
-);
-
-// Admin write (service role)
-const admin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY,
-  { auth: { persistSession: false } }
-);
+import { supabase, admin } from '@/lib/supabaseClients';
 
 // GET /api/blog?admin=1  — all posts for admin panel
 // GET /api/blog          — published only for public blog

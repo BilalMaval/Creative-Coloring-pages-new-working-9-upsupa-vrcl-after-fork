@@ -1,14 +1,9 @@
-import { createClient } from '@supabase/supabase-js';
 import { headers } from 'next/headers';
 import { getBrandByDomain } from '@/config/brands';
 import { getAllPosts } from '@/lib/blog';
+import { supabase } from '@/lib/supabaseClients';
 
 export const dynamic = 'force-dynamic';
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-);
 
 export async function GET() {
   // Get the current domain from headers
