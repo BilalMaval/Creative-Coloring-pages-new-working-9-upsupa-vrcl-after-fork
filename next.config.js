@@ -24,20 +24,16 @@ const nextConfig = {
         hostname: '*.unsplash.com',
       },
     ],
-    // Re-enabled per request for better UX (smaller/WebP images). NOTE:
-    // Vercel's Hobby plan has a monthly Image Optimization quota — once
-    // exceeded, ALL /_next/image requests 402 site-wide until it resets
-    // (confirmed in production logs, this is what broke every icon at
-    // once). Default Next.js generates 8 deviceSizes x 8 imageSizes = up
-    // to 64 distinct variants per image, burning quota fast on a catalog
-    // this size. Trimmed both lists below to the sizes actually used
-    // (80px icons, ~256-640px product cards/galleries) to cut quota
-    // consumption roughly 4x. If 402s return, check Vercel dashboard ->
-    // Usage -> Image Optimization; the real fix at that point is
-    // upgrading the plan, not more code changes.
+    // Disabled again: Vercel's Hobby plan Image Optimization quota kept
+    // getting exhausted (confirmed via 402 OPTIMIZED_IMAGE_REQUEST_PAYMENT_REQUIRED
+    // on /_next/image in production), which breaks every product image and
+    // icon site-wide until the monthly quota resets. unoptimized:true makes
+    // <Image> serve the original file straight from Supabase Storage,
+    // trading away automatic resize/WebP conversion for guaranteed uptime.
+    // Re-enable (set back to false) once the Vercel plan is upgraded.
     deviceSizes: [640, 768, 1080, 1920],
     imageSizes: [96, 128, 256, 384],
-    unoptimized: false,
+    unoptimized: true,
   },
   experimental: {
     // Prisma is no longer used — kept to avoid breaking older cached builds
