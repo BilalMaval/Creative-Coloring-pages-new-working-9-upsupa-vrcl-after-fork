@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { randomUUID } from 'crypto';
 import { supabase } from '@/lib/supabaseClients';
 
 // GET all collections (top-level categories where parent_id is null)
@@ -74,6 +75,7 @@ export async function POST(request) {
     const { data: newCollection, error } = await supabase
       .from('categories')
       .insert({
+        id: randomUUID(),
         name,
         slug,
         description: description || '',
@@ -81,6 +83,7 @@ export async function POST(request) {
         parent_id: null,
         order: order || 0,
         is_active: true,
+        updated_at: new Date().toISOString(),
       })
       .select()
       .single();

@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { randomUUID } from 'crypto';
 import { supabase } from '@/lib/supabaseClients';
 
 export async function GET() {
@@ -94,6 +95,7 @@ export async function POST(request) {
     const { data: newCategory, error } = await supabase
       .from('categories')
       .insert({
+        id: randomUUID(),
         name,
         slug,
         description: description || '',
@@ -104,6 +106,7 @@ export async function POST(request) {
         show_on_homepage: showOnHomepage || false,
         homepage_order: homepageOrder || 0,
         is_active: true,
+        updated_at: new Date().toISOString(),
       })
       .select()
       .single();

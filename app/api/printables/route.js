@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { randomUUID } from 'crypto';
 import { supabase } from '@/lib/supabaseClients';
 
 export async function GET(request) {
@@ -115,6 +116,7 @@ export async function POST(request) {
     const { data: newProduct, error } = await supabase
       .from('products')
       .insert({
+        id: randomUUID(),
         title,
         slug,
         description: description || '',
@@ -132,6 +134,7 @@ export async function POST(request) {
         is_active: true,
         downloads: downloads || 0,
         views: views || 0,
+        updated_at: new Date().toISOString(),
       })
       .select()
       .single();
