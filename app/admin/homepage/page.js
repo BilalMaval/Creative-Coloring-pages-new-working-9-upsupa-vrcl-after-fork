@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
+import EmojiPicker from '@/components/admin/EmojiPicker';
 import { Home, GripVertical, Save, Settings, Eye, EyeOff, Loader2 } from 'lucide-react';
 
 export default function AdminHomepagePage() {
@@ -296,11 +297,9 @@ export default function AdminHomepagePage() {
                     </div>
 
                     <div className="flex items-center gap-2">
-                      <Input
+                      <EmojiPicker
                         value={category.emoji || '🎨'}
-                        onChange={(e) => handleUpdateEmoji(category.id, e.target.value)}
-                        className="w-16 text-center text-xl"
-                        maxLength={2}
+                        onChange={(emoji) => handleUpdateEmoji(category.id, emoji)}
                       />
                     </div>
 

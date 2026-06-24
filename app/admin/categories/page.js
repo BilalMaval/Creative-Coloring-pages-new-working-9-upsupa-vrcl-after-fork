@@ -9,6 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import EmojiPicker from '@/components/admin/EmojiPicker';
 import { Plus, Edit, Trash2, Loader2, FolderOpen, Search } from 'lucide-react';
 
 export default function AdminCategoriesPage() {
@@ -323,15 +324,13 @@ export default function AdminCategoriesPage() {
               </div>
 
               <div className="border-2 border-yellow-200 rounded-lg p-4 bg-yellow-50">
-                <Label htmlFor="emoji" className="text-yellow-800 font-bold">😀 Emoji Icon (Fallback)</Label>
-                <p className="text-xs text-muted-foreground mb-2">This emoji shows if no icon image is uploaded. Click the field and use emoji picker.</p>
-                <Input
-                  id="emoji"
+                <Label className="text-yellow-800 font-bold">😀 Emoji Icon (Fallback)</Label>
+                <p className="text-xs text-muted-foreground mb-2">
+                  Shown if no icon image is uploaded, <strong>or automatically if the icon image fails to load</strong> (e.g. quota limits) — so always pick a relevant emoji even when uploading a custom icon.
+                </p>
+                <EmojiPicker
                   value={formData.emoji}
-                  onChange={(e) => setFormData({ ...formData, emoji: e.target.value })}
-                  placeholder="🎨"
-                  maxLength={2}
-                  className="text-2xl text-center w-20"
+                  onChange={(emoji) => setFormData({ ...formData, emoji })}
                 />
               </div>
 
