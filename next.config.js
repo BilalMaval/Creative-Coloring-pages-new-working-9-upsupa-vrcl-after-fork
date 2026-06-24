@@ -24,8 +24,11 @@ const nextConfig = {
         hostname: '*.unsplash.com',
       },
     ],
-    // Enable image optimization for Vercel
-    unoptimized: false,
+    // Vercel's Hobby plan caps monthly Image Optimization usage; once
+    // exceeded, ALL /_next/image requests return 402 Payment Required
+    // site-wide (confirmed in production logs). unoptimized:true serves
+    // original image URLs directly, bypassing that paid quota entirely.
+    unoptimized: true,
   },
   experimental: {
     // Prisma is no longer used — kept to avoid breaking older cached builds
