@@ -1,9 +1,9 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import Image from 'next/image';
 import { headers } from 'next/headers';
 import { Sparkles, Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import CategoryIcon from '@/components/CategoryIcon';
 import { getCollectionBySlug } from '@/lib/db';
 import { generateMetadata as genMeta, generateBreadcrumbSchema, getBaseUrl } from '@/lib/seo';
 import { getBrandByDomain } from '@/config/brands';
@@ -168,11 +168,7 @@ export default async function CollectionPage({ params }) {
                     <Link key={category.id} href={`/category/${category.slug}`}>
                       <article className={`bg-white rounded-2xl p-4 shadow-lg hover:shadow-2xl transform hover:scale-105 transition-all duration-300 cursor-pointer border-4 border-${color}-400`}>
                         <div className={`aspect-square bg-gradient-to-br from-${color}-100 to-${color}-200 rounded-xl mb-3 flex items-center justify-center overflow-hidden`}>
-                          {category.iconImage ? (
-                            <Image src={category.iconImage} alt={category.name} width={80} height={80} className="object-contain" />
-                          ) : (
-                            <span className="text-5xl">{category.emoji || '🎨'}</span>
-                          )}
+                          <CategoryIcon iconImage={category.iconImage} emoji={category.emoji || '🎨'} name={category.name} />
                         </div>
                         <h3 className="font-black text-center text-gray-800 text-sm md:text-base">
                           {category.name}
