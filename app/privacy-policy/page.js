@@ -151,6 +151,8 @@ export default async function PrivacyPolicyPage() {
                 <ul className="list-disc pl-6 text-gray-700 mb-4">
                   <li>Through our <a href="/contact" className="text-purple-600 hover:underline font-bold">Contact Form</a></li>
                   <li>Email: {brand.contact.email}</li>
+                  {brand.contact.phone && <li>Phone: {brand.contact.phone}</li>}
+                  {brand.contact.address && <li>Address: {brand.contact.address}</li>}
                 </ul>
               </section>
 

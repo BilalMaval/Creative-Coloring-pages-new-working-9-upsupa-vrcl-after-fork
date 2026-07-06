@@ -27,9 +27,9 @@ const brand = {
   // Contact Information
   contact: {
     email: 'admin@creativecoloringpages.online',
-    supportEmail: 'sufyan.afzalk@gmail.com',
-    phone: '',
-    address: ''
+    supportEmail: 'admin@creativecoloringpages.online',
+    phone: '+1 (902) 707-8554',
+    address: '1001 S Main St Ste 500, Kalispell, MT 59901'
   },
   
   // Social Media Links

@@ -37,13 +37,23 @@ export default async function ContactPage() {
             <ContactForm brandEmail={brand.contact.email} />
           </div>
 
-          <div className="mt-8 text-center space-y-3">
-            <div className="bg-white rounded-2xl p-4 inline-block shadow-lg">
+          <div className="mt-8 space-y-3">
+            <div className="bg-white rounded-2xl p-5 shadow-lg space-y-2">
               <p className="text-gray-600">
-                You can also reach us at: <strong className="text-purple-600">{brand.contact.email}</strong>
+                📧 <strong className="text-purple-600">{brand.contact.email}</strong>
               </p>
+              {brand.contact.phone && (
+                <p className="text-gray-600">
+                  📞 <strong className="text-purple-600">{brand.contact.phone}</strong>
+                </p>
+              )}
+              {brand.contact.address && (
+                <p className="text-gray-600">
+                  📍 <strong className="text-purple-600">{brand.contact.address}</strong>
+                </p>
+              )}
             </div>
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-gray-500 text-center">
               This website is owned and operated by Color Craft Studio LLC, a Montana limited liability company.
             </p>
           </div>
