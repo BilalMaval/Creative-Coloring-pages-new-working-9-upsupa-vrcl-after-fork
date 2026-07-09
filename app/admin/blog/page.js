@@ -451,7 +451,7 @@ function PostForm({ initial, onSave, onCancel, saving }) {
                 contentMode === 'html' ? 'bg-white shadow text-purple-700' : 'text-gray-500 hover:text-gray-700'
               }`}
             >
-              <Code2 className="h-4 w-4" /> HTML Page
+              <Code2 className="h-4 w-4" /> Full Page
             </button>
           </div>
 
