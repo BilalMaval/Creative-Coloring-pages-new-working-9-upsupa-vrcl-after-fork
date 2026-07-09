@@ -458,10 +458,6 @@ function PostForm({ initial, onSave, onCancel, saving }) {
           {/* HTML mode */}
           {contentMode === 'html' && (
             <div className="space-y-3">
-              <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 text-sm text-amber-800">
-                <p className="font-bold mb-1">Paste a complete HTML article</p>
-                <p className="text-xs">The HTML is rendered as-is inside the article container. Existing sections and FAQs are ignored when HTML content is present.</p>
-              </div>
               <textarea
                 value={form.htmlContent}
                 onChange={e => set('htmlContent', e.target.value)}
