@@ -42,6 +42,8 @@ function buildRow(b) {
   if (b.metaTitle           !== undefined) row.meta_title            = b.metaTitle?.trim();
   if (b.description         !== undefined) row.description           = b.description?.trim();
   if (b.coverEmoji          !== undefined) row.cover_emoji           = b.coverEmoji;
+  if (b.coverImage          !== undefined) row.cover_image           = b.coverImage || null;
+  if (b.htmlContent         !== undefined) row.html_content          = b.htmlContent || null;
   if (b.tags                !== undefined) row.tags = Array.isArray(b.tags) ? b.tags : b.tags.split(',').map(t => t.trim()).filter(Boolean);
   if (b.readTime            !== undefined) row.read_time             = b.readTime;
   if (b.sections            !== undefined) row.sections              = b.sections;

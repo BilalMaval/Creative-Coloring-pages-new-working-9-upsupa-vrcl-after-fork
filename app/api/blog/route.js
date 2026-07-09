@@ -43,6 +43,8 @@ function buildRow(b) {
     meta_title:            b.metaTitle?.trim() || b.title?.trim(),
     description:           b.description?.trim() || '',
     cover_emoji:           b.coverEmoji || '📝',
+    cover_image:           b.coverImage || null,
+    html_content:          b.htmlContent || null,
     tags:                  Array.isArray(b.tags) ? b.tags : (b.tags || '').split(',').map(t => t.trim()).filter(Boolean),
     read_time:             b.readTime || '5 min read',
     sections:              Array.isArray(b.sections) ? b.sections : [],

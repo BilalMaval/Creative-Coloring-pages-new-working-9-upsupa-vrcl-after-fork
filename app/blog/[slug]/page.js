@@ -282,7 +282,11 @@ export default async function BlogPostPage({ params }) {
 
           {/* Hero */}
           <div className="bg-gradient-to-br from-purple-500 to-pink-500 rounded-3xl p-10 text-center mb-8 shadow-2xl">
-            <div className="text-6xl mb-4">{post.coverEmoji}</div>
+            {post.coverImage ? (
+              <img src={post.coverImage} alt={post.title} className="w-24 h-24 object-cover rounded-2xl mx-auto mb-4 shadow-lg" />
+            ) : (
+              <div className="text-6xl mb-4">{post.coverEmoji}</div>
+            )}
             <h1 className="text-3xl md:text-5xl font-black text-white leading-tight">{post.title}</h1>
           </div>
 
@@ -336,8 +340,13 @@ export default async function BlogPostPage({ params }) {
             </div>
           )}
 
-          {/* Article sections */}
-          {post.sections?.length > 0 && (
+          {/* Article body — raw HTML or structured sections */}
+          {post.htmlContent ? (
+            <article
+              className="bg-white rounded-3xl p-8 md:p-12 shadow-xl mb-10 prose prose-purple max-w-none"
+              dangerouslySetInnerHTML={{ __html: post.htmlContent }}
+            />
+          ) : post.sections?.length > 0 && (
             <article className="bg-white rounded-3xl p-8 md:p-12 shadow-xl mb-10">
               {post.sections.map((section, i) => (
                 <SectionBlock key={i} section={section} />

@@ -5,7 +5,7 @@ import AdminLayout from '@/components/AdminLayout';
 import {
   Plus, Pencil, Trash2, Eye, EyeOff, Save, X, ChevronDown, ChevronUp,
   BookOpen, Search, Globe, FileText, Clock, Tag, AlignLeft, HelpCircle,
-  Link2, Smile, RefreshCw, CheckCircle, AlertCircle, Loader2
+  Link2, Smile, RefreshCw, CheckCircle, AlertCircle, Loader2, Upload, Code2, Layers
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -26,7 +26,9 @@ function formatDate(d) {
 
 const EMPTY_POST = {
   title: '', slug: '', metaTitle: '', description: '',
-  coverEmoji: '📝', tags: '', readTime: '5 min read',
+  coverEmoji: '📝', coverImage: '',
+  htmlContent: '',
+  tags: '', readTime: '5 min read',
   relatedCategoryName: '', relatedCategorySlug: '',
   isPublished: true, publishedAt: new Date().toISOString().split('T')[0],
   sections: [], faqs: [],
@@ -189,6 +191,8 @@ function PostForm({ initial, onSave, onCancel, saving }) {
   const [form, setForm] = useState(initial || EMPTY_POST);
   const [autoSlug, setAutoSlug] = useState(!initial?.id);
   const [tab, setTab]   = useState('basic'); // basic | content | seo
+  const [contentMode, setContentMode] = useState(initial?.htmlContent ? 'html' : 'builder');
+  const [uploadingCover, setUploadingCover] = useState(false);
 
   const set = (key, val) => setForm(f => ({ ...f, [key]: val }));
 
@@ -213,6 +217,22 @@ function PostForm({ initial, onSave, onCancel, saving }) {
   };
   const removeFaq = (i) => set('faqs', form.faqs.filter((_, idx) => idx !== i));
   const addFaq    = ()  => set('faqs', [...form.faqs, { ...EMPTY_FAQ }]);
+
+  const handleCoverImageUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingCover(true);
+    try {
+      const fd = new FormData();
+      fd.append('file', file);
+      fd.append('type', 'image');
+      const res = await fetch('/api/upload', { method: 'POST', body: fd });
+      const data = await res.json();
+      if (data.success) set('coverImage', data.url);
+      else alert('Image upload failed: ' + data.error);
+    } catch { alert('Image upload failed'); }
+    finally { setUploadingCover(false); }
+  };
 
   const TABS = [
     { id: 'basic',   label: 'Basic Info',  icon: FileText },
@@ -242,7 +262,7 @@ function PostForm({ initial, onSave, onCancel, saving }) {
       {/* BASIC INFO */}
       {tab === 'basic' && (
         <div className="space-y-5">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             {/* Cover emoji */}
             <div>
               <label className="text-sm font-bold text-gray-700 mb-1 flex items-center gap-1 block">
@@ -254,6 +274,31 @@ function PostForm({ initial, onSave, onCancel, saving }) {
                 className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-2xl focus:outline-none focus:ring-2 focus:ring-purple-400"
                 maxLength={4}
               />
+              <p className="text-xs text-gray-400 mt-1">Used if no image uploaded</p>
+            </div>
+            {/* Cover image upload */}
+            <div>
+              <label className="text-sm font-bold text-gray-700 mb-1 flex items-center gap-1 block">
+                <Upload className="h-4 w-4 text-purple-500" /> Cover Image
+              </label>
+              <label className="flex flex-col items-center justify-center w-full h-[58px] border-2 border-dashed border-gray-300 rounded-xl cursor-pointer hover:border-purple-400 hover:bg-purple-50 transition-colors relative overflow-hidden">
+                {form.coverImage ? (
+                  <>
+                    <img src={form.coverImage} alt="cover" className="absolute inset-0 w-full h-full object-cover rounded-xl" />
+                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity rounded-xl">
+                      <span className="text-white text-xs font-bold">Change</span>
+                    </div>
+                  </>
+                ) : uploadingCover ? (
+                  <Loader2 className="h-5 w-5 animate-spin text-purple-400" />
+                ) : (
+                  <span className="text-xs text-gray-400 font-medium">Upload image</span>
+                )}
+                <input type="file" accept="image/*" className="sr-only" onChange={handleCoverImageUpload} disabled={uploadingCover} />
+              </label>
+              {form.coverImage && (
+                <button onClick={() => set('coverImage', '')} className="text-xs text-red-500 hover:text-red-700 mt-1">✕ Remove image</button>
+              )}
             </div>
             {/* Read time */}
             <div>
@@ -390,73 +435,120 @@ function PostForm({ initial, onSave, onCancel, saving }) {
       {/* CONTENT */}
       {tab === 'content' && (
         <div className="space-y-6">
-          {/* Sections */}
-          <div>
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="font-black text-gray-800 flex items-center gap-2">
-                <AlignLeft className="h-5 w-5 text-purple-500" />
-                Article Sections
-                <span className="bg-purple-100 text-purple-700 text-xs font-bold px-2 py-0.5 rounded-full">
-                  {form.sections.length}
-                </span>
-              </h3>
-              <Button onClick={addSection} size="sm" className="bg-purple-600 hover:bg-purple-700 text-white">
-                <Plus className="h-4 w-4 mr-1" /> Add Section
-              </Button>
-            </div>
-
-            {form.sections.length === 0 ? (
-              <div className="text-center py-10 text-gray-400 border-2 border-dashed border-gray-200 rounded-2xl">
-                <AlignLeft className="h-10 w-10 mx-auto mb-2 opacity-40" />
-                <p className="text-sm font-medium">No sections yet.</p>
-                <p className="text-xs">Click "Add Section" to build your article content.</p>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {form.sections.map((s, i) => (
-                  <SectionEditor
-                    key={i} index={i} section={s}
-                    onChange={val => updateSection(i, val)}
-                    onRemove={() => removeSection(i)}
-                  />
-                ))}
-              </div>
-            )}
+          {/* Mode toggle */}
+          <div className="flex items-center gap-2 p-1 bg-gray-100 rounded-xl w-fit">
+            <button
+              onClick={() => setContentMode('builder')}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-colors ${
+                contentMode === 'builder' ? 'bg-white shadow text-purple-700' : 'text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              <Layers className="h-4 w-4" /> Section Builder
+            </button>
+            <button
+              onClick={() => setContentMode('html')}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-colors ${
+                contentMode === 'html' ? 'bg-white shadow text-purple-700' : 'text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              <Code2 className="h-4 w-4" /> HTML Page
+            </button>
           </div>
 
-          {/* FAQs */}
-          <div className="border-t-2 border-gray-100 pt-6">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="font-black text-gray-800 flex items-center gap-2">
-                <HelpCircle className="h-5 w-5 text-purple-500" />
-                FAQs
-                <span className="bg-purple-100 text-purple-700 text-xs font-bold px-2 py-0.5 rounded-full">
-                  {form.faqs.length}
-                </span>
-              </h3>
-              <Button onClick={addFaq} size="sm" className="bg-purple-600 hover:bg-purple-700 text-white">
-                <Plus className="h-4 w-4 mr-1" /> Add FAQ
-              </Button>
+          {/* HTML mode */}
+          {contentMode === 'html' && (
+            <div className="space-y-3">
+              <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 text-sm text-amber-800">
+                <p className="font-bold mb-1">Paste a complete HTML article</p>
+                <p className="text-xs">The HTML is rendered as-is inside the article container. Existing sections and FAQs are ignored when HTML content is present.</p>
+              </div>
+              <textarea
+                value={form.htmlContent}
+                onChange={e => set('htmlContent', e.target.value)}
+                rows={20}
+                className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-purple-400 resize-y"
+                placeholder="<h2>Your heading</h2><p>Your article content...</p>"
+              />
+              {form.htmlContent && (
+                <button onClick={() => set('htmlContent', '')} className="text-xs text-red-500 hover:text-red-700">
+                  ✕ Clear HTML content (switch back to section builder)
+                </button>
+              )}
             </div>
+          )}
 
-            {form.faqs.length === 0 ? (
-              <div className="text-center py-10 text-gray-400 border-2 border-dashed border-gray-200 rounded-2xl">
-                <HelpCircle className="h-10 w-10 mx-auto mb-2 opacity-40" />
-                <p className="text-sm font-medium">No FAQs yet.</p>
-                <p className="text-xs">FAQs appear in a structured FAQ section and generate Schema.org markup.</p>
+          {/* Builder mode */}
+          {contentMode === 'builder' && (
+            <>
+              {/* Sections */}
+              <div>
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="font-black text-gray-800 flex items-center gap-2">
+                    <AlignLeft className="h-5 w-5 text-purple-500" />
+                    Article Sections
+                    <span className="bg-purple-100 text-purple-700 text-xs font-bold px-2 py-0.5 rounded-full">
+                      {form.sections.length}
+                    </span>
+                  </h3>
+                  <Button onClick={addSection} size="sm" className="bg-purple-600 hover:bg-purple-700 text-white">
+                    <Plus className="h-4 w-4 mr-1" /> Add Section
+                  </Button>
+                </div>
+
+                {form.sections.length === 0 ? (
+                  <div className="text-center py-10 text-gray-400 border-2 border-dashed border-gray-200 rounded-2xl">
+                    <AlignLeft className="h-10 w-10 mx-auto mb-2 opacity-40" />
+                    <p className="text-sm font-medium">No sections yet.</p>
+                    <p className="text-xs">Click "Add Section" to build your article content.</p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {form.sections.map((s, i) => (
+                      <SectionEditor
+                        key={i} index={i} section={s}
+                        onChange={val => updateSection(i, val)}
+                        onRemove={() => removeSection(i)}
+                      />
+                    ))}
+                  </div>
+                )}
               </div>
-            ) : (
-              <div className="space-y-4">
-                {form.faqs.map((faq, i) => (
-                  <FAQEditor
-                    key={i} index={i} faq={faq}
-                    onChange={val => updateFaq(i, val)}
-                    onRemove={() => removeFaq(i)}
-                  />
-                ))}
+
+              {/* FAQs */}
+              <div className="border-t-2 border-gray-100 pt-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="font-black text-gray-800 flex items-center gap-2">
+                    <HelpCircle className="h-5 w-5 text-purple-500" />
+                    FAQs
+                    <span className="bg-purple-100 text-purple-700 text-xs font-bold px-2 py-0.5 rounded-full">
+                      {form.faqs.length}
+                    </span>
+                  </h3>
+                  <Button onClick={addFaq} size="sm" className="bg-purple-600 hover:bg-purple-700 text-white">
+                    <Plus className="h-4 w-4 mr-1" /> Add FAQ
+                  </Button>
+                </div>
+
+                {form.faqs.length === 0 ? (
+                  <div className="text-center py-10 text-gray-400 border-2 border-dashed border-gray-200 rounded-2xl">
+                    <HelpCircle className="h-10 w-10 mx-auto mb-2 opacity-40" />
+                    <p className="text-sm font-medium">No FAQs yet.</p>
+                    <p className="text-xs">FAQs appear in a structured FAQ section and generate Schema.org markup.</p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {form.faqs.map((faq, i) => (
+                      <FAQEditor
+                        key={i} index={i} faq={faq}
+                        onChange={val => updateFaq(i, val)}
+                        onRemove={() => removeFaq(i)}
+                      />
+                    ))}
+                  </div>
+                )}
               </div>
-            )}
-          </div>
+            </>
+          )}
         </div>
       )}
 
@@ -565,6 +657,8 @@ export default function AdminBlogPage() {
         metaTitle:            form.metaTitle,
         description:          form.description,
         coverEmoji:           form.coverEmoji,
+        coverImage:           form.coverImage || null,
+        htmlContent:          form.htmlContent || null,
         tags:                 typeof form.tags === 'string'
           ? form.tags.split(',').map(t => t.trim()).filter(Boolean)
           : form.tags,
@@ -754,9 +848,12 @@ export default function AdminBlogPage() {
                 <Card key={post.id} className="hover:shadow-md transition-shadow border-2 border-gray-100 hover:border-purple-200">
                   <CardContent className="p-5">
                     <div className="flex items-start gap-4">
-                      {/* Emoji */}
-                      <div className="text-4xl flex-shrink-0 w-14 h-14 bg-gradient-to-br from-purple-100 to-pink-100 rounded-2xl flex items-center justify-center">
-                        {post.cover_emoji || '📝'}
+                      {/* Cover image or emoji */}
+                      <div className="flex-shrink-0 w-14 h-14 rounded-2xl overflow-hidden bg-gradient-to-br from-purple-100 to-pink-100 flex items-center justify-center">
+                        {post.cover_image
+                          ? <img src={post.cover_image} alt="" className="w-full h-full object-cover" />
+                          : <span className="text-4xl">{post.cover_emoji || '📝'}</span>
+                        }
                       </div>
 
                       {/* Info */}
@@ -870,6 +967,8 @@ export default function AdminBlogPage() {
                   metaTitle:            editPost.meta_title || editPost.title || '',
                   description:          editPost.description || '',
                   coverEmoji:           editPost.cover_emoji || '📝',
+                  coverImage:           editPost.cover_image || '',
+                  htmlContent:          editPost.html_content || '',
                   tags:                 Array.isArray(editPost.tags) ? editPost.tags.join(', ') : (editPost.tags || ''),
                   readTime:             editPost.read_time || '5 min read',
                   sections:             editPost.sections || [],
