@@ -269,22 +269,14 @@ function PostForm({ initial, onSave, onCancel, saving }) {
               <label className="text-sm font-bold text-gray-700 mb-1 flex items-center gap-1 block">
                 <Smile className="h-4 w-4 text-purple-500" /> Cover Emoji
               </label>
-              <div className="flex gap-2">
-                <input
-                  value={form.coverEmoji}
-                  onChange={e => set('coverEmoji', e.target.value)}
-                  className="flex-1 border-2 border-gray-200 rounded-xl px-4 py-3 text-2xl focus:outline-none focus:ring-2 focus:ring-purple-400"
-                  maxLength={4}
-                />
-                <button
-                  type="button"
-                  onClick={() => setEmojiPickerOpen(o => !o)}
-                  className="border-2 border-gray-200 rounded-xl px-3 hover:border-purple-400 hover:bg-purple-50 transition-colors text-lg"
-                  title="Pick emoji"
-                >
-                  {emojiPickerOpen ? '▲' : '▼'}
-                </button>
-              </div>
+              <input
+                value={form.coverEmoji}
+                onChange={e => set('coverEmoji', e.target.value)}
+                onClick={() => setEmojiPickerOpen(o => !o)}
+                className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-2xl focus:outline-none focus:ring-2 focus:ring-purple-400 cursor-pointer"
+                maxLength={4}
+                readOnly
+              />
               {emojiPickerOpen && (
                 <div className="mt-2 p-2 border-2 border-gray-200 rounded-xl bg-white shadow-lg flex flex-wrap gap-1">
                   {['📝','🎨','🖍️','✏️','🖌️','📚','🌟','🎉','🦁','🐶','🐱','🦋','🌸','🌈','🎭','🏆','💡','🔥','❤️','🎯','🧩','🎪','🌺','🦄','🐼','🦊','🐸','🌙','⭐','🍀','🎸','🎵','🚀','🌍','🎃','🎄','🎁','🍭','🌻','🦅'].map(e => (
