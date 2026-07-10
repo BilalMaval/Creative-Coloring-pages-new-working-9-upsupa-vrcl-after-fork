@@ -269,17 +269,17 @@ function PostForm({ initial, onSave, onCancel, saving }) {
               <label className="text-sm font-bold text-gray-700 mb-1 flex items-center gap-1 block">
                 <Smile className="h-4 w-4 text-purple-500" /> Cover Emoji
               </label>
-              <div className="flex gap-2">
+              <div className="relative flex items-center border-2 border-gray-200 rounded-xl focus-within:ring-2 focus-within:ring-purple-400">
                 <input
                   value={form.coverEmoji}
                   onChange={e => set('coverEmoji', e.target.value)}
-                  className="flex-1 border-2 border-gray-200 rounded-xl px-4 py-3 text-2xl focus:outline-none focus:ring-2 focus:ring-purple-400"
+                  className="flex-1 bg-transparent px-4 py-3 text-2xl focus:outline-none"
                   maxLength={4}
                 />
                 <button
                   type="button"
                   onClick={() => setEmojiPickerOpen(o => !o)}
-                  className="border-2 border-gray-200 rounded-xl px-3 text-sm text-gray-500 hover:border-purple-400 hover:bg-purple-50 transition-colors"
+                  className="pr-3 text-xs text-gray-400 hover:text-purple-600 transition-colors"
                 >
                   {emojiPickerOpen ? '▲' : '▼'}
                 </button>
