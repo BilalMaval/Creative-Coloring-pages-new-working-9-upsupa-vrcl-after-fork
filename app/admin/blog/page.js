@@ -5,7 +5,7 @@ import AdminLayout from '@/components/AdminLayout';
 import {
   Plus, Pencil, Trash2, Eye, EyeOff, Save, X, ChevronDown, ChevronUp,
   BookOpen, Search, Globe, FileText, Clock, Tag, AlignLeft, HelpCircle,
-  Link2, RefreshCw, CheckCircle, AlertCircle, Loader2, Upload, Code2, Layers
+  Link2, Smile, RefreshCw, CheckCircle, AlertCircle, Loader2, Upload, Code2, Layers
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -262,7 +262,30 @@ function PostForm({ initial, onSave, onCancel, saving }) {
       {/* BASIC INFO */}
       {tab === 'basic' && (
         <div className="space-y-5">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            {/* Cover emoji + picker */}
+            <div>
+              <label className="text-sm font-bold text-gray-700 mb-1 flex items-center gap-1 block">
+                <Smile className="h-4 w-4 text-purple-500" /> Cover Emoji
+              </label>
+              <input
+                value={form.coverEmoji}
+                onChange={e => set('coverEmoji', e.target.value)}
+                className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-2xl focus:outline-none focus:ring-2 focus:ring-purple-400"
+                maxLength={4}
+              />
+              <div className="mt-2 flex flex-wrap gap-1">
+                {['📝','🎨','🖍️','✏️','🖌️','📚','🌟','🎉','🦁','🐶','🐱','🦋','🌸','🌈','🎭','🏆','💡','🔥','❤️','🎯','🧩','🎪','🌺','🦄','🐼','🦊','🐸','🌙','⭐','🍀','🎸','🎵','🚀','🌍','🎃','🎄','🎁','🍭','🌻','🦅'].map(e => (
+                  <button
+                    key={e}
+                    type="button"
+                    onClick={() => set('coverEmoji', e)}
+                    className={`text-lg p-1 rounded-lg hover:bg-purple-100 transition-colors ${form.coverEmoji === e ? 'bg-purple-200 ring-2 ring-purple-400' : ''}`}
+                  >{e}</button>
+                ))}
+              </div>
+              <p className="text-xs text-gray-400 mt-1">Used if no image uploaded</p>
+            </div>
             {/* Cover image upload */}
             <div>
               <label className="text-sm font-bold text-gray-700 mb-1 flex items-center gap-1 block">
