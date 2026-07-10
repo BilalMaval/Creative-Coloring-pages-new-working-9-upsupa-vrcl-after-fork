@@ -458,6 +458,24 @@ function PostForm({ initial, onSave, onCancel, saving }) {
           {/* HTML mode */}
           {contentMode === 'html' && (
             <div className="space-y-3">
+              {/* File upload */}
+              <label className="flex items-center gap-3 px-4 py-3 border-2 border-dashed border-gray-300 rounded-xl cursor-pointer hover:border-purple-400 hover:bg-purple-50 transition-colors w-fit">
+                <Upload className="h-4 w-4 text-purple-500 flex-shrink-0" />
+                <span className="text-sm font-medium text-gray-600">Upload .html file</span>
+                <input
+                  type="file"
+                  accept=".html,.htm"
+                  className="sr-only"
+                  onChange={e => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    const reader = new FileReader();
+                    reader.onload = ev => set('htmlContent', ev.target.result);
+                    reader.readAsText(file);
+                    e.target.value = '';
+                  }}
+                />
+              </label>
               <textarea
                 value={form.htmlContent}
                 onChange={e => set('htmlContent', e.target.value)}

@@ -43,9 +43,12 @@ export default async function BlogPage() {
             {posts.map((post) => (
               <Link key={post.slug} href={`/blog/${post.slug}`}>
                 <article className="bg-white rounded-3xl shadow-lg hover:shadow-2xl transform hover:scale-[1.02] transition-all duration-300 overflow-hidden border-2 border-gray-100 hover:border-purple-300 h-full flex flex-col">
-                  {/* Cover emoji banner */}
-                  <div className="bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center py-10 text-7xl">
-                    {post.coverEmoji}
+                  {/* Cover image or emoji banner */}
+                  <div className="bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center py-10">
+                    {post.coverImage
+                      ? <img src={post.coverImage} alt={post.title} className="w-20 h-20 object-cover rounded-2xl shadow-lg" />
+                      : <span className="text-7xl">{post.coverEmoji}</span>
+                    }
                   </div>
 
                   <div className="p-6 flex flex-col flex-1">
