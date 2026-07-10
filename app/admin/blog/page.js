@@ -5,7 +5,7 @@ import AdminLayout from '@/components/AdminLayout';
 import {
   Plus, Pencil, Trash2, Eye, EyeOff, Save, X, ChevronDown, ChevronUp,
   BookOpen, Search, Globe, FileText, Clock, Tag, AlignLeft, HelpCircle,
-  Link2, Smile, RefreshCw, CheckCircle, AlertCircle, Loader2, Upload, Code2, Layers
+  Link2, RefreshCw, CheckCircle, AlertCircle, Loader2, Upload, Code2, Layers
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -262,20 +262,7 @@ function PostForm({ initial, onSave, onCancel, saving }) {
       {/* BASIC INFO */}
       {tab === 'basic' && (
         <div className="space-y-5">
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            {/* Cover emoji */}
-            <div>
-              <label className="text-sm font-bold text-gray-700 mb-1 flex items-center gap-1 block">
-                <Smile className="h-4 w-4 text-purple-500" /> Cover Emoji
-              </label>
-              <input
-                value={form.coverEmoji}
-                onChange={e => set('coverEmoji', e.target.value)}
-                className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-2xl focus:outline-none focus:ring-2 focus:ring-purple-400"
-                maxLength={4}
-              />
-              <p className="text-xs text-gray-400 mt-1">Used if no image uploaded</p>
-            </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {/* Cover image upload */}
             <div>
               <label className="text-sm font-bold text-gray-700 mb-1 flex items-center gap-1 block">
@@ -461,7 +448,7 @@ function PostForm({ initial, onSave, onCancel, saving }) {
               {/* File upload */}
               <label className="flex items-center gap-3 px-4 py-3 border-2 border-dashed border-gray-300 rounded-xl cursor-pointer hover:border-purple-400 hover:bg-purple-50 transition-colors w-fit">
                 <Upload className="h-4 w-4 text-purple-500 flex-shrink-0" />
-                <span className="text-sm font-medium text-gray-600">Upload .html file</span>
+                <span className="text-sm font-medium text-gray-600">Upload file</span>
                 <input
                   type="file"
                   accept=".html,.htm"
