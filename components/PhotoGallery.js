@@ -88,17 +88,17 @@ export default function PhotoGallery({ images = [], mainImage, title }) {
           <>
             <button
               onClick={prevImage}
-              className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white rounded-full p-3 shadow-lg transition-all hover:scale-110 z-10"
+              className="absolute left-2 top-1/2 -translate-y-1/2 rounded-full p-2 transition-all hover:scale-110 z-10"
               aria-label="Previous image"
             >
-              <ChevronLeft className="h-6 w-6 text-gray-800" />
+              <ChevronLeft className="h-7 w-7 text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.6)]" />
             </button>
             <button
               onClick={nextImage}
-              className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white rounded-full p-3 shadow-lg transition-all hover:scale-110 z-10"
+              className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full p-2 transition-all hover:scale-110 z-10"
               aria-label="Next image"
             >
-              <ChevronRight className="h-6 w-6 text-gray-800" />
+              <ChevronRight className="h-7 w-7 text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.6)]" />
             </button>
             
             {/* Image counter */}
@@ -112,7 +112,6 @@ export default function PhotoGallery({ images = [], mainImage, title }) {
       {/* Thumbnail Gallery */}
       {allImages.length > 1 && (
         <div>
-          <p className="text-sm font-bold text-gray-700 mb-2">📷 Gallery ({allImages.length} images)</p>
           <div className="flex gap-2 overflow-x-auto pb-2">
             {allImages.map((img, index) => (
               <button
