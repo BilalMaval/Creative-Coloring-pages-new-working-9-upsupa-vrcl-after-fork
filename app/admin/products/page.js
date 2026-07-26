@@ -36,6 +36,8 @@ export default function AdminProductsPage() {
     title: '',
     slug: '',
     description: '',
+    metaTitle: '',
+    metaDescription: '',
     tags: '',
     image: '',
     pdfPath: '',
@@ -278,7 +280,9 @@ export default function AdminProductsPage() {
         dimensions: formData.dimensions || null,
         customFields: {
           additionalCategories: selectedCategories.slice(1),
-          collection: selectedCollection
+          collection: selectedCollection,
+          metaTitle: formData.metaTitle.trim() || null,
+          metaDescription: formData.metaDescription.trim() || null,
         }
       };
       
@@ -312,6 +316,8 @@ export default function AdminProductsPage() {
       title: '',
       slug: '',
       description: '',
+      metaTitle: '',
+      metaDescription: '',
       tags: '',
       image: '',
       pdfPath: '',
@@ -347,6 +353,8 @@ export default function AdminProductsPage() {
       title: product.title,
       slug: product.slug,
       description: product.description || '',
+      metaTitle: product.customFields?.metaTitle || '',
+      metaDescription: product.customFields?.metaDescription || '',
       tags: Array.isArray(product.tags) ? product.tags.join(', ') : '',
       image: product.webpPath || '',
       pdfPath: product.pdfPath || '',
@@ -517,6 +525,36 @@ export default function AdminProductsPage() {
                 />
               </div>
 
+              {/* SEO Meta Fields */}
+              <div className="border-2 border-amber-200 rounded-lg p-4 bg-amber-50">
+                <Label className="text-amber-800 font-bold mb-3 block">🔍 SEO Meta (optional — overrides auto-generated)</Label>
+                <div className="space-y-3">
+                  <div>
+                    <Label htmlFor="metaTitle">Meta Title</Label>
+                    <Input
+                      id="metaTitle"
+                      value={formData.metaTitle}
+                      onChange={(e) => setFormData({ ...formData, metaTitle: e.target.value })}
+                      placeholder="Custom SEO title (leave blank to auto-generate)"
+                      maxLength={70}
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">{formData.metaTitle.length}/70 characters</p>
+                  </div>
+                  <div>
+                    <Label htmlFor="metaDescription">Meta Description</Label>
+                    <Textarea
+                      id="metaDescription"
+                      value={formData.metaDescription}
+                      onChange={(e) => setFormData({ ...formData, metaDescription: e.target.value })}
+                      placeholder="Custom SEO description (leave blank to auto-generate from description)"
+                      rows={2}
+                      maxLength={160}
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">{formData.metaDescription.length}/160 characters</p>
+                  </div>
+                </div>
+              </div>
+
               <div>
                 <Label htmlFor="tags">Tags (comma-separated)</Label>
                 <Input
@@ -657,40 +695,38 @@ export default function AdminProductsPage() {
                 {uploading.image && <p className="text-sm text-muted-foreground mt-2">Uploading image...</p>}
               </div>
 
-              {/* Photo Gallery - For Printables and Bookshop */}
-              {isPrintablesOrBookshopSelected() && (
-                <div className="border-2 border-blue-200 rounded-lg p-4 bg-blue-50">
-                  <Label className="text-blue-800 font-bold mb-3 block">📷 Photo Gallery (Multiple Images)</Label>
-                  <Input
-                    type="file"
-                    accept="image/*"
-                    multiple
-                    onChange={handleGalleryUpload}
-                    disabled={uploading.gallery}
-                  />
-                  {uploading.gallery && <p className="text-sm text-muted-foreground mt-2">Uploading images...</p>}
-                  
-                  {formData.gallery.length > 0 && (
-                    <div className="flex flex-wrap gap-2 mt-3">
-                      {formData.gallery.map((img, index) => (
-                        <div key={index} className="relative">
-                          <img src={img} alt={`Gallery ${index + 1}`} className="h-16 w-16 object-cover rounded" />
-                          <button
-                            type="button"
-                            onClick={() => removeGalleryImage(index)}
-                            className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
-                          >
-                            <X className="h-3 w-3" />
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                  <p className="text-xs text-muted-foreground mt-2">
-                    Select multiple images at once (hold Ctrl/Cmd to select multiple files)
-                  </p>
-                </div>
-              )}
+              {/* Photo Gallery - Available for all products */}
+              <div className="border-2 border-blue-200 rounded-lg p-4 bg-blue-50">
+                <Label className="text-blue-800 font-bold mb-3 block">📷 Preview Gallery (Multiple Images)</Label>
+                <Input
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  onChange={handleGalleryUpload}
+                  disabled={uploading.gallery}
+                />
+                {uploading.gallery && <p className="text-sm text-muted-foreground mt-2">Uploading images...</p>}
+
+                {formData.gallery.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mt-3">
+                    {formData.gallery.map((img, index) => (
+                      <div key={index} className="relative">
+                        <img src={img} alt={`Gallery ${index + 1}`} className="h-16 w-16 object-cover rounded" />
+                        <button
+                          type="button"
+                          onClick={() => removeGalleryImage(index)}
+                          className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                <p className="text-xs text-muted-foreground mt-2">
+                  These appear in the image slider on the product page alongside the main image. Hold Ctrl/Cmd to select multiple files.
+                </p>
+              </div>
 
               <div>
                 <Label htmlFor="pdf" className="flex items-center gap-2">

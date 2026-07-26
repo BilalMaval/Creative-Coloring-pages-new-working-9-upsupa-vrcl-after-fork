@@ -24,9 +24,14 @@ export async function generateMetadata({ params }) {
       : product.category?.name || 'Coloring Page';
     const priceText = product.isFree ? 'FREE' : 'Premium';
 
+    const metaTitle = product.customFields?.metaTitle || `${product.title} - ${priceText} Download`;
+    const metaDesc = product.customFields?.metaDescription
+      || product.description
+      || `Download ${product.title} - a beautiful ${categoryPath.toLowerCase()} printable. High-quality PDF ready to print and color. ${brand.tagline}`;
+
     return genMeta({
-      title: `${product.title} - ${priceText} Download`,
-      description: product.description || `Download ${product.title} - a beautiful ${categoryPath.toLowerCase()} printable. High-quality PDF ready to print and color. ${brand.tagline}`,
+      title: metaTitle,
+      description: metaDesc,
       path: `/product/${slug}`,
       image: product.webpPath || brand.logo,
       keywords: `${product.title.toLowerCase()}, free coloring page, printable ${product.category?.name?.toLowerCase() || 'coloring page'}, download coloring sheet`,
