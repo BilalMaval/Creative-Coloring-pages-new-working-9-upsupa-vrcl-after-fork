@@ -49,9 +49,12 @@ export default function DownloadButton({ product, gradient, onReviewSubmitted })
 
     setLoading(true);
 
-    const filePath = encodeURIComponent(
-      product.pdfPath.replace(/^.*\/uploads\//, '')
-    );
+    // Extract the storage key (e.g. "pdfs/filename.pdf") from the full URL.
+    // Handles both legacy Supabase URLs (.../uploads/pdfs/...) and new R2
+    // URLs (https://cdn.creativecoloringpages.online/pdfs/...) by taking
+    // everything after the last occurrence of "/pdfs/" or "/images/".
+    const storageKey = product.pdfPath.replace(/^.*?\/(pdfs\/|images\/)/, '$1');
+    const filePath = encodeURIComponent(storageKey);
 
     const fileName = product.title.replace(/[^a-z0-9]/gi, '_') + '.pdf';
     const url = `/api/download?file=${filePath}&name=${encodeURIComponent(fileName)}&productId=${product.id}`;

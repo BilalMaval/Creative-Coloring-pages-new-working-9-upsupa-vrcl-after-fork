@@ -3,17 +3,23 @@ const nextConfig = {
   // Vercel optimized - no standalone needed for Vercel
   images: {
     remotePatterns: [
+      // R2 CDN — new storage backend
+      {
+        protocol: 'https',
+        hostname: 'cdn.creativecoloringpages.online',
+      },
+      // Supabase Storage — kept for legacy DB records until URL rewrite
       {
         protocol: 'https',
         hostname: '**.supabase.co',
       },
       {
         protocol: 'https',
-        hostname: 'customer-assets.emergentagent.com',
+        hostname: 'vfiyffogstwmeudvnasp.supabase.co',
       },
       {
         protocol: 'https',
-        hostname: 'vfiyffogstwmeudvnasp.supabase.co',
+        hostname: 'customer-assets.emergentagent.com',
       },
       {
         protocol: 'https',

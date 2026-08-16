@@ -1,5 +1,6 @@
-
-import { supabase, admin } from '@/lib/supabaseClients';
+import { GetObjectCommand } from '@aws-sdk/client-s3';
+import { getR2Client, R2_BUCKET } from '@/lib/r2Client';
+import { admin } from '@/lib/supabaseClients';
 
 export const runtime = 'nodejs';
 
@@ -14,7 +15,7 @@ export async function GET(request) {
       return new Response('File not specified', { status: 400 });
     }
 
-    // Increment download count via Supabase REST (Prisma port is blocked on this machine)
+    // Increment download count (Supabase DB only — not storage)
     if (productId) {
       try {
         const { data: product } = await admin
@@ -34,20 +35,22 @@ export async function GET(request) {
       }
     }
 
-    // Download file from Supabase
-    const { data, error } = await supabase.storage.from('uploads').download(filePathParam);
+    // Fetch file from R2
+    const r2Response = await getR2Client().send(new GetObjectCommand({
+      Bucket: R2_BUCKET(),
+      Key:    filePathParam,
+    }));
 
-    if (error || !data) {
-      console.error('Supabase download error:', error);
-      return new Response('Download failed', { status: 500 });
+    const chunks = [];
+    for await (const chunk of r2Response.Body) {
+      chunks.push(chunk);
     }
+    const buffer = Buffer.concat(chunks);
 
-    const arrayBuffer = await data.arrayBuffer();
-
-    return new Response(arrayBuffer, {
+    return new Response(buffer, {
       status: 200,
       headers: {
-        'Content-Type': data.type || 'application/octet-stream',
+        'Content-Type':        r2Response.ContentType || 'application/octet-stream',
         'Content-Disposition': `attachment; filename="${fileNameParam}"`,
       },
     });
