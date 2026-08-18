@@ -3,19 +3,10 @@ const nextConfig = {
   // Vercel optimized - no standalone needed for Vercel
   images: {
     remotePatterns: [
-      // R2 CDN — new storage backend
+      // R2 CDN — primary storage backend
       {
         protocol: 'https',
         hostname: 'cdn.creativecoloringpages.online',
-      },
-      // Supabase Storage — kept for legacy DB records until URL rewrite
-      {
-        protocol: 'https',
-        hostname: '**.supabase.co',
-      },
-      {
-        protocol: 'https',
-        hostname: 'vfiyffogstwmeudvnasp.supabase.co',
       },
       {
         protocol: 'https',
@@ -36,6 +27,7 @@ const nextConfig = {
     // icon site-wide until the monthly quota resets. unoptimized:true makes
     // <Image> serve the original file straight from Supabase Storage,
     // trading away automatic resize/WebP conversion for guaranteed uptime.
+    // Images are now served from Cloudflare R2 CDN.
     // Re-enable (set back to false) once the Vercel plan is upgraded.
     deviceSizes: [640, 768, 1080, 1920],
     imageSizes: [96, 128, 256, 384],
