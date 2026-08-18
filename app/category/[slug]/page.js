@@ -43,7 +43,7 @@ export async function generateMetadata({ params, searchParams }) {
     if (!category) return {};
 
     // Build breadcrumb path for title
-    const parentLabel = category.parent ? category.parent.name : 'Printables';
+    const parentLabel = category.parent?.name || 'Printables';
     const pageLabel = page > 1 ? ` - Page ${page}` : '';
 
     return genMeta({
