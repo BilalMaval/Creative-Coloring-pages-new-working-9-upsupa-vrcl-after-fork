@@ -26,7 +26,7 @@ export default function DownloadButton({ product, gradient, onReviewSubmitted })
         id: product.id,
         slug: product.slug,
         title: product.title,
-        price: product.price,
+        price: product.salePrice || product.price,
         isFree: product.isFree,
         image: product.webpPath || product.thumbnailPath,
         category: product.category?.name || '',
