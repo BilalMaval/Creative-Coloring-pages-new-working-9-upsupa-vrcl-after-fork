@@ -39,8 +39,17 @@ export async function POST(request) {
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
 
+    // Normalise MIME type — browsers sometimes send empty/wrong type for ZIP
+    const ext = fileName.split('.').pop()?.toLowerCase();
+    const resolvedMime = mimeType || (
+      ext === 'zip'  ? 'application/zip' :
+      ext === 'epub' ? 'application/epub+zip' :
+      ext === 'pdf'  ? 'application/pdf' :
+      'application/octet-stream'
+    );
+
     // ✅ Upload properly
-    const url = await uploadFile(buffer, folder, fileName, mimeType);
+    const url = await uploadFile(buffer, folder, fileName, resolvedMime);
 
     return NextResponse.json({ success: true, url });
 

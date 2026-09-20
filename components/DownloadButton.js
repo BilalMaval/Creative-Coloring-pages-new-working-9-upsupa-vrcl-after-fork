@@ -56,7 +56,8 @@ export default function DownloadButton({ product, gradient, onReviewSubmitted })
     const storageKey = product.pdfPath.replace(/^.*?\/(pdfs\/|images\/)/, '$1');
     const filePath = encodeURIComponent(storageKey);
 
-    const fileName = product.title.replace(/[^a-z0-9]/gi, '_') + '.pdf';
+    const fileExt = product.pdfPath.split('.').pop()?.toLowerCase() || 'pdf';
+    const fileName = product.title.replace(/[^a-z0-9]/gi, '_') + '.' + fileExt;
     const url = `/api/download?file=${filePath}&name=${encodeURIComponent(fileName)}&productId=${product.id}`;
 
     try {
