@@ -890,14 +890,12 @@ export default function AdminProductsPage() {
                 <div className="flex items-center gap-2 mb-4">
                   {product.isFree ? (
                     <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full font-medium">FREE</span>
+                  ) : product.customFields?.salePrice ? (
+                    <span className="text-xs bg-red-100 text-red-800 px-2 py-1 rounded-full font-medium">
+                      <span className="line-through opacity-60">${product.price}</span> → ${product.customFields.salePrice}
+                    </span>
                   ) : (
-                    {product.customFields?.salePrice ? (
-                      <span className="text-xs bg-red-100 text-red-800 px-2 py-1 rounded-full font-medium">
-                        <span className="line-through opacity-60">${product.price}</span> → ${product.customFields.salePrice}
-                      </span>
-                    ) : (
-                      <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full font-medium">${product.price}</span>
-                    )}
+                    <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full font-medium">${product.price}</span>
                   )}
                   <span className="text-xs text-muted-foreground">{product.downloads || 0} downloads</span>
                   {product.gallery?.length > 0 && (
