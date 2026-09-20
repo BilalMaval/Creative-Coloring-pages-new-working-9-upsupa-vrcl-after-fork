@@ -203,7 +203,7 @@ export default function DownloadButton({ product, gradient, onReviewSubmitted })
         ) : (
           <>
             <Zap className="mr-3 h-8 w-8" />
-            Buy Now - ${Number(product.price).toFixed(2)}
+            Buy Now - ${Number(product.salePrice || product.price).toFixed(2)}
           </>
         )}
       </Button>
