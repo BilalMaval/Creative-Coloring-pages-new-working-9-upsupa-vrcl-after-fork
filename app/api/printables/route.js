@@ -59,6 +59,7 @@ export async function GET(request) {
         pdfPath: item.pdf_path,
         categoryId: item.category_id,
         price: item.price ? Number(item.price) : 0,
+        salePrice: item.custom_fields?.salePrice ? Number(item.custom_fields.salePrice) : null,
         isFree: item.is_free,
         isFeatured: item.is_featured,
         gallery: item.gallery || [],

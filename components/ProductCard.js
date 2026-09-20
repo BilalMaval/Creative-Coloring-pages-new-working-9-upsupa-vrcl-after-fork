@@ -50,8 +50,15 @@ export default function ProductCard({ product, showRating = true, priority = fal
             </div>
           )}
           {product.isFree === false && (
-            <div className="absolute top-2 right-2 bg-yellow-400 text-yellow-900 text-xs font-black px-2 py-1 rounded-full">
-              ${Number(product.price).toFixed(2)}
+            <div className={`absolute top-2 right-2 text-xs font-black px-2 py-1 rounded-full ${product.salePrice ? 'bg-red-500 text-white flex flex-col items-center leading-tight' : 'bg-yellow-400 text-yellow-900'}`}>
+              {product.salePrice ? (
+                <>
+                  <span className="line-through opacity-70">${Number(product.price).toFixed(2)}</span>
+                  <span>${Number(product.salePrice).toFixed(2)}</span>
+                </>
+              ) : (
+                `$${Number(product.price).toFixed(2)}`
+              )}
             </div>
           )}
         </div>

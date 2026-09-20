@@ -19,7 +19,7 @@ export async function GET(request) {
     // We run two parallel queries (title match + description match) and merge.
     const titleQuery = supabase
       .from('products')
-      .select('id, title, slug, description, webp_path, is_free, is_featured, price, downloads, category_id, tags')
+      .select('id, title, slug, description, webp_path, is_free, is_featured, price, downloads, category_id, tags, custom_fields')
       .eq('is_active', true)
       .ilike('title', `%${q}%`)
       .order('downloads', { ascending: false })
@@ -27,7 +27,7 @@ export async function GET(request) {
 
     const descQuery = supabase
       .from('products')
-      .select('id, title, slug, description, webp_path, is_free, is_featured, price, downloads, category_id, tags')
+      .select('id, title, slug, description, webp_path, is_free, is_featured, price, downloads, category_id, tags, custom_fields')
       .eq('is_active', true)
       .ilike('description', `%${q}%`)
       .order('downloads', { ascending: false })
@@ -38,7 +38,7 @@ export async function GET(request) {
       ? words.map(word =>
           supabase
             .from('products')
-            .select('id, title, slug, description, webp_path, is_free, is_featured, price, downloads, category_id, tags')
+            .select('id, title, slug, description, webp_path, is_free, is_featured, price, downloads, category_id, tags, custom_fields')
             .eq('is_active', true)
             .ilike('title', `%${word}%`)
             .order('downloads', { ascending: false })
@@ -123,6 +123,7 @@ export async function GET(request) {
         isFree: product.is_free,
         isFeatured: product.is_featured,
         price: product.price ? Number(product.price) : 0,
+        salePrice: product.custom_fields?.salePrice ? Number(product.custom_fields.salePrice) : null,
         downloads: product.downloads || 0,
         tags: product.tags || [],
         category: categoryMap[product.category_id] || null,
