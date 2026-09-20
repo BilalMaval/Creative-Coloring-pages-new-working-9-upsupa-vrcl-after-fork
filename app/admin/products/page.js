@@ -43,6 +43,7 @@ export default function AdminProductsPage() {
     pdfPath: '',
     categoryId: '',
     price: '0',
+    salePrice: '',
     pricingType: 'free', // 'free' or 'paid'
     gallery: [],
     printLength: '',
@@ -283,6 +284,9 @@ export default function AdminProductsPage() {
           collection: selectedCollection,
           metaTitle: formData.metaTitle.trim() || null,
           metaDescription: formData.metaDescription.trim() || null,
+          salePrice: (formData.pricingType === 'paid' && formData.salePrice && parseFloat(formData.salePrice) > 0)
+            ? parseFloat(formData.salePrice)
+            : null,
         }
       };
       
@@ -323,6 +327,7 @@ export default function AdminProductsPage() {
       pdfPath: '',
       categoryId: '',
       price: '0',
+      salePrice: '',
       pricingType: 'free',
       gallery: [],
       printLength: '',
@@ -360,6 +365,7 @@ export default function AdminProductsPage() {
       pdfPath: product.pdfPath || '',
       categoryId: product.categoryId,
       price: String(product.price || 0),
+      salePrice: product.customFields?.salePrice ? String(product.customFields.salePrice) : '',
       pricingType: isFree ? 'free' : 'paid',
       gallery: product.gallery || [],
       printLength: product.printLength || '',
@@ -584,18 +590,38 @@ export default function AdminProductsPage() {
                 </RadioGroup>
                 
                 {formData.pricingType === 'paid' && (
-                  <div className="mt-3">
-                    <Label htmlFor="price">Price ($)</Label>
-                    <Input
-                      id="price"
-                      type="number"
-                      step="0.01"
-                      min="0.01"
-                      value={formData.price}
-                      onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-                      placeholder="9.99"
-                      className="w-32"
-                    />
+                  <div className="mt-3 flex flex-wrap gap-4">
+                    <div>
+                      <Label htmlFor="price">Price ($)</Label>
+                      <Input
+                        id="price"
+                        type="number"
+                        step="0.01"
+                        min="0.01"
+                        value={formData.price}
+                        onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                        placeholder="9.99"
+                        className="w-32"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="salePrice">Sale Price ($) <span className="text-muted-foreground font-normal">(optional)</span></Label>
+                      <Input
+                        id="salePrice"
+                        type="number"
+                        step="0.01"
+                        min="0.01"
+                        value={formData.salePrice}
+                        onChange={(e) => setFormData({ ...formData, salePrice: e.target.value })}
+                        placeholder="Leave empty for no sale"
+                        className="w-48"
+                      />
+                      {formData.salePrice && parseFloat(formData.salePrice) > 0 && (
+                        <p className="text-xs text-green-700 mt-1">
+                          Regular <span className="line-through">${parseFloat(formData.price || 0).toFixed(2)}</span> → <strong>${parseFloat(formData.salePrice).toFixed(2)}</strong>
+                        </p>
+                      )}
+                    </div>
                   </div>
                 )}
               </div>

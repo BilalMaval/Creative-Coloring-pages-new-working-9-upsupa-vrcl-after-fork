@@ -256,6 +256,11 @@ export default async function CategoryPage({ params, searchParams }) {
                           <div className="absolute top-2 left-2 bg-green-500 text-white text-xs font-black px-2 py-1 rounded-full">
                             FREE
                           </div>
+                        ) : product.salePrice ? (
+                          <div className="absolute top-2 left-2 bg-red-500 text-white text-xs font-black px-2 py-1 rounded-full flex flex-col items-center leading-tight">
+                            <span className="line-through opacity-70">${Number(product.price).toFixed(2)}</span>
+                            <span>${Number(product.salePrice).toFixed(2)}</span>
+                          </div>
                         ) : (
                           <div className="absolute top-2 left-2 bg-blue-500 text-white text-xs font-black px-2 py-1 rounded-full">
                             ${Number(product.price).toFixed(2)}

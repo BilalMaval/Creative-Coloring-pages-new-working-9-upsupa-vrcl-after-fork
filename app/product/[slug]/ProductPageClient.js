@@ -148,7 +148,15 @@ export default function ProductPageClient({ product, relatedProducts, gradient }
                   </div>
                 ) : (
                   <div className="bg-gradient-to-r from-yellow-400 to-orange-400 text-gray-900 text-center py-6 px-8 rounded-2xl shadow-xl">
-                    <p className="text-3xl font-black mb-1">${Number(product.price).toFixed(2)}</p>
+                    {product.salePrice ? (
+                      <>
+                        <p className="text-lg line-through opacity-60 mb-0.5">${Number(product.price).toFixed(2)}</p>
+                        <p className="text-3xl font-black mb-1">${Number(product.salePrice).toFixed(2)}</p>
+                        <p className="text-xs font-bold bg-red-600 text-white rounded-full px-3 py-0.5 inline-block mb-1">SALE</p>
+                      </>
+                    ) : (
+                      <p className="text-3xl font-black mb-1">${Number(product.price).toFixed(2)}</p>
+                    )}
                     <p className="text-sm font-bold">One-time purchase</p>
                   </div>
                 )}
