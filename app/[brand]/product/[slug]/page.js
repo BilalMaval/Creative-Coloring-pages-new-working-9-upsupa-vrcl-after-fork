@@ -1,8 +1,8 @@
 import { notFound } from 'next/navigation';
 import { getProductBySlug } from '@/lib/db';
 import ProductPageClient from './ProductPageClient';
-import { generateMetadata as genMeta, generateProductSchema, generateBreadcrumbSchema, generateHowToPrintSchema, getBaseUrl } from '@/lib/seo';
-import { getBrandByDomain, SITE_HOST } from '@/config/brands';
+import { generateMetadata as genMeta, generateProductSchema, generateBreadcrumbSchema, generateHowToPrintSchema } from '@/lib/seo';
+import { getBrandByKey, getSiteUrl } from '@/config/brands';
 
 // Cache for 2 minutes - ISR for fast page loads
 export const revalidate = 120;
@@ -13,9 +13,8 @@ export async function generateStaticParams() {
 }
 
 export async function generateMetadata({ params }) {
-  const { slug } = await params;
-  const host = SITE_HOST;
-  const brand = getBrandByDomain(host);
+  const { brand: brandKey, slug } = await params;
+  const brand = getBrandByKey(brandKey);
   
   try {
     const data = await getProductBySlug(slug);
@@ -33,6 +32,7 @@ export async function generateMetadata({ params }) {
       || `Download ${product.title} - a beautiful ${categoryPath.toLowerCase()} printable. High-quality PDF ready to print and color. ${brand.tagline}`;
 
     return genMeta({
+      brand,
       title: metaTitle,
       description: metaDesc,
       path: `/product/${slug}`,
@@ -66,7 +66,8 @@ function getGradient(product) {
 }
 
 export default async function ProductPage({ params }) {
-  const { slug } = await params;
+  const { brand: brandKey, slug } = await params;
+  const brand = getBrandByKey(brandKey);
   const data = await getProductData(slug);
   
   if (!data) {
@@ -75,7 +76,7 @@ export default async function ProductPage({ params }) {
   
   const { product, relatedProducts } = data;
   const gradient = getGradient(product);
-  const baseUrl = await getBaseUrl();
+  const baseUrl = getSiteUrl(brand);
   
   // Generate breadcrumb schema
   const breadcrumbItems = [
@@ -101,10 +102,10 @@ export default async function ProductPage({ params }) {
     url: `/product/${product.slug}`
   });
   
-  const breadcrumbSchema = await generateBreadcrumbSchema(breadcrumbItems);
+  const breadcrumbSchema = await generateBreadcrumbSchema(breadcrumbItems, baseUrl);
   
   // Generate product schema
-  const productSchema = await generateProductSchema({ product, baseUrl });
+  const productSchema = await generateProductSchema({ product, brand, baseUrl });
 
   // Generate HowTo schema — "How to print this coloring page"
   const howToSchema = await generateHowToPrintSchema({ productTitle: product.title, baseUrl });

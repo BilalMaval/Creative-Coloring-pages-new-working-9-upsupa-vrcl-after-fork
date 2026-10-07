@@ -1,14 +1,17 @@
 import { NextResponse } from 'next/server';
-import { getBrandByDomain, SITE_HOST, SITE_URL } from '@/config/brands';
+import { headers } from 'next/headers';
+import { getBrandByDomain, getSiteUrl } from '@/config/brands';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
-  const host = SITE_HOST;
-  const baseUrl = SITE_URL;
+  // Each domain serves its own file; URLs use that brand's canonical origin
+  const headersList = await headers();
+  const host = headersList.get('host') || '';
   
   // Get brand for this domain
   const brand = getBrandByDomain(host);
+  const baseUrl = getSiteUrl(brand);
   
   const robots = `# Robots.txt for ${brand.name}
 # Domain: ${brand.domain}

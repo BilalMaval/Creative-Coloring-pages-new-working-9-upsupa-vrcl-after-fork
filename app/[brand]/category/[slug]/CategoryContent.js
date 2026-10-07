@@ -4,8 +4,8 @@ import Image from 'next/image';
 import { Download, ArrowLeft, Grid3x3, Star, Heart, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { getCategoryBySlug, getProductsByCategory } from '@/lib/db';
-import { generateMetadata as genMeta, generateBreadcrumbSchema, generateCategoryFAQSchema, getBaseUrl } from '@/lib/seo';
-import { getBrandByDomain, SITE_HOST } from '@/config/brands';
+import { generateMetadata as genMeta, generateBreadcrumbSchema, generateCategoryFAQSchema } from '@/lib/seo';
+import { getSiteUrl } from '@/config/brands';
 
 // Star rating component
 function StarRating({ rating }) {
@@ -25,9 +25,7 @@ function StarRating({ rating }) {
   );
 }
 
-export async function buildCategoryMetadata(slug, page = 1) {
-  const host = SITE_HOST;
-  const brand = getBrandByDomain(host);
+export async function buildCategoryMetadata(brand, slug, page = 1) {
   
   try {
     const category = await getCategoryBySlug(slug);
@@ -39,6 +37,7 @@ export async function buildCategoryMetadata(slug, page = 1) {
     const pageLabel = page > 1 ? ` - Page ${page}` : '';
 
     return genMeta({
+      brand,
       title: `Free ${category.name} ${parentLabel} - Download & Print${pageLabel}`,
       description: category.description || `Browse and download free ${category.name.toLowerCase()} printables. High-quality PDFs ready to print and color. ${brand.tagline}`,
       path: pageHref(slug, page),
@@ -78,7 +77,7 @@ async function getCategoryData(slug, page = 1) {
   }
 }
 
-export default async function CategoryContent({ slug, page = 1 }) {
+export default async function CategoryContent({ brand, slug, page = 1 }) {
   const data = await getCategoryData(slug, page);
   
   if (!data) {
@@ -86,7 +85,7 @@ export default async function CategoryContent({ slug, page = 1 }) {
   }
   
   const { category, products, totalCount, totalPages, currentPage } = data;
-  const baseUrl = await getBaseUrl();
+  const baseUrl = getSiteUrl(brand);
   
   // Generate breadcrumb schema
   const breadcrumbItems = [
@@ -105,7 +104,7 @@ export default async function CategoryContent({ slug, page = 1 }) {
     url: `/category/${category.slug}`
   });
   
-  const breadcrumbSchema = await generateBreadcrumbSchema(breadcrumbItems);
+  const breadcrumbSchema = await generateBreadcrumbSchema(breadcrumbItems, baseUrl);
 
   // FAQ schema — 5 contextual Q&As about this category
   const faqSchema = generateCategoryFAQSchema({

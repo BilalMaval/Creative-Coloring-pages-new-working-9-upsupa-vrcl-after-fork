@@ -80,6 +80,7 @@ const brand = {
   seo: {
     titleTemplate: '%s | Creative Coloring Pages',
     defaultTitle: 'Free Printable Coloring Pages & Mandalas',
+    pinterestVerify: 'cec57036f897cd1954e89b997411ade0',
     ogImage: 'https://customer-assets.emergentagent.com/job_mandala-maker-2/artifacts/xyc9pvqy_Coloringpages%20logo%20%281%29.png'
   }
 };

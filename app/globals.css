@@ -160,3 +160,9 @@ html {
 main {
   min-height: calc(100vh - 5rem);
 }
+
+/* Prevent white flash during page transitions */
+html, body {
+  background: linear-gradient(to bottom, #eff6ff, #faf5ff, #fdf2f8);
+  min-height: 100vh;
+}

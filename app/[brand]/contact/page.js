@@ -1,12 +1,13 @@
-import { generateMetadata as genMeta, getCurrentBrand } from '@/lib/seo';
-import { getBrandByDomain, SITE_HOST } from '@/config/brands';
+import { generateMetadata as genMeta } from '@/lib/seo';
+import { getBrandByKey } from '@/config/brands';
 import ContactForm from './ContactForm';
 
-export async function generateMetadata() {
-  const host = SITE_HOST;
-  const brand = getBrandByDomain(host);
+export async function generateMetadata({ params }) {
+  const { brand: brandKey } = await params;
+  const brand = getBrandByKey(brandKey);
   
   return genMeta({
+    brand,
     title: `Contact Us - ${brand.name}`,
     description: `Get in touch with ${brand.name}. Have questions about our coloring pages or printables? We'd love to hear from you!`,
     path: '/contact',
@@ -16,8 +17,9 @@ export async function generateMetadata() {
 
 export const revalidate = 86400;
 
-export default async function ContactPage() {
-  const brand = await getCurrentBrand();
+export default async function ContactPage({ params }) {
+  const { brand: brandKey } = await params;
+  const brand = getBrandByKey(brandKey);
 
   return (
     <div className="bg-gradient-to-b from-blue-50 via-purple-50 to-pink-50 flex-1">

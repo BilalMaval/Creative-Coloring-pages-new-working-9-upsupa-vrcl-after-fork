@@ -1,12 +1,13 @@
 import { getPageBySlug } from '@/lib/db';
-import { generateMetadata as genMeta, getCurrentBrand, generateOrganizationSchema } from '@/lib/seo';
-import { getBrandByDomain, SITE_HOST } from '@/config/brands';
+import { generateMetadata as genMeta, generateOrganizationSchema } from '@/lib/seo';
+import { getBrandByKey } from '@/config/brands';
 
-export async function generateMetadata() {
-  const host = SITE_HOST;
-  const brand = getBrandByDomain(host);
+export async function generateMetadata({ params }) {
+  const { brand: brandKey } = await params;
+  const brand = getBrandByKey(brandKey);
   
   return genMeta({
+    brand,
     title: `About Us - ${brand.name}`,
     description: `Learn about ${brand.name} - our mission to provide free, high-quality printable coloring pages and mandalas for kids and adults. Discover who we are and what we do.`,
     path: '/about',
@@ -25,10 +26,11 @@ async function getPageContent() {
   }
 }
 
-export default async function AboutPage() {
+export default async function AboutPage({ params }) {
   const pageContent = await getPageContent();
-  const brand = await getCurrentBrand();
-  const orgSchema = await generateOrganizationSchema();
+  const { brand: brandKey } = await params;
+  const brand = getBrandByKey(brandKey);
+  const orgSchema = await generateOrganizationSchema(brand);
 
   return (
     <>

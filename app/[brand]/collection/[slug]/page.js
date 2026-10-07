@@ -4,8 +4,8 @@ import { Sparkles, Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import CategoryIcon from '@/components/CategoryIcon';
 import { getCollectionBySlug } from '@/lib/db';
-import { generateMetadata as genMeta, generateBreadcrumbSchema, getBaseUrl } from '@/lib/seo';
-import { getBrandByDomain, SITE_HOST } from '@/config/brands';
+import { generateMetadata as genMeta, generateBreadcrumbSchema } from '@/lib/seo';
+import { getBrandByKey, getSiteUrl } from '@/config/brands';
 
 // Cache for 2 minutes - ISR for fast page loads
 export const revalidate = 120;
@@ -16,9 +16,8 @@ export async function generateStaticParams() {
 }
 
 export async function generateMetadata({ params }) {
-  const { slug } = await params;
-  const host = SITE_HOST;
-  const brand = getBrandByDomain(host);
+  const { brand: brandKey, slug } = await params;
+  const brand = getBrandByKey(brandKey);
   
   try {
     const result = await getCollectionBySlug(slug);
@@ -27,6 +26,7 @@ export async function generateMetadata({ params }) {
     if (!collection) return {};
     
     return genMeta({
+      brand,
       title: `Free Printable ${collection.name} - Download & Print`,
       description: collection.description || `Browse our ${collection.name.toLowerCase()} collection. Find and download free printable ${collection.name.toLowerCase()} for kids and adults. ${brand.tagline}`,
       path: `/collection/${slug}`,
@@ -49,7 +49,8 @@ async function getCollectionData(slug) {
 }
 
 export default async function CollectionPage({ params }) {
-  const { slug } = await params;
+  const { brand: brandKey, slug } = await params;
+  const brand = getBrandByKey(brandKey);
   const data = await getCollectionData(slug);
   
   if (!data) {
@@ -57,7 +58,7 @@ export default async function CollectionPage({ params }) {
   }
   
   const { collection, categories } = data;
-  const baseUrl = await getBaseUrl();
+  const baseUrl = getSiteUrl(brand);
   
   // Generate breadcrumb schema
   const breadcrumbItems = [
@@ -65,7 +66,7 @@ export default async function CollectionPage({ params }) {
     { name: collection.name, url: `/collection/${collection.slug}` }
   ];
   
-  const breadcrumbSchema = await generateBreadcrumbSchema(breadcrumbItems);
+  const breadcrumbSchema = await generateBreadcrumbSchema(breadcrumbItems, baseUrl);
   
   // Collection page schema
   const collectionSchema = {

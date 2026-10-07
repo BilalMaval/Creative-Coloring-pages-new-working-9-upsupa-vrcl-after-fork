@@ -1,5 +1,6 @@
 import { notFound, permanentRedirect } from 'next/navigation';
 import CategoryContent, { buildCategoryMetadata } from '../../CategoryContent';
+import { getBrandByKey } from '@/config/brands';
 
 export const revalidate = 120;
 
@@ -13,16 +14,16 @@ function parsePage(raw) {
 }
 
 export async function generateMetadata({ params }) {
-  const { slug, page } = await params;
+  const { brand: brandKey, slug, page } = await params;
   const n = parsePage(page);
   if (!n || n === 1) return {};
-  return buildCategoryMetadata(slug, n);
+  return buildCategoryMetadata(getBrandByKey(brandKey), slug, n);
 }
 
 export default async function CategoryPageN({ params }) {
-  const { slug, page } = await params;
+  const { brand: brandKey, slug, page } = await params;
   const n = parsePage(page);
   if (!n) notFound();
   if (n === 1) permanentRedirect(`/category/${slug}`);
-  return <CategoryContent slug={slug} page={n} />;
+  return <CategoryContent brand={getBrandByKey(brandKey)} slug={slug} page={n} />;
 }

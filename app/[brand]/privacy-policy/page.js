@@ -1,11 +1,12 @@
-import { generateMetadata as genMeta, getCurrentBrand } from '@/lib/seo';
-import { getBrandByDomain, SITE_HOST } from '@/config/brands';
+import { generateMetadata as genMeta } from '@/lib/seo';
+import { getBrandByKey } from '@/config/brands';
 
-export async function generateMetadata() {
-  const host = SITE_HOST;
-  const brand = getBrandByDomain(host);
+export async function generateMetadata({ params }) {
+  const { brand: brandKey } = await params;
+  const brand = getBrandByKey(brandKey);
   
   return genMeta({
+    brand,
     title: `Privacy Policy - ${brand.name}`,
     description: `Privacy policy for ${brand.name}. Learn how we handle your information when you use our website for downloading free coloring pages and printables.`,
     path: '/privacy-policy',
@@ -15,8 +16,9 @@ export async function generateMetadata() {
 
 export const revalidate = 86400; // Cache for 24 hours
 
-export default async function PrivacyPolicyPage() {
-  const brand = await getCurrentBrand();
+export default async function PrivacyPolicyPage({ params }) {
+  const { brand: brandKey } = await params;
+  const brand = getBrandByKey(brandKey);
   const lastUpdated = new Date().toLocaleDateString('en-US', { 
     year: 'numeric', 
     month: 'long', 

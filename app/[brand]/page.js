@@ -6,15 +6,16 @@ import SubscribeButton from '@/components/SubscribeButton';
 import CategoryIcon from '@/components/CategoryIcon';
 import { Sparkles, Star, Heart, Download, Palette, Smile } from 'lucide-react';
 import { getAllActiveCategories, getSettingByKey } from '@/lib/db';
-import { generateMetadata as genMeta, generateWebsiteSchema, generateOrganizationSchema, getBaseUrl } from '@/lib/seo';
-import { getBrandByDomain, SITE_HOST } from '@/config/brands';
+import { generateMetadata as genMeta, generateWebsiteSchema, generateOrganizationSchema } from '@/lib/seo';
+import { getBrandByKey, getSiteUrl } from '@/config/brands';
 
 // Generate homepage metadata
-export async function generateMetadata() {
-  const host = SITE_HOST;
-  const brand = getBrandByDomain(host);
+export async function generateMetadata({ params }) {
+  const { brand: brandKey } = await params;
+  const brand = getBrandByKey(brandKey);
   
   return genMeta({
+    brand,
     title: brand.seo.defaultTitle,
     description: brand.description,
     path: '',
@@ -51,17 +52,17 @@ async function getHomeData() {
     return { collections, categoryLimit };
   } catch (error) {
     console.error('Error fetching home data:', error);
-    return { collections: [], categoryLimit: 12 };
+    throw error;
   }
 }
 
-export default async function Home() {
+export default async function Home({ params }) {
+  const { brand: brandKey } = await params;
+  const brand = getBrandByKey(brandKey);
   const { collections } = await getHomeData();
-  const baseUrl = await getBaseUrl();
-  const websiteSchema = await generateWebsiteSchema();
-  const orgSchema = await generateOrganizationSchema();
-  const host = SITE_HOST;
-  const brand = getBrandByDomain(host);
+  const baseUrl = getSiteUrl(brand);
+  const websiteSchema = await generateWebsiteSchema(brand);
+  const orgSchema = await generateOrganizationSchema(brand);
   
   // Collection list schema for SEO
   const collectionsSchema = {

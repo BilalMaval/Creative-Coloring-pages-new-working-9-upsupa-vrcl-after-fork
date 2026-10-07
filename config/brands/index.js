@@ -10,10 +10,6 @@ export const brands = {
   'www.colorkiddy.com': colorkiddy,
 };
 
-// Single live site: canonical host (www) used for all URLs so pages can be cached
-export const SITE_HOST = 'www.creativecoloringpages.online';
-export const SITE_URL = `https://${SITE_HOST}`;
-
 // Default brand for unknown domains
 export const defaultBrand = creativecoloringpages;
 
@@ -37,6 +33,43 @@ export function getBrandByDomain(domain) {
   
   // Return default brand for unknown domains
   return defaultBrand;
+}
+
+// ── Brand keys: the URL segment middleware rewrites each domain to (/[brand]/...) ──
+const uniqueBrands = [creativecoloringpages, colorkiddy];
+
+export function getBrandKey(brand) {
+  return brand.id.toLowerCase();
+}
+
+export function getBrandKeys() {
+  return uniqueBrands.map(getBrandKey);
+}
+
+export function getBrandByKey(key) {
+  return uniqueBrands.find((b) => getBrandKey(b) === key) || null;
+}
+
+// Canonical public origin for a brand (www by default; override with brand.canonicalHost)
+export function getSiteUrl(brand) {
+  return `https://${brand.canonicalHost || `www.${brand.domain}`}`;
+}
+
+// Brand fields that are safe to send to client components (no secrets)
+export function toClientBrand(brand) {
+  return {
+    domain: brand.domain,
+    name: brand.name,
+    shortName: brand.shortName,
+    tagline: brand.tagline,
+    description: brand.description,
+    logo: brand.logo,
+    favicon: brand.favicon,
+    colors: brand.colors,
+    contact: brand.contact,
+    socialLinks: brand.socialLinks,
+    seo: brand.seo,
+  };
 }
 
 export default brands;
