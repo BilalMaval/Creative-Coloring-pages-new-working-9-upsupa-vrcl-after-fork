@@ -12,8 +12,8 @@ const brand = {
   keywords: 'coloring pages, printable coloring pages, mandalas, free printables, coloring sheets, kids coloring, adult coloring, mandala designs',
   
   // Branding
-  logo: 'https://customer-assets.emergentagent.com/job_mandala-maker-2/artifacts/xyc9pvqy_Coloringpages%20logo%20%281%29.png',
-  favicon: 'https://customer-assets.emergentagent.com/job_mandala-maker-2/artifacts/xyc9pvqy_Coloringpages%20logo%20%281%29.png',
+  logo: 'https://cdn.creativecoloringpages.online/brand/ccp-logo.png',
+  favicon: 'https://cdn.creativecoloringpages.online/brand/ccp-logo.png',
   
   // Colors (Tailwind class names)
   colors: {
@@ -81,7 +81,7 @@ const brand = {
     titleTemplate: '%s | Creative Coloring Pages',
     defaultTitle: 'Free Printable Coloring Pages & Mandalas',
     pinterestVerify: 'cec57036f897cd1954e89b997411ade0',
-    ogImage: 'https://customer-assets.emergentagent.com/job_mandala-maker-2/artifacts/xyc9pvqy_Coloringpages%20logo%20%281%29.png'
+    ogImage: 'https://cdn.creativecoloringpages.online/brand/ccp-logo.png'
   }
 };
 

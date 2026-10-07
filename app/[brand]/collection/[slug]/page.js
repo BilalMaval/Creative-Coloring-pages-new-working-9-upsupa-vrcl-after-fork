@@ -4,7 +4,7 @@ import { Sparkles, Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import CategoryIcon from '@/components/CategoryIcon';
 import { getCollectionBySlug } from '@/lib/db';
-import { generateMetadata as genMeta, generateBreadcrumbSchema } from '@/lib/seo';
+import { generateMetadata as genMeta, generateBreadcrumbSchema, collectionTitle, descriptionBody, padDescription } from '@/lib/seo';
 import { getBrandByKey, getSiteUrl } from '@/config/brands';
 
 // Cache for 2 minutes - ISR for fast page loads
@@ -27,8 +27,8 @@ export async function generateMetadata({ params }) {
     
     return genMeta({
       brand,
-      title: `Free Printable ${collection.name} - Download & Print`,
-      description: collection.description || `Browse our ${collection.name.toLowerCase()} collection. Find and download free printable ${collection.name.toLowerCase()} for kids and adults. ${brand.tagline}`,
+      title: collectionTitle(collection.name),
+      description: padDescription(descriptionBody(collection.description), `Browse our ${collection.name.toLowerCase()} collection. Find and download free printable ${collection.name.toLowerCase()} for kids and adults. ${brand.tagline}`),
       path: `/collection/${slug}`,
       image: collection.image || brand.logo,
       keywords: `${collection.name.toLowerCase()}, free ${collection.name.toLowerCase()}, printable ${collection.name.toLowerCase()}, download ${collection.name.toLowerCase()}`

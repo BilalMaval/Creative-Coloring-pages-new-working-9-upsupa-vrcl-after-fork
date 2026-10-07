@@ -7,7 +7,7 @@ export async function generateMetadata({ params }) {
   
   return genMeta({
     brand,
-    title: `Privacy Policy - ${brand.name}`,
+    title: 'Privacy Policy',
     description: `Privacy policy for ${brand.name}. Learn how we handle your information when you use our website for downloading free coloring pages and printables.`,
     path: '/privacy-policy',
     keywords: 'privacy policy, data protection, coloring pages privacy'

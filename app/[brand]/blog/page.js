@@ -1,15 +1,22 @@
 import Link from 'next/link';
 import { Clock, ArrowRight, BookOpen } from 'lucide-react';
 import { getAllPublishedPosts, formatDate } from '@/lib/blog-db';
+import { generateMetadata as genMeta } from '@/lib/seo';
+import { getBrandByKey } from '@/config/brands';
 
 // Revalidate every 5 minutes — new posts appear quickly after admin publishes
 export const revalidate = 300;
 
-export const metadata = {
-  title: 'Coloring Tips & Guides — Free Printable Coloring Pages Blog',
-  description:
-    'Explore our guides on free printable coloring pages for kids and adults. Tips on ocean animals, mandalas, dinosaurs, butterflies, Christmas themes, and more.',
-};
+export async function generateMetadata({ params }) {
+  const { brand: brandKey } = await params;
+  return genMeta({
+    brand: getBrandByKey(brandKey),
+    title: 'Coloring Tips & Guides',
+    description:
+      'Explore our guides on free printable coloring pages for kids and adults. Tips on ocean animals, mandalas, dinosaurs, butterflies, Christmas themes, and more.',
+    path: '/blog',
+  });
+}
 
 export default async function BlogPage() {
   const posts = await getAllPublishedPosts();

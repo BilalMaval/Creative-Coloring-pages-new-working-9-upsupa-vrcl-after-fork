@@ -4,7 +4,7 @@ import Image from 'next/image';
 import { Download, ArrowLeft, Grid3x3, Star, Heart, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { getCategoryBySlug, getProductsByCategory } from '@/lib/db';
-import { generateMetadata as genMeta, generateBreadcrumbSchema, generateCategoryFAQSchema } from '@/lib/seo';
+import { generateMetadata as genMeta, generateBreadcrumbSchema, generateCategoryFAQSchema, categoryTitle, descriptionBody, padDescription } from '@/lib/seo';
 import { getSiteUrl } from '@/config/brands';
 
 // Star rating component
@@ -32,14 +32,12 @@ export async function buildCategoryMetadata(brand, slug, page = 1) {
 
     if (!category) return {};
 
-    // Build breadcrumb path for title
-    const parentLabel = category.parent?.name || 'Printables';
     const pageLabel = page > 1 ? ` - Page ${page}` : '';
 
     return genMeta({
       brand,
-      title: `Free ${category.name} ${parentLabel} - Download & Print${pageLabel}`,
-      description: category.description || `Browse and download free ${category.name.toLowerCase()} printables. High-quality PDFs ready to print and color. ${brand.tagline}`,
+      title: `${categoryTitle(category.name, category.parent?.name)}${pageLabel}`,
+      description: padDescription(descriptionBody(category.description), `Browse and download free ${category.name.toLowerCase()} printables. High-quality PDFs ready to print and color. ${brand.tagline}`),
       path: pageHref(slug, page),
       image: category.image || brand.logo,
       keywords: `${category.name.toLowerCase()}, free ${category.name.toLowerCase()}, printable ${category.name.toLowerCase()}, ${category.name.toLowerCase()} coloring pages, download ${category.name.toLowerCase()}`

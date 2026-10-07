@@ -53,6 +53,13 @@ const nextConfig = {
   compress: true,
   // Powered by header
   poweredByHeader: false,
+  async redirects() {
+    return [
+      // Category renamed (typo fix): keep old URLs and their link equity
+      { source: '/category/solor-system', destination: '/category/solar-system', permanent: true },
+      { source: '/category/solor-system/page/:n', destination: '/category/solar-system/page/:n', permanent: true },
+    ];
+  },
   async headers() {
     return [
       {

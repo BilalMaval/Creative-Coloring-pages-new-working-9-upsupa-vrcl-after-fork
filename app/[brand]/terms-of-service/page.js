@@ -7,7 +7,7 @@ export async function generateMetadata({ params }) {
   
   return genMeta({
     brand,
-    title: `Terms of Service - ${brand.name}`,
+    title: 'Terms of Service',
     description: `Terms of service for ${brand.name}. Read our rules and regulations for using our website to download free coloring pages and printables.`,
     path: '/terms-of-service',
     keywords: 'terms of service, terms and conditions, coloring pages terms, usage policy'

@@ -8,7 +8,7 @@ export async function generateMetadata({ params }) {
   
   return genMeta({
     brand,
-    title: `Contact Us - ${brand.name}`,
+    title: 'Contact Us',
     description: `Get in touch with ${brand.name}. Have questions about our coloring pages or printables? We'd love to hear from you!`,
     path: '/contact',
     keywords: 'contact us, coloring pages support, help, feedback, suggestions'

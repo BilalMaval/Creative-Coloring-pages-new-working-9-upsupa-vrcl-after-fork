@@ -8,7 +8,7 @@ export async function generateMetadata({ params }) {
   
   return genMeta({
     brand,
-    title: `About Us - ${brand.name}`,
+    title: 'About Us',
     description: `Learn about ${brand.name} - our mission to provide free, high-quality printable coloring pages and mandalas for kids and adults. Discover who we are and what we do.`,
     path: '/about',
     keywords: `about ${brand.name}, coloring pages company, printable coloring sheets, free coloring pages, ${brand.name} mission`

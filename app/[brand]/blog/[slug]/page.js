@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { Clock, ArrowLeft, ArrowRight, Calendar, Tag, Layers } from 'lucide-react';
 import { getAllPublishedPosts, getPostBySlug, formatDate } from '@/lib/blog-db';
 import { getBrandByKey, getSiteUrl } from '@/config/brands';
+import { cleanDescription } from '@/lib/seo';
 
 export const revalidate = 300;
 
@@ -12,15 +13,24 @@ export async function generateStaticParams() {
 }
 
 export async function generateMetadata({ params }) {
-  const { slug } = await params;
+  const { brand: brandKey, slug } = await params;
   const post = await getPostBySlug(slug);
   if (!post) return {};
+  const brand = getBrandByKey(brandKey);
+  const canonical = `${getSiteUrl(brand)}/blog/${slug}`;
+  const image = post.coverImage && post.coverImage.startsWith('http') ? post.coverImage : brand.logo;
+  const description = cleanDescription(post.description);
   return {
     title: post.metaTitle || post.title,
-    description: post.description,
+    description,
+    alternates: { canonical },
+    twitter: { card: 'summary_large_image', title: post.metaTitle || post.title, description, images: [image] },
     openGraph: {
       title: post.metaTitle || post.title,
-      description: post.description,
+      description,
+      url: canonical,
+      siteName: brand.name,
+      images: [image],
       type: 'article',
       publishedTime: post.publishedAt,
       modifiedTime:  post.updatedAt,
