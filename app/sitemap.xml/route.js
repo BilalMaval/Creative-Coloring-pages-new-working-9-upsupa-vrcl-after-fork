@@ -1,6 +1,6 @@
 import { headers } from 'next/headers';
 import { getBrandByDomain } from '@/config/brands';
-import { getAllPosts } from '@/lib/blog';
+import { getAllPublishedPosts } from '@/lib/blog-db';
 import { supabase } from '@/lib/supabaseClients';
 
 export const dynamic = 'force-dynamic';
@@ -30,8 +30,8 @@ export async function GET() {
       .eq('is_active', true)
       .order('updated_at', { ascending: false });
 
-    // Blog posts (static data — no DB call needed)
-    const blogPosts = getAllPosts();
+    // Blog posts — Supabase blog_posts is the single source of truth
+    const blogPosts = await getAllPublishedPosts();
 
     // Static pages
     const staticPages = [
@@ -41,7 +41,6 @@ export async function GET() {
       { url: '/privacy-policy',changefreq: 'monthly', priority: '0.3' },
       { url: '/terms-of-service', changefreq: 'monthly', priority: '0.3' },
       { url: '/contact',       changefreq: 'monthly', priority: '0.5' },
-      { url: '/search',        changefreq: 'weekly',  priority: '0.7' },
     ];
 
     const currentDate = new Date().toISOString();
@@ -76,7 +75,7 @@ ${(products || []).map(product => `  <url>
   </url>`).join('\n')}
 ${blogPosts.map(post => `  <url>
     <loc>${baseUrl}/blog/${post.slug}</loc>
-    <lastmod>${new Date(post.updatedAt).toISOString()}</lastmod>
+    <lastmod>${new Date(post.updatedAt || post.publishedAt || Date.now()).toISOString()}</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>`).join('\n')}
