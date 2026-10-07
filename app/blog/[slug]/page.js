@@ -1,9 +1,8 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { headers } from 'next/headers';
 import { Clock, ArrowLeft, ArrowRight, Calendar, Tag, Layers } from 'lucide-react';
 import { getAllPublishedPosts, getPostBySlug, formatDate } from '@/lib/blog-db';
-import { getBrandByDomain } from '@/config/brands';
+import { getBrandByDomain, SITE_HOST } from '@/config/brands';
 import { getBaseUrl } from '@/lib/seo';
 
 export const revalidate = 300;
@@ -219,8 +218,7 @@ export default async function BlogPostPage({ params }) {
   const prevPost   = currentIdx < allPosts.length - 1 ? allPosts[currentIdx + 1] : null;
   const nextPost   = currentIdx > 0                   ? allPosts[currentIdx - 1] : null;
 
-  const headersList = await headers();
-  const host = headersList.get('host') || '';
+  const host = SITE_HOST;
   const brand = getBrandByDomain(host);
   const baseUrl = await getBaseUrl();
 

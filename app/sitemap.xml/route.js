@@ -1,16 +1,12 @@
-import { headers } from 'next/headers';
-import { getBrandByDomain } from '@/config/brands';
+import { getBrandByDomain, SITE_HOST, SITE_URL } from '@/config/brands';
 import { getAllPublishedPosts } from '@/lib/blog-db';
 import { supabase } from '@/lib/supabaseClients';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
-  // Get the current domain from headers
-  const headersList = await headers();
-  const host = headersList.get('host') || '';
-  const protocol = headersList.get('x-forwarded-proto') || 'https';
-  const baseUrl = `${protocol}://${host}`;
+  const host = SITE_HOST;
+  const baseUrl = SITE_URL;
 
   // Get brand for this domain
   const brand = getBrandByDomain(host);

@@ -1,5 +1,4 @@
 import Link from 'next/link';
-import { headers } from 'next/headers';
 import { Button } from '@/components/ui/button';
 import SearchBar from '@/components/SearchBar';
 import HeroLogo from '@/components/HeroLogo';
@@ -8,12 +7,11 @@ import CategoryIcon from '@/components/CategoryIcon';
 import { Sparkles, Star, Heart, Download, Palette, Smile } from 'lucide-react';
 import { getAllActiveCategories, getSettingByKey } from '@/lib/db';
 import { generateMetadata as genMeta, generateWebsiteSchema, generateOrganizationSchema, getBaseUrl } from '@/lib/seo';
-import { getBrandByDomain } from '@/config/brands';
+import { getBrandByDomain, SITE_HOST } from '@/config/brands';
 
 // Generate homepage metadata
 export async function generateMetadata() {
-  const headersList = await headers();
-  const host = headersList.get('host') || '';
+  const host = SITE_HOST;
   const brand = getBrandByDomain(host);
   
   return genMeta({
@@ -62,8 +60,7 @@ export default async function Home() {
   const baseUrl = await getBaseUrl();
   const websiteSchema = await generateWebsiteSchema();
   const orgSchema = await generateOrganizationSchema();
-  const headersList = await headers();
-  const host = headersList.get('host') || '';
+  const host = SITE_HOST;
   const brand = getBrandByDomain(host);
   
   // Collection list schema for SEO

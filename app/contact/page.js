@@ -1,11 +1,9 @@
-import { headers } from 'next/headers';
 import { generateMetadata as genMeta, getCurrentBrand } from '@/lib/seo';
-import { getBrandByDomain } from '@/config/brands';
+import { getBrandByDomain, SITE_HOST } from '@/config/brands';
 import ContactForm from './ContactForm';
 
 export async function generateMetadata() {
-  const headersList = await headers();
-  const host = headersList.get('host') || '';
+  const host = SITE_HOST;
   const brand = getBrandByDomain(host);
   
   return genMeta({

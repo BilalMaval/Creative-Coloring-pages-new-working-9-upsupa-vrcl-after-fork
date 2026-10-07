@@ -1,20 +1,23 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { headers } from 'next/headers';
 import { Sparkles, Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import CategoryIcon from '@/components/CategoryIcon';
 import { getCollectionBySlug } from '@/lib/db';
 import { generateMetadata as genMeta, generateBreadcrumbSchema, getBaseUrl } from '@/lib/seo';
-import { getBrandByDomain } from '@/config/brands';
+import { getBrandByDomain, SITE_HOST } from '@/config/brands';
 
 // Cache for 2 minutes - ISR for fast page loads
 export const revalidate = 120;
 
+// Empty list: pages are built on first request, then cached and revalidated (ISR).
+export async function generateStaticParams() {
+  return [];
+}
+
 export async function generateMetadata({ params }) {
   const { slug } = await params;
-  const headersList = await headers();
-  const host = headersList.get('host') || '';
+  const host = SITE_HOST;
   const brand = getBrandByDomain(host);
   
   try {
@@ -32,7 +35,7 @@ export async function generateMetadata({ params }) {
     });
   } catch (error) {
     console.error('Error generating collection metadata:', error);
-    return {};
+    throw error;
   }
 }
 
@@ -41,7 +44,7 @@ async function getCollectionData(slug) {
     return await getCollectionBySlug(slug);
   } catch (error) {
     console.error('Error fetching collection:', error);
-    return null;
+    throw error;
   }
 }
 

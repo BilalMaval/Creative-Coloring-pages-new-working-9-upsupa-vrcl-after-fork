@@ -10,6 +10,10 @@ export const brands = {
   'www.colorkiddy.com': colorkiddy,
 };
 
+// Single live site: canonical host (www) used for all URLs so pages can be cached
+export const SITE_HOST = 'www.creativecoloringpages.online';
+export const SITE_URL = `https://${SITE_HOST}`;
+
 // Default brand for unknown domains
 export const defaultBrand = creativecoloringpages;
 

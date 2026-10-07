@@ -1,0 +1,28 @@
+import { notFound, permanentRedirect } from 'next/navigation';
+import CategoryContent, { buildCategoryMetadata } from '../../CategoryContent';
+
+export const revalidate = 120;
+
+export async function generateStaticParams() {
+  return [];
+}
+
+function parsePage(raw) {
+  const n = Number(raw);
+  return Number.isInteger(n) && n >= 1 ? n : null;
+}
+
+export async function generateMetadata({ params }) {
+  const { slug, page } = await params;
+  const n = parsePage(page);
+  if (!n || n === 1) return {};
+  return buildCategoryMetadata(slug, n);
+}
+
+export default async function CategoryPageN({ params }) {
+  const { slug, page } = await params;
+  const n = parsePage(page);
+  if (!n) notFound();
+  if (n === 1) permanentRedirect(`/category/${slug}`);
+  return <CategoryContent slug={slug} page={n} />;
+}

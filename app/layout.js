@@ -1,6 +1,5 @@
 import "./globals.css";
-import { headers } from 'next/headers';
-import { getBrandByDomain } from '@/config/brands';
+import { getBrandByDomain, SITE_HOST } from '@/config/brands';
 import { BrandProvider } from '@/components/BrandProvider';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
@@ -8,8 +7,7 @@ import NavigationProgress from '@/components/NavigationProgress';
 
 // Dynamic metadata based on brand
 export async function generateMetadata() {
-  const headersList = await headers();
-  const host = headersList.get('host') || '';
+  const host = SITE_HOST;
   const brand = getBrandByDomain(host);
   
   return {
@@ -32,12 +30,10 @@ export async function generateMetadata() {
 }
 
 export default async function RootLayout({ children }) {
-  // Get brand from request headers
-  const headersList = await headers();
-  const host = headersList.get('host') || '';
-  const protocol = headersList.get('x-forwarded-proto') || 'https';
+  // Single brand, fixed host — keeps the layout static so pages can be cached
+  const host = SITE_HOST;
   const brand = getBrandByDomain(host);
-  const baseUrl = `${protocol}://${host}`;
+  const baseUrl = `https://${host}`;
   
   // Serialize brand for client components (no sensitive data)
   const clientBrand = {

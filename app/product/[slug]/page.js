@@ -1,17 +1,20 @@
 import { notFound } from 'next/navigation';
-import { headers } from 'next/headers';
 import { getProductBySlug } from '@/lib/db';
 import ProductPageClient from './ProductPageClient';
 import { generateMetadata as genMeta, generateProductSchema, generateBreadcrumbSchema, generateHowToPrintSchema, getBaseUrl } from '@/lib/seo';
-import { getBrandByDomain } from '@/config/brands';
+import { getBrandByDomain, SITE_HOST } from '@/config/brands';
 
 // Cache for 2 minutes - ISR for fast page loads
 export const revalidate = 120;
 
+// Empty list: pages are built on first request, then cached and revalidated (ISR).
+export async function generateStaticParams() {
+  return [];
+}
+
 export async function generateMetadata({ params }) {
   const { slug } = await params;
-  const headersList = await headers();
-  const host = headersList.get('host') || '';
+  const host = SITE_HOST;
   const brand = getBrandByDomain(host);
   
   try {
@@ -39,7 +42,7 @@ export async function generateMetadata({ params }) {
     });
   } catch (error) {
     console.error('Error generating product metadata:', error);
-    return {};
+    throw error;
   }
 }
 
@@ -48,7 +51,7 @@ async function getProductData(slug) {
     return await getProductBySlug(slug);
   } catch (error) {
     console.error('Error fetching product:', error);
-    return null;
+    throw error;
   }
 }
 

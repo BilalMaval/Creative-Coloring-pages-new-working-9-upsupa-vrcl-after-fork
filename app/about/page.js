@@ -1,11 +1,9 @@
 import { getPageBySlug } from '@/lib/db';
-import { headers } from 'next/headers';
 import { generateMetadata as genMeta, getCurrentBrand, generateOrganizationSchema } from '@/lib/seo';
-import { getBrandByDomain } from '@/config/brands';
+import { getBrandByDomain, SITE_HOST } from '@/config/brands';
 
 export async function generateMetadata() {
-  const headersList = await headers();
-  const host = headersList.get('host') || '';
+  const host = SITE_HOST;
   const brand = getBrandByDomain(host);
   
   return genMeta({
