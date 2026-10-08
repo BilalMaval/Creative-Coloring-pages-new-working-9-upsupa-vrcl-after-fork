@@ -6,7 +6,7 @@ import SubscribeButton from '@/components/SubscribeButton';
 import CategoryIcon from '@/components/CategoryIcon';
 import { Sparkles, Star, Heart, Download, Palette, Smile } from 'lucide-react';
 import { getAllActiveCategories, getSettingByKey } from '@/lib/db';
-import { generateMetadata as genMeta, generateWebsiteSchema, generateOrganizationSchema } from '@/lib/seo';
+import { generateMetadata as genMeta, generateWebsiteSchema, generateOrganizationSchema, descriptionParagraphs, firstSentence } from '@/lib/seo';
 import { getBrandByKey, getSiteUrl } from '@/config/brands';
 
 // Generate homepage metadata
@@ -200,7 +200,7 @@ export default async function Home({ params }) {
                       {collection.name}
                     </h3>
                     <p className="text-white font-bold text-lg">
-                      {collection.description}
+                      {firstSentence(descriptionParagraphs(collection.description).join(' ')) || collection.description}
                     </p>
                     <div className="bg-white text-gray-800 font-black py-3 px-6 rounded-full inline-block">
                       {collection.categories?.length || 0} Categories Inside!

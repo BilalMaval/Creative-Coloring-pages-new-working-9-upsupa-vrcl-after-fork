@@ -186,7 +186,7 @@ export default async function CollectionPage({ params }) {
                         </h3>
                         {category.description && (
                           <p className="text-xs text-center text-gray-600 mt-1 line-clamp-2">
-                            {category.description}
+                            {firstSentence(descriptionParagraphs(category.description).join(' ')) || category.description}
                           </p>
                         )}
                       </article>
