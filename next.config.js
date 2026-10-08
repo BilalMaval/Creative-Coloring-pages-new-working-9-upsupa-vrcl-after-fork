@@ -58,6 +58,8 @@ const nextConfig = {
       // Category renamed (typo fix): keep old URLs and their link equity
       { source: '/category/solor-system', destination: '/category/solar-system', permanent: true },
       { source: '/category/solor-system/page/:n', destination: '/category/solar-system/page/:n', permanent: true },
+      { source: '/category/tridional-clothes', destination: '/category/traditional-clothes', permanent: true },
+      { source: '/category/tridional-clothes/page/:n', destination: '/category/traditional-clothes/page/:n', permanent: true },
     ];
   },
   async headers() {
