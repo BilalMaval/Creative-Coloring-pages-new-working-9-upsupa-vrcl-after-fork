@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import Image from 'next/image';
+import ThumbImage from '@/components/ThumbImage';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -243,7 +243,7 @@ export default function CheckoutPage() {
                 {cartItems.map((item) => (
                   <div key={item.id} className="flex gap-3 p-3 bg-muted/50 rounded-lg">
                     <div className="relative w-16 h-16 flex-shrink-0">
-                      <Image
+                      <ThumbImage
                         src={item.image || '/placeholder.png'}
                         alt={item.title}
                         fill

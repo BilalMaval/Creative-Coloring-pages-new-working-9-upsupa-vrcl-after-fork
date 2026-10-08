@@ -48,7 +48,7 @@ export default async function BrandLayout({ children, params }) {
     <div className={`flex flex-col min-h-screen bg-gradient-to-b ${brand.colors.gradient}`}>
       {brand.analytics?.gtmId && (
         <>
-          <Script id="gtm-init" strategy="afterInteractive">
+          <Script id="gtm-init" strategy="lazyOnload">
             {`(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
 new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
 j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
@@ -68,8 +68,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
       {brand.analytics?.gaId && (
         <>
-          <Script src={`https://www.googletagmanager.com/gtag/js?id=${brand.analytics.gaId}`} strategy="afterInteractive" />
-          <Script id="ga-init" strategy="afterInteractive">
+          <Script src={`https://www.googletagmanager.com/gtag/js?id=${brand.analytics.gaId}`} strategy="lazyOnload" />
+          <Script id="ga-init" strategy="lazyOnload">
             {`window.dataLayer = window.dataLayer || [];
 function gtag(){dataLayer.push(arguments);}
 gtag('js', new Date());

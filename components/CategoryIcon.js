@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import Image from 'next/image';
+import ThumbImage from '@/components/ThumbImage';
 
 // Renders the category's uploaded icon image, but falls back to the emoji
 // if the image fails to load (e.g. Vercel Image Optimization quota hit) —
@@ -14,7 +14,7 @@ export default function CategoryIcon({ iconImage, emoji, name, size = 80 }) {
   }
 
   return (
-    <Image
+    <ThumbImage
       src={iconImage}
       alt={name}
       width={size}

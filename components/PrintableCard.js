@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import Image from 'next/image';
+import ThumbImage from '@/components/ThumbImage';
 import { Download, ShoppingCart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
@@ -15,7 +15,7 @@ export default function PrintableCard({ printable }) {
       <Link href={`/product/${printable.slug}`}>
         <div className="relative aspect-[3/4] overflow-hidden bg-muted">
           {imageUrl ? (
-            <Image
+            <ThumbImage
               src={imageUrl}
               alt={printable.title}
               fill

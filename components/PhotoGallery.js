@@ -2,6 +2,7 @@
 
 import { useState, useRef } from 'react';
 import Image from 'next/image';
+import ThumbImage from '@/components/ThumbImage';
 import { ChevronLeft, ChevronRight, ZoomIn } from 'lucide-react';
 
 export default function PhotoGallery({ images = [], mainImage, title }) {
@@ -123,7 +124,7 @@ export default function PhotoGallery({ images = [], mainImage, title }) {
                     : 'border-gray-200 hover:border-blue-400'
                 }`}
               >
-                <Image
+                <ThumbImage
                   src={img}
                   alt={`${title} - Thumbnail ${index + 1}`}
                   fill

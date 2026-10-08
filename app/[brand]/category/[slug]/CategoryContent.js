@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import Image from 'next/image';
+import ThumbImage from '@/components/ThumbImage';
 import { Download, ArrowLeft, Grid3x3, Star, Heart, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { getCategoryBySlug, getProductsByCategory } from '@/lib/db';
@@ -225,7 +225,7 @@ export default async function CategoryContent({ brand, slug, page = 1 }) {
                     <article className="bg-white rounded-2xl p-3 shadow-lg hover:shadow-2xl transform hover:scale-105 transition-all duration-300 cursor-pointer border-2 border-gray-200 hover:border-blue-400">
                       <div className="aspect-[3/4] bg-gradient-to-br from-gray-100 to-gray-200 rounded-xl mb-3 relative overflow-hidden">
                         {product.webpPath ? (
-                          <Image
+                          <ThumbImage
                             src={product.webpPath}
                             alt={product.title}
                             fill

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
+import ThumbImage from '@/components/ThumbImage';
 import { ArrowLeft, Tag, Calendar, Eye, Heart, Share2, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -234,7 +234,7 @@ export default function ProductPageClient({ product, relatedProducts, gradient }
                   <div className="bg-white rounded-2xl p-3 shadow-lg hover:shadow-2xl transform hover:scale-105 transition-all duration-300 cursor-pointer border-2 border-gray-200 hover:border-blue-400">
                     <div className="aspect-[3/4] bg-gradient-to-br from-gray-100 to-gray-200 rounded-xl mb-3 relative overflow-hidden">
                       {related.webpPath ? (
-                        <Image
+                        <ThumbImage
                           src={related.webpPath}
                           alt={related.title}
                           fill

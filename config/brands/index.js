@@ -64,6 +64,7 @@ export function toClientBrand(brand) {
     tagline: brand.tagline,
     description: brand.description,
     logo: brand.logo,
+    logoSmall: brand.logoSmall || brand.logo,
     favicon: brand.favicon,
     colors: brand.colors,
     contact: brand.contact,

@@ -55,7 +55,7 @@ export default function Header() {
           <Link href="/" className="flex items-center space-x-3 group">
             <div className="relative h-16 w-16">
               <Image
-                src={brand.logo}
+                src={brand.logoSmall || brand.logo}
                 alt={`${brand.name} Logo`}
                 fill
                 className="object-contain group-hover:scale-110 transition-transform"

@@ -19,7 +19,7 @@ export default function Footer() {
             <div className="flex flex-col items-center mb-4">
               <div className="relative h-20 w-20 mb-3">
                 <Image
-                  src={brand.logo}
+                  src={brand.logoSmall || brand.logo}
                   alt={`${brand.shortName} Logo`}
                   fill
                   className="object-contain"

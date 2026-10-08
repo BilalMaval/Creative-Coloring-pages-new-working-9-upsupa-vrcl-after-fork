@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
+import ThumbImage from '@/components/ThumbImage';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Trash2, ShoppingBag, ArrowRight, Minus, Plus } from 'lucide-react';
@@ -93,7 +93,7 @@ export default function CartPage() {
                 <CardContent className="p-4">
                   <div className="flex gap-4">
                     <div className="relative w-24 h-24 flex-shrink-0">
-                      <Image
+                      <ThumbImage
                         src={item.image || '/placeholder.png'}
                         alt={item.title}
                         fill

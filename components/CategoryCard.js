@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import Image from 'next/image';
+import ThumbImage from '@/components/ThumbImage';
 import { Card, CardContent } from '@/components/ui/card';
 
 export default function CategoryCard({ category }) {
@@ -10,7 +10,7 @@ export default function CategoryCard({ category }) {
       <Card className="group overflow-hidden hover:shadow-lg transition-shadow cursor-pointer">
         <div className="relative aspect-video overflow-hidden bg-muted">
           {category.image ? (
-            <Image
+            <ThumbImage
               src={category.image}
               alt={category.name}
               fill
