@@ -3,8 +3,8 @@ import Link from 'next/link';
 import { Sparkles, Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import CategoryIcon from '@/components/CategoryIcon';
-import { getCollectionBySlug } from '@/lib/db';
-import { generateMetadata as genMeta, generateBreadcrumbSchema, collectionTitle, descriptionBody, padDescription } from '@/lib/seo';
+import { getCollectionBySlug, countActiveProducts } from '@/lib/db';
+import { generateMetadata as genMeta, generateBreadcrumbSchema, collectionTitle, descriptionBody, descriptionParagraphs, firstSentence, padDescription } from '@/lib/seo';
 import { getBrandByKey, getSiteUrl } from '@/config/brands';
 
 // Cache for 2 minutes - ISR for fast page loads
@@ -25,8 +25,11 @@ export async function generateMetadata({ params }) {
 
     if (!collection) return {};
     
+    const noindex = (await countActiveProducts(result.categories.map((c) => c.id))) === 0;
+
     return genMeta({
       brand,
+      noindex,
       title: collectionTitle(collection.name),
       description: padDescription(descriptionBody(collection.description), `Browse our ${collection.name.toLowerCase()} collection. Find and download free printable ${collection.name.toLowerCase()} for kids and adults. ${brand.tagline}`),
       path: `/collection/${slug}`,
@@ -113,6 +116,10 @@ export default async function CollectionPage({ params }) {
   
   const style = collectionStyles[slug] || collectionStyles['coloring-pages'];
 
+  const paragraphs = descriptionParagraphs(collection.description);
+  const fullText = paragraphs.join(' ');
+  const hasAbout = fullText.length > 220;
+
   return (
     <>
       {/* Structured Data */}
@@ -134,7 +141,7 @@ export default async function CollectionPage({ params }) {
                 {collection.name}
               </h1>
               <p className="text-xl md:text-2xl font-bold text-white max-w-2xl mx-auto">
-                {collection.description}
+                {hasAbout ? firstSentence(fullText) : collection.description}
               </p>
               <div className="bg-white text-gray-800 font-black py-3 px-6 rounded-full inline-block">
                 {categories.length} Categories Available!
@@ -187,6 +194,15 @@ export default async function CollectionPage({ params }) {
                   );
                 })}
               </div>
+
+              {hasAbout && (
+                <section className="bg-white rounded-3xl p-6 md:p-10 shadow-lg mt-12 max-w-4xl mx-auto">
+                  <h2 className="text-2xl md:text-3xl font-black text-gray-800 mb-4">About {collection.name}</h2>
+                  {paragraphs.map((para, i) => (
+                    <p key={i} className="text-gray-700 leading-relaxed mb-4 last:mb-0">{para}</p>
+                  ))}
+                </section>
+              )}
 
               <div className="text-center mt-12">
                 <Link href="/">

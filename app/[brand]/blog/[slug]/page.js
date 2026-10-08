@@ -299,6 +299,9 @@ export default async function BlogPostPage({ params }) {
           {/* Meta row */}
           <div className="flex flex-wrap items-center gap-4 mb-8 text-sm text-gray-600">
             <div className="flex items-center gap-1 font-medium">
+              By <Link href="/about" className="font-bold text-purple-700 hover:underline">{brand.name} Team</Link>
+            </div>
+            <div className="flex items-center gap-1 font-medium">
               <Calendar className="h-4 w-4" />
               Published {formatDate(post.publishedAt)}
             </div>

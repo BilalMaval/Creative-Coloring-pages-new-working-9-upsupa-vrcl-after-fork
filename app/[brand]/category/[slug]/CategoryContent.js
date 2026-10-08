@@ -3,8 +3,8 @@ import Link from 'next/link';
 import ThumbImage from '@/components/ThumbImage';
 import { Download, ArrowLeft, Grid3x3, Star, Heart, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { getCategoryBySlug, getProductsByCategory } from '@/lib/db';
-import { generateMetadata as genMeta, generateBreadcrumbSchema, generateCategoryFAQSchema, categoryTitle, descriptionBody, padDescription } from '@/lib/seo';
+import { getCategoryBySlug, getProductsByCategory, countActiveProducts } from '@/lib/db';
+import { generateMetadata as genMeta, generateBreadcrumbSchema, categoryFaqs, faqSchemaFrom, categoryTitle, descriptionBody, descriptionParagraphs, firstSentence, padDescription } from '@/lib/seo';
 import { getSiteUrl } from '@/config/brands';
 
 // Star rating component
@@ -32,10 +32,12 @@ export async function buildCategoryMetadata(brand, slug, page = 1) {
 
     if (!category) return {};
 
+    const noindex = (await countActiveProducts([category.id])) === 0;
     const pageLabel = page > 1 ? ` - Page ${page}` : '';
 
     return genMeta({
       brand,
+      noindex,
       title: `${categoryTitle(category.name, category.parent?.name)}${pageLabel}`,
       description: padDescription(descriptionBody(category.description), `Browse and download free ${category.name.toLowerCase()} printables. High-quality PDFs ready to print and color. ${brand.tagline}`),
       path: pageHref(slug, page),
@@ -104,13 +106,14 @@ export default async function CategoryContent({ brand, slug, page = 1 }) {
   
   const breadcrumbSchema = await generateBreadcrumbSchema(breadcrumbItems, baseUrl);
 
-  // FAQ schema — 5 contextual Q&As about this category
-  const faqSchema = generateCategoryFAQSchema({
-    categoryName: category.name,
-    categorySlug: category.slug,
-    totalCount,
-    baseUrl,
-  });
+  // Content depth: long descriptions become an "About" section; coloring-page categories get a visible FAQ
+  // (schema mirrors the visible list; paginated pages skip both to avoid duplicate content)
+  const paragraphs = descriptionParagraphs(category.description);
+  const fullText = paragraphs.join(' ');
+  const hasAbout = fullText.length > 220;
+  const isColoring = /coloring/i.test(category.parent?.name || '');
+  const faqs = isColoring && page === 1 ? categoryFaqs({ categoryName: category.name, totalCount }) : null;
+  const faqSchema = faqs ? faqSchemaFrom(faqs) : null;
 
   // Category collection schema
   const collectionSchema = {
@@ -157,10 +160,12 @@ export default async function CategoryContent({ brand, slug, page = 1 }) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(collectionSchema) }}
       />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
-      />
+      {faqSchema && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+        />
+      )}
       
       <div className="bg-gradient-to-b from-blue-50 via-purple-50 to-pink-50 flex-1">
         <div className="container mx-auto px-4 py-8">
@@ -172,7 +177,7 @@ export default async function CategoryContent({ brand, slug, page = 1 }) {
               </h1>
               {category.description && (
                 <p className="text-xl md:text-2xl font-bold text-white max-w-2xl mx-auto">
-                  {category.description}
+                  {hasAbout ? firstSentence(fullText) : category.description}
                 </p>
               )}
               <div className="flex flex-wrap justify-center gap-4">
@@ -298,6 +303,34 @@ export default async function CategoryContent({ brand, slug, page = 1 }) {
                     </Link>
                   )}
                 </div>
+              )}
+
+              {/* About + FAQ (first page only) */}
+              {page === 1 && hasAbout && (
+                <section className="bg-white rounded-3xl p-6 md:p-10 shadow-lg mt-12 max-w-4xl mx-auto">
+                  <h2 className="text-2xl md:text-3xl font-black text-gray-800 mb-4">
+                    About {category.name}{isColoring ? ' Coloring Pages' : ''}
+                  </h2>
+                  {paragraphs.map((para, i) => (
+                    <p key={i} className="text-gray-700 leading-relaxed mb-4 last:mb-0">{para}</p>
+                  ))}
+                </section>
+              )}
+
+              {faqs && (
+                <section className="bg-white rounded-3xl p-6 md:p-10 shadow-lg mt-8 max-w-4xl mx-auto">
+                  <h2 className="text-2xl md:text-3xl font-black text-gray-800 mb-4">
+                    {category.name} Coloring Pages: Frequently Asked Questions
+                  </h2>
+                  <div className="divide-y divide-gray-200">
+                    {faqs.map(({ q, a }) => (
+                      <details key={q} className="py-3 group">
+                        <summary className="font-bold text-gray-800 cursor-pointer">{q}</summary>
+                        <p className="text-gray-700 leading-relaxed mt-2">{a}</p>
+                      </details>
+                    ))}
+                  </div>
+                </section>
               )}
 
               <div className="text-center mt-8">

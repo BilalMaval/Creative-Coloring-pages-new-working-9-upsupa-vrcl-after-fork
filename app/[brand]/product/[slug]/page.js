@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
 import { getProductBySlug } from '@/lib/db';
 import ProductPageClient from './ProductPageClient';
-import { generateMetadata as genMeta, generateProductSchema, generateBreadcrumbSchema, generateHowToPrintSchema } from '@/lib/seo';
+import { generateMetadata as genMeta, generateProductSchema, generateBreadcrumbSchema } from '@/lib/seo';
 import { getBrandByKey, getSiteUrl } from '@/config/brands';
 
 // Cache for 2 minutes - ISR for fast page loads
@@ -107,9 +107,6 @@ export default async function ProductPage({ params }) {
   // Generate product schema
   const productSchema = await generateProductSchema({ product, brand, baseUrl });
 
-  // Generate HowTo schema — "How to print this coloring page"
-  const howToSchema = await generateHowToPrintSchema({ productTitle: product.title, baseUrl });
-
   return (
     <>
       {/* Structured Data */}
@@ -120,10 +117,6 @@ export default async function ProductPage({ params }) {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(productSchema) }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
       />
       
       <ProductPageClient 

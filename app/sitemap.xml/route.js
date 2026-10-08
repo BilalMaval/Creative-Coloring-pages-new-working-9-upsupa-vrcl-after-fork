@@ -18,16 +18,23 @@ export async function GET() {
     // Fetch all active products
     const { data: products } = await supabase
       .from('products')
-      .select('slug, updated_at')
+      .select('slug, updated_at, category_id')
       .eq('is_active', true)
       .order('updated_at', { ascending: false });
 
     // Fetch all active categories (both collections and subcategories)
     const { data: categories } = await supabase
       .from('categories')
-      .select('slug, parent_id, updated_at')
+      .select('id, slug, parent_id, updated_at')
       .eq('is_active', true)
       .order('updated_at', { ascending: false });
+
+    // Empty categories/collections are noindexed on-page, so keep them out of the sitemap too
+    const nonEmpty = new Set((products || []).map(p => p.category_id));
+    const listedCategories = (categories || []).filter(c => c.parent_id !== null && nonEmpty.has(c.id));
+    const listedCollections = (categories || []).filter(
+      c => c.parent_id === null && (categories || []).some(k => k.parent_id === c.id && nonEmpty.has(k.id))
+    );
 
     // Blog posts — Supabase blog_posts is the single source of truth
     const blogPosts = await getAllPublishedPosts();
@@ -48,19 +55,19 @@ export async function GET() {
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <!-- Sitemap for ${brand.name} (${brand.domain}) -->
   <!-- Generated: ${currentDate} -->
-  <!-- Products: ${(products || []).length} | Categories: ${(categories || []).length} | Blog: ${blogPosts.length} -->
+  <!-- Products: ${(products || []).length} | Categories: ${listedCategories.length} | Blog: ${blogPosts.length} -->
 ${staticPages.map(page => `  <url>
     <loc>${baseUrl}${page.url}</loc>
     <changefreq>${page.changefreq}</changefreq>
     <priority>${page.priority}</priority>
   </url>`).join('\n')}
-${(categories || []).filter(c => c.parent_id === null).map(collection => `  <url>
+${listedCollections.map(collection => `  <url>
     <loc>${baseUrl}/collection/${collection.slug}</loc>
     <lastmod>${new Date(collection.updated_at).toISOString()}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>`).join('\n')}
-${(categories || []).filter(c => c.parent_id !== null).map(cat => `  <url>
+${listedCategories.map(cat => `  <url>
     <loc>${baseUrl}/category/${cat.slug}</loc>
     <lastmod>${new Date(cat.updated_at).toISOString()}</lastmod>
     <changefreq>weekly</changefreq>
