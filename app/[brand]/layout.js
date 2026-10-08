@@ -1,4 +1,5 @@
 import Script from 'next/script';
+import ReactDOM from 'react-dom';
 import { notFound } from 'next/navigation';
 import { getBrandByKey, getBrandKeys, getSiteUrl, toClientBrand } from '@/config/brands';
 import { BrandProvider } from '@/components/BrandProvider';
@@ -43,6 +44,9 @@ export default async function BrandLayout({ children, params }) {
   const { brand: key } = await params;
   const brand = getBrandByKey(key);
   if (!brand) notFound();
+
+  // Open the image-CDN connection early so the LCP image (hero logo / first product image) isn't delayed by DNS+TLS
+  try { ReactDOM.preconnect(new URL(brand.logoSmall || brand.logo).origin); } catch {}
 
   return (
     <div className={`flex flex-col min-h-screen bg-gradient-to-b ${brand.colors.gradient}`}>
