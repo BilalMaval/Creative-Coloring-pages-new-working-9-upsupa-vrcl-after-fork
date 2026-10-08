@@ -7,7 +7,7 @@ import NavigationProgress from '@/components/NavigationProgress';
 export const metadata = {
   title: 'Admin',
   robots: { index: false, follow: false },
-  icons: { icon: defaultBrand.favicon, apple: defaultBrand.favicon },
+  icons: { icon: defaultBrand.favicon, apple: defaultBrand.appleIcon || defaultBrand.favicon },
 };
 
 export default function AdminRootLayout({ children }) {

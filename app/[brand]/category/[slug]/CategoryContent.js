@@ -236,7 +236,7 @@ export default async function CategoryContent({ brand, slug, page = 1 }) {
                             fill
                             className="object-cover"
                             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 16vw"
-                            priority={index < 6}
+                            priority={index < 2}
                           />
                         ) : (
                           <div className="flex items-center justify-center h-full">

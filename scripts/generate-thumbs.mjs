@@ -1,12 +1,19 @@
-// Backfill WebP thumbnails (thumbs/<name>.webp, 480px wide) for every CDN image referenced by the database.
-// Additive only: never overwrites an existing thumbnail and never touches originals.
+// Backfill WebP variants for every CDN image referenced by the database:
+//   thumbs/<name>.webp (480px)  - grids and cards
+//   medium/<name>.webp (800px)  - main product image (original is used only while zooming)
+//   tiny/<name>.webp   (160px)  - gallery strip
+// Additive only: never overwrites an existing variant and never touches originals.
 // Usage: node scripts/generate-thumbs.mjs [--dry]
 import fs from 'fs';
 import sharp from 'sharp';
 import { S3Client, GetObjectCommand, HeadObjectCommand, PutObjectCommand } from '@aws-sdk/client-s3';
 
 const DRY = process.argv.includes('--dry');
-const WIDTH = 480;
+const VARIANTS = [
+  { prefix: 'thumbs', width: 480, quality: 72 },
+  { prefix: 'medium', width: 800, quality: 78 },
+  { prefix: 'tiny', width: 160, quality: 70 },
+];
 const env = Object.fromEntries(fs.readFileSync('.env', 'utf8').split(/\r?\n/).filter((l) => l.includes('=') && !l.startsWith('#')).map((l) => { const i = l.indexOf('='); return [l.slice(0, i).trim(), l.slice(i + 1).trim().replace(/^["']|["']$/g, '')]; }));
 const SB = env.NEXT_PUBLIC_SUPABASE_URL, KEY = env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 const bucket = env.R2_BUCKET_NAME || env.R2_BUCKET || 'ccp-storage';
@@ -27,29 +34,37 @@ const keys = [...urls];
 console.log(`${keys.length} distinct source images referenced by the database`);
 
 const exists = async (Key) => { try { await s3.send(new HeadObjectCommand({ Bucket: bucket, Key })); return true; } catch { return false; } };
-const thumbOf = (k) => `thumbs/${k.match(/^images\/([^/]+)\./)[1]}.webp`;
+const nameOf = (k) => k.match(/^images\/([^/]+)\./)[1];
 
-let todo = [];
+const todo = [];
 for (let i = 0; i < keys.length; i += 20) {
-  const batch = keys.slice(i, i + 20);
-  const res = await Promise.all(batch.map(async (k) => ((await exists(thumbOf(k))) ? null : k)));
+  const res = await Promise.all(keys.slice(i, i + 20).map(async (k) => {
+    const missing = [];
+    for (const v of VARIANTS) if (!(await exists(`${v.prefix}/${nameOf(k)}.webp`))) missing.push(v);
+    return missing.length ? { key: k, missing } : null;
+  }));
   todo.push(...res.filter(Boolean));
 }
-console.log(`${keys.length - todo.length} thumbnails already exist, ${todo.length} to create${DRY ? ' (dry run — nothing written)' : ''}`);
+const counts = Object.fromEntries(VARIANTS.map((v) => [v.prefix, todo.filter((t) => t.missing.includes(v)).length]));
+console.log(`${keys.length - todo.length} images already have every variant; to create:`, JSON.stringify(counts), DRY ? '(dry run, nothing written)' : '');
 if (DRY) process.exit(0);
 
-let done = 0, failed = [], inBytes = 0, outBytes = 0;
-async function work(k) {
+let done = 0, failed = [], inBytes = 0; const outBytes = Object.fromEntries(VARIANTS.map((v) => [v.prefix, 0]));
+async function work({ key, missing }) {
   try {
-    const obj = await s3.send(new GetObjectCommand({ Bucket: bucket, Key: k }));
+    const obj = await s3.send(new GetObjectCommand({ Bucket: bucket, Key: key }));
     const input = Buffer.from(await obj.Body.transformToByteArray());
-    const out = await sharp(input).rotate().resize({ width: WIDTH, withoutEnlargement: true }).webp({ quality: 72, effort: 4 }).toBuffer();
-    await s3.send(new PutObjectCommand({ Bucket: bucket, Key: thumbOf(k), Body: out, ContentType: 'image/webp', CacheControl: 'public, max-age=31536000, immutable' }));
-    inBytes += input.length; outBytes += out.length;
-  } catch (e) { failed.push(`${k}: ${e.message}`); }
-  if (++done % 50 === 0 || done === todo.length) console.log(`  ${done}/${todo.length}  avg original ${(inBytes / Math.max(1, done - failed.length) / 1024).toFixed(0)} KB -> thumb ${(outBytes / Math.max(1, done - failed.length) / 1024).toFixed(0)} KB`);
+    inBytes += input.length;
+    for (const v of missing) {
+      const out = await sharp(input).rotate().resize({ width: v.width, withoutEnlargement: true }).webp({ quality: v.quality, effort: 4 }).toBuffer();
+      await s3.send(new PutObjectCommand({ Bucket: bucket, Key: `${v.prefix}/${nameOf(key)}.webp`, Body: out, ContentType: 'image/webp', CacheControl: 'public, max-age=31536000, immutable' }));
+      outBytes[v.prefix] += out.length;
+    }
+  } catch (e) { failed.push(`${key}: ${e.message}`); }
+  if (++done % 50 === 0 || done === todo.length) console.log(`  ${done}/${todo.length}  failed ${failed.length}`);
 }
 const queue = [...todo];
 await Promise.all(Array.from({ length: 6 }, async () => { while (queue.length) await work(queue.shift()); }));
-console.log(`finished: ${done - failed.length} created, ${failed.length} failed; ${(inBytes / 1048576).toFixed(1)} MB -> ${(outBytes / 1048576).toFixed(1)} MB`);
+const mb = (n) => (n / 1048576).toFixed(1);
+console.log(`finished: ${done - failed.length} ok, ${failed.length} failed; read ${mb(inBytes)} MB originals; wrote ` + VARIANTS.map((v) => `${v.prefix} ${mb(outBytes[v.prefix])} MB`).join(', '));
 failed.slice(0, 10).forEach((f) => console.log('  FAILED', f));

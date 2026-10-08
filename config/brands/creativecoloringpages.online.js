@@ -15,7 +15,8 @@ const brand = {
   logo: 'https://cdn.creativecoloringpages.online/brand/ccp-logo.png',
   // 320px WebP for header/footer/hero (full-size logo stays for OG images and schema)
   logoSmall: 'https://cdn.creativecoloringpages.online/brand/ccp-logo-320.webp',
-  favicon: 'https://cdn.creativecoloringpages.online/brand/ccp-logo.png',
+  favicon: 'https://cdn.creativecoloringpages.online/brand/ccp-icon-64.png',
+  appleIcon: 'https://cdn.creativecoloringpages.online/brand/ccp-icon-180.png',
   
   // Colors (Tailwind class names)
   colors: {

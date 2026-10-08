@@ -2,13 +2,14 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
-import { thumbUrl } from '@/lib/images';
+import { variantUrl } from '@/lib/images';
 
-// Renders the small WebP thumbnail of a CDN image; falls back to the original if the thumbnail is missing.
-export default function ThumbImage({ src, onError, ...props }) {
-  const thumb = thumbUrl(src);
+// Renders a resized WebP variant of a CDN image ('thumb' | 'medium' | 'tiny', or 'original');
+// falls back to the original if the variant is missing.
+export default function ThumbImage({ src, variant = 'thumb', onError, ...props }) {
+  const mapped = variantUrl(src, variant);
   const [failedFor, setFailedFor] = useState(null);
-  const current = failedFor === src ? src : thumb;
+  const current = failedFor === src ? src : mapped;
 
   return (
     <Image

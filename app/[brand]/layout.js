@@ -29,7 +29,7 @@ export async function generateMetadata({ params }) {
     },
     icons: {
       icon: brand.favicon,
-      apple: brand.favicon,
+      apple: brand.appleIcon || brand.favicon,
     },
     openGraph: {
       title: brand.seo.defaultTitle,

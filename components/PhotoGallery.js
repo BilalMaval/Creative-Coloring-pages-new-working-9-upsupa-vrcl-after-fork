@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useRef } from 'react';
-import Image from 'next/image';
 import ThumbImage from '@/components/ThumbImage';
 import { ChevronLeft, ChevronRight, ZoomIn } from 'lucide-react';
 
@@ -65,7 +64,8 @@ export default function PhotoGallery({ images = [], mainImage, title }) {
               transformOrigin: 'center center'
             }}
           >
-            <Image
+            <ThumbImage
+              variant={isHovering ? 'original' : 'medium'}
               src={allImages[currentIndex]}
               alt={`${title} - Image ${currentIndex + 1}`}
               fill
@@ -125,6 +125,7 @@ export default function PhotoGallery({ images = [], mainImage, title }) {
                 }`}
               >
                 <ThumbImage
+                  variant="tiny"
                   src={img}
                   alt={`${title} - Thumbnail ${index + 1}`}
                   fill
