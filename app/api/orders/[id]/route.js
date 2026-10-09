@@ -1,8 +1,11 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
+import { requireAdmin } from '@/lib/adminAuth';
 
 // GET single order
 export async function GET(request, { params }) {
+  const denied = await requireAdmin(request);
+  if (denied) return denied;
   try {
     const { id } = params;
     
@@ -47,6 +50,8 @@ export async function GET(request, { params }) {
 
 // PATCH update order status
 export async function PATCH(request, { params }) {
+  const denied = await requireAdmin(request);
+  if (denied) return denied;
   try {
     const { id } = params;
     const body = await request.json();
@@ -76,6 +81,8 @@ export async function PATCH(request, { params }) {
 
 // DELETE order
 export async function DELETE(request, { params }) {
+  const denied = await requireAdmin(request);
+  if (denied) return denied;
   try {
     const { id } = params;
 

@@ -2,9 +2,12 @@ import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { v4 as uuidv4 } from 'uuid';
 import { sendOrderConfirmationEmail } from '@/lib/email';
+import { requireAdmin } from '@/lib/adminAuth';
 
 // GET all orders (for admin)
 export async function GET(request) {
+  const denied = await requireAdmin(request);
+  if (denied) return denied;
   try {
     const { searchParams } = new URL(request.url);
     const status = searchParams.get('status');

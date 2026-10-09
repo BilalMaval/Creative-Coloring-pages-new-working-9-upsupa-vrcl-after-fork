@@ -1,5 +1,9 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
+import { requireAdmin } from '@/lib/adminAuth';
+
+// Without this Next prerenders GET at build time, which also makes PUT answer 405 and freezes the values
+export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
@@ -25,6 +29,8 @@ export async function GET() {
 }
 
 export async function PUT(request) {
+  const denied = await requireAdmin(request);
+  if (denied) return denied;
   try {
     const body = await request.json();
     const { key, value } = body;

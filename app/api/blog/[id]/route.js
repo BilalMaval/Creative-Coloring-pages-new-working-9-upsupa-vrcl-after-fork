@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { admin } from '@/lib/supabaseClients';
+import { requireAdmin } from '@/lib/adminAuth';
 
 // GET /api/blog/[id]
 export async function GET(request, { params }) {
@@ -11,6 +12,8 @@ export async function GET(request, { params }) {
 
 // PUT /api/blog/[id]
 export async function PUT(request, { params }) {
+  const denied = await requireAdmin(request);
+  if (denied) return denied;
   const { id } = await params;
   try {
     const body = await request.json();
@@ -29,6 +32,8 @@ export async function PUT(request, { params }) {
 
 // DELETE /api/blog/[id]
 export async function DELETE(request, { params }) {
+  const denied = await requireAdmin(request);
+  if (denied) return denied;
   const { id } = await params;
   const { error } = await admin.from('blog_posts').delete().eq('id', id);
   if (error) return NextResponse.json({ success: false, error: error.message }, { status: 400 });

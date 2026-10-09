@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { randomUUID } from 'crypto';
 import { supabase } from '@/lib/supabaseClients';
+import { requireAdmin } from '@/lib/adminAuth';
 
 // GET all collections (top-level categories where parent_id is null)
 export async function GET() {
@@ -53,6 +54,8 @@ export async function GET() {
 
 // POST create new collection
 export async function POST(request) {
+  const denied = await requireAdmin(request);
+  if (denied) return denied;
   try {
     const body = await request.json();
     const { name, slug, description, image, order } = body;
@@ -102,6 +105,8 @@ export async function POST(request) {
 
 // PUT update collection
 export async function PUT(request) {
+  const denied = await requireAdmin(request);
+  if (denied) return denied;
   try {
     const body = await request.json();
     const { id, name, slug, description, image, order } = body;
@@ -138,6 +143,8 @@ export async function PUT(request) {
 
 // DELETE collection (and optionally its children)
 export async function DELETE(request) {
+  const denied = await requireAdmin(request);
+  if (denied) return denied;
   try {
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');

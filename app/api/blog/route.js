@@ -1,11 +1,12 @@
 import { NextResponse } from 'next/server';
 import { supabase, admin } from '@/lib/supabaseClients';
+import { requireAdmin, isAdminRequest } from '@/lib/adminAuth';
 
 // GET /api/blog?admin=1  — all posts for admin panel
 // GET /api/blog          — published only for public blog
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
-  const isAdmin = searchParams.get('admin') === '1';
+  const isAdmin = searchParams.get('admin') === '1' && (await isAdminRequest(request));
 
   const client = isAdmin ? admin : supabase;
   let query = client.from('blog_posts').select('*').order('published_at', { ascending: false });
@@ -18,6 +19,8 @@ export async function GET(request) {
 
 // POST /api/blog  — create new post
 export async function POST(request) {
+  const denied = await requireAdmin(request);
+  if (denied) return denied;
   try {
     const body = await request.json();
     if (!body.title?.trim()) return NextResponse.json({ success: false, error: 'Title is required' }, { status: 400 });

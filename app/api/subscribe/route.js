@@ -3,6 +3,7 @@ import { headers } from 'next/headers';
 import prisma from '@/lib/prisma';
 import { sendSubscriptionWelcomeEmail } from '@/lib/email';
 import { getBrandByDomain } from '@/config/brands';
+import { requireAdmin } from '@/lib/adminAuth';
 
 export async function POST(request) {
   try {
@@ -88,7 +89,9 @@ export async function POST(request) {
   }
 }
 
-export async function GET() {
+export async function GET(request) {
+  const denied = await requireAdmin(request);
+  if (denied) return denied;
   try {
     const subscribers = await prisma.subscriber.findMany({
       where: { isActive: true },

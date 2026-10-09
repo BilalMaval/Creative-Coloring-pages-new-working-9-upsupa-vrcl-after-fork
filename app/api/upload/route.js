@@ -1,9 +1,12 @@
 import { NextResponse } from 'next/server';
 import { uploadFile, validateImageFile, validatePdfFile } from '@/lib/upload';
+import { requireAdmin } from '@/lib/adminAuth';
 
 export const runtime = 'nodejs';
 
 export async function POST(request) {
+  const denied = await requireAdmin(request);
+  if (denied) return denied;
   try {
     const formData = await request.formData();
     const file = formData.get('file');

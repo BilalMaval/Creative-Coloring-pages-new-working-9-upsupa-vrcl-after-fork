@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { randomUUID } from 'crypto';
 import { supabase, admin } from '@/lib/supabaseClients';
+import { requireAdmin } from '@/lib/adminAuth';
 
 // Map snake_case DB row → camelCase for the frontend
 function mapReview(row) {
@@ -132,6 +133,8 @@ export async function POST(request) {
 
 // DELETE /api/reviews?id=xxx  — admin only
 export async function DELETE(request) {
+  const denied = await requireAdmin(request);
+  if (denied) return denied;
   try {
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');

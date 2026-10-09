@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { randomUUID } from 'crypto';
 import { supabase } from '@/lib/supabaseClients';
+import { requireAdmin } from '@/lib/adminAuth';
 
 export async function GET() {
   try {
@@ -73,6 +74,8 @@ export async function GET() {
 }
 
 export async function POST(request) {
+  const denied = await requireAdmin(request);
+  if (denied) return denied;
   try {
     const body = await request.json();
     const { name, slug, description, image, iconImage, emoji, parentId, showOnHomepage, homepageOrder } = body;
@@ -124,6 +127,8 @@ export async function POST(request) {
 }
 
 export async function PUT(request) {
+  const denied = await requireAdmin(request);
+  if (denied) return denied;
   try {
     const body = await request.json();
     const { id, name, slug, description, image, iconImage, emoji, parentId, showOnHomepage, homepageOrder } = body;
@@ -163,6 +168,8 @@ export async function PUT(request) {
 }
 
 export async function DELETE(request) {
+  const denied = await requireAdmin(request);
+  if (denied) return denied;
   try {
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');

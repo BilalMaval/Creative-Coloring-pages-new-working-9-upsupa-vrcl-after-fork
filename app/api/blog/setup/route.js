@@ -7,8 +7,11 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { blogPosts } from '@/lib/blog';
+import { requireAdmin } from '@/lib/adminAuth';
 
-export async function POST() {
+export async function POST(request) {
+  const denied = await requireAdmin(request);
+  if (denied) return denied;
   // Need service role key for DDL
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
   const url        = process.env.NEXT_PUBLIC_SUPABASE_URL;

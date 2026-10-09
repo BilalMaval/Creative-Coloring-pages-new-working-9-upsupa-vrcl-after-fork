@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
+import { requireAdmin } from '@/lib/adminAuth';
 
 export async function GET(request) {
   try {
@@ -31,6 +32,8 @@ export async function GET(request) {
 }
 
 export async function POST(request) {
+  const denied = await requireAdmin(request);
+  if (denied) return denied;
   try {
     const body = await request.json();
     const { slug, title, body: content } = body;

@@ -36,7 +36,7 @@ export async function POST(request) {
       }
     });
     
-    const token = createAuthToken(email, password);
+    const token = await createAuthToken(user.email, user.role);
     
     const response = NextResponse.json({
       success: true,
