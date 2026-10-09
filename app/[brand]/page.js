@@ -5,7 +5,8 @@ import HeroLogo from '@/components/HeroLogo';
 import SubscribeButton from '@/components/SubscribeButton';
 import CategoryIcon from '@/components/CategoryIcon';
 import { Sparkles, Star, Heart, Download, Palette, Smile } from 'lucide-react';
-import { getAllActiveCategories, getSettingByKey } from '@/lib/db';
+import ProductCard from '@/components/ProductCard';
+import { getAllActiveCategories, getSettingByKey, getHomeProducts } from '@/lib/db';
 import { generateMetadata as genMeta, generateWebsiteSchema, generateOrganizationSchema, descriptionParagraphs, firstSentence } from '@/lib/seo';
 import { getBrandByKey, getSiteUrl } from '@/config/brands';
 
@@ -30,9 +31,10 @@ export const revalidate = 3600;
 async function getHomeData() {
   try {
     // Run settings + categories in PARALLEL (was sequential — 2 round trips one after another)
-    const [limitSetting, allCategories] = await Promise.all([
+    const [limitSetting, allCategories, homeProducts] = await Promise.all([
       getSettingByKey('homepage_category_limit'),
       getAllActiveCategories(),
+      getHomeProducts(12),
     ]);
 
     let categoryLimit = 12;
@@ -49,7 +51,7 @@ async function getHomeData() {
           .slice(0, categoryLimit)
       }));
 
-    return { collections, categoryLimit };
+    return { collections, categoryLimit, latest: homeProducts.latest, popular: homeProducts.popular };
   } catch (error) {
     console.error('Error fetching home data:', error);
     throw error;
@@ -59,7 +61,7 @@ async function getHomeData() {
 export default async function Home({ params }) {
   const { brand: brandKey } = await params;
   const brand = getBrandByKey(brandKey);
-  const { collections } = await getHomeData();
+  const { collections, latest, popular } = await getHomeData();
   const baseUrl = getSiteUrl(brand);
   const websiteSchema = await generateWebsiteSchema(brand);
   const orgSchema = await generateOrganizationSchema(brand);
@@ -405,11 +407,29 @@ export default async function Home({ params }) {
         </section>
       )}
 
+      {/* Newest + Most popular: direct links from the homepage to product pages */}
+      {[['Newest Designs', latest], ['Most Popular Downloads', popular]].map(([title, items]) =>
+        items.length > 0 && (
+          <section key={title} className="container mx-auto px-4 mb-16">
+            <div className="bg-white rounded-3xl p-6 md:p-10 shadow-xl border-4 border-purple-200">
+              <h2 className="text-3xl md:text-4xl font-black text-center mb-8 text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-pink-600">
+                {title}
+              </h2>
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4 md:gap-6">
+                {items.map((product) => (
+                  <ProductCard key={product.id} product={product} showRating={false} />
+                ))}
+              </div>
+            </div>
+          </section>
+        )
+      )}
+
       {/* Features Section */}
       <section className="container mx-auto px-4 pb-16">
         <div className="bg-white rounded-3xl p-8 md:p-12 shadow-2xl border-4 border-purple-300">
           <h2 className="text-3xl md:text-5xl font-black text-center mb-12 text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-pink-600">
-            Why Kids Love CCP!
+            Why Kids Love {brand.shortName}!
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
             <div className="text-center bg-gradient-to-br from-blue-500 to-purple-600 rounded-3xl p-8 shadow-xl transform hover:scale-105 transition-transform">
