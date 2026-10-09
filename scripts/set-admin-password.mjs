@@ -2,13 +2,16 @@
 // Run it yourself in a terminal so the password never appears in chat, logs or files:
 //   node scripts/set-admin-password.mjs
 //   node scripts/set-admin-password.mjs --email admin@printables.com --new-email you@yourdomain.com
+//   add --show to see the characters as you type (otherwise nothing is echoed)
 // Needs NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY in .env. Only that one user row is changed.
 import fs from 'fs';
 import crypto from 'crypto';
+import readline from 'readline';
 
 const arg = (name, fallback) => { const i = process.argv.indexOf(`--${name}`); return i > -1 ? process.argv[i + 1] : fallback; };
 const email = arg('email', 'admin@printables.com');
 const newEmail = arg('new-email', null);
+const SHOW = process.argv.includes('--show'); // echo the characters you type (default: hidden)
 
 const env = Object.fromEntries(fs.readFileSync('.env', 'utf8').split(/\r?\n/).filter((l) => l.includes('=') && !l.startsWith('#')).map((l) => { const i = l.indexOf('='); return [l.slice(0, i).trim(), l.slice(i + 1).trim().replace(/^["']|["']$/g, '')]; }));
 const URL_ = env.NEXT_PUBLIC_SUPABASE_URL, KEY = env.SUPABASE_SERVICE_ROLE_KEY;
@@ -17,6 +20,12 @@ const H = { apikey: KEY, Authorization: `Bearer ${KEY}`, 'Content-Type': 'applic
 
 // Hidden password prompt (characters are not echoed)
 function ask(prompt) {
+  if (SHOW) {
+    return new Promise((resolve) => {
+      const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+      rl.question(prompt, (answer) => { rl.close(); resolve(answer); });
+    });
+  }
   return new Promise((resolve) => {
     process.stdout.write(prompt);
     const stdin = process.stdin;
