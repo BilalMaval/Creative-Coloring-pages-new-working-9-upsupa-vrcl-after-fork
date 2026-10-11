@@ -1,5 +1,8 @@
+import { NextResponse } from 'next/server';
 import { GetObjectCommand } from '@aws-sdk/client-s3';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { getR2Client, R2_BUCKET } from '@/lib/r2Client';
+import { DOWNLOAD_MIME } from '@/lib/upload';
 import { admin } from '@/lib/supabaseClients';
 
 export const runtime = 'nodejs';
@@ -13,6 +16,11 @@ export async function GET(request) {
 
     if (!filePathParam) {
       return new Response('File not specified', { status: 400 });
+    }
+
+    // Only files this site stores: pdfs/<name> or images/<name>
+    if (!/^(pdfs|images)\/[^/\\]+$/.test(filePathParam) || filePathParam.includes('..')) {
+      return new Response('Invalid file', { status: 400 });
     }
 
     // Increment download count (Supabase DB only — not storage)
@@ -35,25 +43,25 @@ export async function GET(request) {
       }
     }
 
-    // Fetch file from R2
-    const r2Response = await getR2Client().send(new GetObjectCommand({
-      Bucket: R2_BUCKET(),
-      Key:    filePathParam,
-    }));
+    // Hand the browser a short-lived signed R2 link instead of proxying the bytes through this function:
+    // no 4.5MB response cap, no function time limit, no memory use, works for 50MB files.
+    const ext = filePathParam.split('.').pop()?.toLowerCase();
+    const asciiName = fileNameParam.replace(/[^A-Za-z0-9._ -]+/g, '_');
+    const signedUrl = await getSignedUrl(
+      getR2Client(),
+      new GetObjectCommand({
+        Bucket: R2_BUCKET(),
+        Key:    filePathParam,
+        ResponseContentDisposition: `attachment; filename="${asciiName}"; filename*=UTF-8''${encodeURIComponent(fileNameParam)}`,
+        ...(DOWNLOAD_MIME[ext] ? { ResponseContentType: DOWNLOAD_MIME[ext] } : {}),
+      }),
+      { expiresIn: 300 }
+    );
 
-    const chunks = [];
-    for await (const chunk of r2Response.Body) {
-      chunks.push(chunk);
+    if (url.searchParams.get('format') === 'json') {
+      return NextResponse.json({ success: true, url: signedUrl });
     }
-    const buffer = Buffer.concat(chunks);
-
-    return new Response(buffer, {
-      status: 200,
-      headers: {
-        'Content-Type':        r2Response.ContentType || 'application/octet-stream',
-        'Content-Disposition': `attachment; filename="${fileNameParam}"`,
-      },
-    });
+    return NextResponse.redirect(signedUrl, 302);
   } catch (err) {
     console.error('Download route error:', err);
     return new Response('Internal Server Error', { status: 500 });

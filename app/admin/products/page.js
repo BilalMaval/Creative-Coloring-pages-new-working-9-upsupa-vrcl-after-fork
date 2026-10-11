@@ -21,6 +21,7 @@ export default function AdminProductsPage() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
   const [uploading, setUploading] = useState({ image: false, pdf: false, gallery: false });
+  const [pdfProgress, setPdfProgress] = useState(0);
   
   // Filter states
   const [filterCollection, setFilterCollection] = useState('all');
@@ -128,9 +129,61 @@ export default function AdminProductsPage() {
     });
   };
 
+  // Downloadable files (up to 50MB) go straight from the browser to storage with a signed URL,
+  // because Vercel rejects request bodies over 4.5MB.
+  const putWithProgress = (url, file, contentType, onProgress) =>
+    new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.open('PUT', url);
+      xhr.setRequestHeader('Content-Type', contentType);
+      xhr.upload.onprogress = (ev) => {
+        if (ev.lengthComputable) onProgress(Math.round((ev.loaded / ev.total) * 100));
+      };
+      xhr.onload = () => (xhr.status >= 200 && xhr.status < 300 ? resolve() : reject(new Error(`Storage rejected the upload (HTTP ${xhr.status})`)));
+      xhr.onerror = () => reject(new Error('NETWORK_OR_CORS'));
+      xhr.send(file);
+    });
+
+  const uploadDownloadableFile = async (file) => {
+    if (file.size > 50 * 1024 * 1024) {
+      alert('File too large. Max size: 50MB');
+      return;
+    }
+    setUploading((prev) => ({ ...prev, pdf: true }));
+    setPdfProgress(0);
+    try {
+      const res = await fetch('/api/upload/presign', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fileName: file.name, size: file.size })
+      });
+      const data = await res.json();
+      if (!data.success) {
+        alert(data.error || 'Upload failed');
+        return;
+      }
+      await putWithProgress(data.uploadUrl, file, data.contentType, setPdfProgress);
+      setFormData((prev) => ({ ...prev, pdfPath: data.url }));
+    } catch (error) {
+      alert(
+        error.message === 'NETWORK_OR_CORS'
+          ? 'Upload was blocked. Check your connection; if it keeps happening, the storage bucket needs a CORS rule that allows this website.'
+          : (error.message || 'Upload failed')
+      );
+    } finally {
+      setUploading((prev) => ({ ...prev, pdf: false }));
+      setPdfProgress(0);
+    }
+  };
+
   const handleFileUpload = async (e, type) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
+    if (type === 'pdf') {
+      await uploadDownloadableFile(file);
+      return;
+    }
 
     setUploading({ ...uploading, [type]: true });
     try {
@@ -756,13 +809,13 @@ export default function AdminProductsPage() {
 
               <div>
                 <Label htmlFor="pdf" className="flex items-center gap-2">
-                  Downloadable File (PDF/EPUB/ZIP) *
+                  Downloadable File (PDF/ZIP/EPUB/JPG/PNG) *
                   {validationErrors.pdf && <span className="text-red-500 text-xs">({validationErrors.pdf})</span>}
                 </Label>
                 <Input
                   id="pdf"
                   type="file"
-                  accept=".pdf,.epub,.zip"
+                  accept=".pdf,.zip,.epub,.jpg,.jpeg,.png"
                   onChange={(e) => handleFileUpload(e, 'pdf')}
                   disabled={uploading.pdf}
                   className={validationErrors.pdf ? 'border-red-500' : ''}
@@ -770,13 +823,20 @@ export default function AdminProductsPage() {
                 {validationErrors.pdf && (
                   <div className="mt-1 p-2 bg-red-50 border border-red-200 rounded text-xs text-red-700">
                     <strong>⚠️ Required:</strong> This is the file customers will download<br/>
-                    <strong>Accepted formats:</strong> PDF, EPUB, ZIP • <strong>Max size:</strong> 50MB
+                    <strong>Accepted formats:</strong> PDF, ZIP, EPUB, JPG, PNG • <strong>Max size:</strong> 50MB
                   </div>
                 )}
                 {formData.pdfPath && (
                   <p className="text-sm text-green-600 mt-2 font-medium">✓ File uploaded and ready for download</p>
                 )}
-                {uploading.pdf && <p className="text-sm text-blue-600 mt-2">📤 Uploading file...</p>}
+                {uploading.pdf && (
+                  <div className="mt-2">
+                    <p className="text-sm text-blue-600">📤 Uploading file... {pdfProgress}%</p>
+                    <div className="h-2 w-full bg-blue-100 rounded mt-1 overflow-hidden">
+                      <div className="h-full bg-blue-500 transition-all" style={{ width: `${pdfProgress}%` }} />
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Submit Button */}

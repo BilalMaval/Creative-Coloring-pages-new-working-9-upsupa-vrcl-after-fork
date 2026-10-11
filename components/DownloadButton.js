@@ -39,8 +39,7 @@ export default function DownloadButton({ product, gradient, onReviewSubmitted })
     return true;
   };
 
-  // Free download handler — uses fetch+blob so the browser never navigates
-  // (anchor-click approach triggers the Next.js router progress bar / spinner)
+  // Free download handler — the anchor has a download attribute, which NavigationProgress ignores (no spinner)
   const handleFreeDownload = async () => {
     if (!product.pdfPath) {
       alert('Download file not available. Please contact support.');
@@ -58,23 +57,22 @@ export default function DownloadButton({ product, gradient, onReviewSubmitted })
 
     const fileExt = product.pdfPath.split('.').pop()?.toLowerCase() || 'pdf';
     const fileName = product.title.replace(/[^a-z0-9]/gi, '_') + '.' + fileExt;
-    const url = `/api/download?file=${filePath}&name=${encodeURIComponent(fileName)}&productId=${product.id}`;
+    const url = `/api/download?file=${filePath}&name=${encodeURIComponent(fileName)}&productId=${product.id}&format=json`;
 
     try {
+      // The server counts the download and returns a short-lived signed storage link; the browser then downloads
+      // it natively (works for large files, no memory use, no page navigation).
       const res = await fetch(url);
-      if (!res.ok) throw new Error('Download failed');
-      const blob = await res.blob();
-      const objectUrl = URL.createObjectURL(blob);
+      const data = await res.json();
+      if (!res.ok || !data.url) throw new Error('Download failed');
 
       const link = document.createElement('a');
-      link.href = objectUrl;
+      link.href = data.url;
       link.download = fileName;
+      link.rel = 'noopener';
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-
-      // Revoke the object URL after a short delay
-      setTimeout(() => URL.revokeObjectURL(objectUrl), 10000);
 
       setDownloadStarted(true);
       setTimeout(() => {
