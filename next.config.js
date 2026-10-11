@@ -1,3 +1,6 @@
+// old product slug -> new slug (products renamed to remove third-party character names); each becomes a permanent redirect
+const productRenames = require('./config/product-renames.json');
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   // Vercel optimized - no standalone needed for Vercel
@@ -54,7 +57,13 @@ const nextConfig = {
   // Powered by header
   poweredByHeader: false,
   async redirects() {
+    const renamedProducts = Object.entries(productRenames).map(([from, to]) => ({
+      source: `/product/${from}`,
+      destination: `/product/${to}`,
+      permanent: true,
+    }));
     return [
+      ...renamedProducts,
       // Category renamed (typo fix): keep old URLs and their link equity
       { source: '/category/solor-system', destination: '/category/solar-system', permanent: true },
       { source: '/category/solor-system/page/:n', destination: '/category/solar-system/page/:n', permanent: true },
