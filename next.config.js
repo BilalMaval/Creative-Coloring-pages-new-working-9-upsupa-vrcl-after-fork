@@ -76,6 +76,11 @@ const nextConfig = {
         ],
       },
     ];
+    // Brand images in public/brand are versioned by file name (change the name to change the image), so cache them for a year
+    rules.push({
+      source: '/brand/:path*',
+      headers: [{ key: 'Cache-Control', value: 'public, max-age=31536000, immutable' }],
+    });
     // Cross-origin API access is off by default. To allow one specific site, set CORS_ORIGINS=https://that-site.com
     if (process.env.CORS_ORIGINS && process.env.CORS_ORIGINS !== '*') {
       rules.push({

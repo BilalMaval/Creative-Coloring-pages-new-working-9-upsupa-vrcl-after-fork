@@ -13,8 +13,9 @@ const brand = {
   
   // Branding
   logo: 'https://cdn.creativecoloringpages.online/brand/ccp-logo.png',
-  // 320px WebP for header/footer/hero (full-size logo stays for OG images and schema)
-  logoSmall: 'https://cdn.creativecoloringpages.online/brand/ccp-logo-320.webp',
+  // 320px WebP for header/footer/hero, served from this site's own domain (public/brand/) so the first paint
+  // needs no extra connection to another host. The full-size logo stays on the CDN for OG images and schema.
+  logoSmall: '/brand/ccp-logo-320.webp',
   favicon: 'https://cdn.creativecoloringpages.online/brand/ccp-icon-64.png',
   appleIcon: 'https://cdn.creativecoloringpages.online/brand/ccp-icon-180.png',
   

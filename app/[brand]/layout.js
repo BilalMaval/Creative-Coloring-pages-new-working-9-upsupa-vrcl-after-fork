@@ -45,8 +45,8 @@ export default async function BrandLayout({ children, params }) {
   const brand = getBrandByKey(key);
   if (!brand) notFound();
 
-  // Open the image-CDN connection early so the LCP image (hero logo / first product image) isn't delayed by DNS+TLS
-  try { ReactDOM.preconnect(new URL(brand.logoSmall || brand.logo).origin); } catch {}
+  // Open the image-CDN connection early so the first product image isn't delayed by DNS+TLS
+  try { ReactDOM.preconnect(new URL(process.env.R2_PUBLIC_URL || brand.logo).origin); } catch {}
 
   return (
     <div className={`flex flex-col min-h-screen bg-gradient-to-b ${brand.colors.gradient}`}>
