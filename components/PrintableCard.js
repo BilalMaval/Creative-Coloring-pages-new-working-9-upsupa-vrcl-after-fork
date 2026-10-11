@@ -30,7 +30,7 @@ export default function PrintableCard({ printable }) {
           {/* Price badge */}
           <div className="absolute top-2 right-2">
             {printable.isFree ? (
-              <span className="bg-green-500 text-white text-xs font-bold px-2 py-1 rounded-full">FREE</span>
+              <span className="bg-green-700 text-white text-xs font-bold px-2 py-1 rounded-full">FREE</span>
             ) : (
               <span className="bg-blue-500 text-white text-xs font-bold px-2 py-1 rounded-full">${Number(printable.price).toFixed(2)}</span>
             )}

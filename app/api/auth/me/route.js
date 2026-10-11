@@ -7,20 +7,15 @@ export async function GET(request) {
   try {
     const token = request.cookies.get('auth_token')?.value;
     
+    // Anonymous visitors are normal (the header asks on every page): answer 200 so browsers don't log a console error
     if (!token) {
-      return NextResponse.json(
-        { success: false, error: 'Not authenticated' },
-        { status: 401 }
-      );
+      return NextResponse.json({ success: false, error: 'Not authenticated' });
     }
     
     const user = await verifyAuth(token);
     
     if (!user) {
-      return NextResponse.json(
-        { success: false, error: 'Invalid token' },
-        { status: 401 }
-      );
+      return NextResponse.json({ success: false, error: 'Invalid token' });
     }
     
     const dbUser = await prisma.user.findUnique({

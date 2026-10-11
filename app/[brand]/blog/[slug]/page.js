@@ -259,14 +259,40 @@ export default async function BlogPostPage({ params }) {
     keywords: (post.tags || []).join(', '),
   };
 
-  const faqSchema = post.faqs?.length ? {
-    '@context': 'https://schema.org',
-    '@type': 'FAQPage',
-    mainEntity: post.faqs.map((faq) => ({
+  // Post HTML can embed its own JSON-LD (Article + FAQPage) and an <h1>. Google expects one FAQPage and one H1 per page,
+  // so lift the embedded FAQ questions into a single FAQPage below, drop the duplicate Article (BlogPosting above covers it),
+  // and demote the embedded <h1> to <h2>.
+  const embeddedFaqs = [];
+  const articleHtml = (post.htmlContent || '')
+    .replace(/<script\s+type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/gi, (_, json) => {
+      try {
+        const data = JSON.parse(json);
+        if (data['@type'] === 'FAQPage') embeddedFaqs.push(...(data.mainEntity || []));
+      } catch {}
+      return '';
+    })
+    .replace(/<h1(\s|>)/gi, '<h2$1')
+    .replace(/<\/h1>/gi, '</h2>');
+
+  const faqEntities = [
+    ...(post.faqs || []).map((faq) => ({
       '@type': 'Question',
       name: faq.q,
       acceptedAnswer: { '@type': 'Answer', text: faq.a },
     })),
+    ...embeddedFaqs,
+  ];
+  const seenQuestions = new Set();
+  const uniqueFaqEntities = faqEntities.filter((q) => {
+    const key = String(q.name || '').toLowerCase().replace(/\s+/g, ' ').trim();
+    if (!key || seenQuestions.has(key)) return false;
+    seenQuestions.add(key);
+    return true;
+  });
+  const faqSchema = uniqueFaqEntities.length ? {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: uniqueFaqEntities,
   } : null;
 
   return (
@@ -353,7 +379,7 @@ export default async function BlogPostPage({ params }) {
           {post.htmlContent ? (
             <article
               className="bg-white rounded-3xl p-8 md:p-12 shadow-xl mb-10 prose prose-purple max-w-none"
-              dangerouslySetInnerHTML={{ __html: post.htmlContent }}
+              dangerouslySetInnerHTML={{ __html: articleHtml }}
             />
           ) : post.sections?.length > 0 && (
             <article className="bg-white rounded-3xl p-8 md:p-12 shadow-xl mb-10">

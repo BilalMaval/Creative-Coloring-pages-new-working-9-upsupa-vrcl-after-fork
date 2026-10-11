@@ -60,6 +60,11 @@ const nextConfig = {
       { source: '/category/solor-system/page/:n', destination: '/category/solar-system/page/:n', permanent: true },
       { source: '/category/tridional-clothes', destination: '/category/traditional-clothes', permanent: true },
       { source: '/category/tridional-clothes/page/:n', destination: '/category/traditional-clothes/page/:n', permanent: true },
+      // Renamed to remove third-party character names
+      { source: '/category/disney-characters', destination: '/category/cartoon-animal-friends', permanent: true },
+      { source: '/category/disney-characters/page/:n', destination: '/category/cartoon-animal-friends/page/:n', permanent: true },
+      { source: '/category/spider-man', destination: '/category/spider-hero', permanent: true },
+      { source: '/category/spider-man/page/:n', destination: '/category/spider-hero/page/:n', permanent: true },
     ];
   },
   async headers() {

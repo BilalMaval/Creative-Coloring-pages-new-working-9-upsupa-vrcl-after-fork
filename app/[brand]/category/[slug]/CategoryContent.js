@@ -249,7 +249,7 @@ export default async function CategoryContent({ brand, slug, page = 1 }) {
                           </div>
                         )}
                         {product.isFree ? (
-                          <div className="absolute top-2 left-2 bg-green-500 text-white text-xs font-black px-2 py-1 rounded-full">
+                          <div className="absolute top-2 left-2 bg-green-700 text-white text-xs font-black px-2 py-1 rounded-full">
                             FREE
                           </div>
                         ) : product.salePrice ? (

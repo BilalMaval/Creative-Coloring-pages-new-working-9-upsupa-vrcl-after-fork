@@ -20,6 +20,13 @@ export async function middleware(request) {
     return NextResponse.next();
   }
 
+  // One canonical URL per page: redirect any path with uppercase letters to its lowercase form (all slugs are lowercase)
+  if (pathname !== pathname.toLowerCase()) {
+    const url = request.nextUrl.clone();
+    url.pathname = pathname.toLowerCase();
+    return NextResponse.redirect(url, 308);
+  }
+
   // Legacy pagination: /category/slug?page=N -> /category/slug/page/N (cacheable, clean URLs)
   if (/^\/category\/[^/]+\/?$/.test(pathname) && searchParams.has('page')) {
     const url = request.nextUrl.clone();

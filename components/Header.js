@@ -132,6 +132,8 @@ export default function Header() {
           <button
             className={`md:hidden bg-${brand.colors.primary}-500 rounded-xl p-3 shadow-lg`}
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
+            aria-expanded={mobileMenuOpen}
           >
             {mobileMenuOpen ? (
               <X className="h-6 w-6 text-white" />

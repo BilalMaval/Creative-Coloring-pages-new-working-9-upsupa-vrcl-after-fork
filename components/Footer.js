@@ -74,7 +74,7 @@ export default function Footer() {
 
           {/* For Parents */}
           <div className="bg-white rounded-3xl p-6 shadow-xl border-4 border-green-400">
-            <h3 className="font-black text-lg mb-4 text-green-600 flex items-center gap-2">
+            <h3 className="font-black text-lg mb-4 text-green-700 flex items-center gap-2">
               <Heart className="h-5 w-5" />
               For Parents
             </h3>

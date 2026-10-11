@@ -123,7 +123,7 @@ export default function DownloadButton({ product, gradient, onReviewSubmitted })
       <Button
         disabled
         size="lg"
-        className="w-full bg-green-500 text-white font-black text-xl md:text-2xl py-8 rounded-2xl shadow-2xl"
+        className="w-full bg-green-700 text-white font-black text-xl md:text-2xl py-8 rounded-2xl shadow-2xl"
       >
         <Check className="mr-3 h-8 w-8" />
         Download Started!
@@ -170,7 +170,7 @@ export default function DownloadButton({ product, gradient, onReviewSubmitted })
         <Button
           disabled
           size="lg"
-          className="w-full bg-green-500 text-white font-black text-xl md:text-2xl py-8 rounded-2xl shadow-2xl"
+          className="w-full bg-green-700 text-white font-black text-xl md:text-2xl py-8 rounded-2xl shadow-2xl"
         >
           <Check className="mr-3 h-8 w-8" />
           Added to Cart!
