@@ -38,7 +38,7 @@ export async function PUT(request, { params }) {
     return NextResponse.json({ success: true, data: rows[0] });
   } catch (err) {
     if (isMissingTable(err)) return NextResponse.json({ success: false, error: 'Coupon tables are not set up yet' }, { status: 503 });
-    if (/unique|duplicate/i.test(String(err?.message))) return NextResponse.json({ success: false, error: 'A coupon with this code already exists' }, { status: 409 });
+    if (/23505|already exists|unique|duplicate/i.test(String(err?.message))) return NextResponse.json({ success: false, error: 'A coupon with this code already exists' }, { status: 409 });
     if (!err?.code && !err?.meta) return NextResponse.json({ success: false, error: err.message }, { status: 400 });
     console.error('Update coupon error:', err);
     return NextResponse.json({ success: false, error: 'Failed to update coupon' }, { status: 500 });
