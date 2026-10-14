@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { CheckCircle, CreditCard, Lock, ArrowLeft, Trash2, Plus, Minus } from 'lucide-react';
 import Link from 'next/link';
+import CouponBox from '@/components/CouponBox';
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -23,6 +24,7 @@ export default function CheckoutPage() {
     name: ''
   });
   const [error, setError] = useState('');
+  const [coupon, setCoupon] = useState(null);
 
   useEffect(() => {
     const savedCart = localStorage.getItem('cart');
@@ -65,7 +67,9 @@ export default function CheckoutPage() {
     updateCart(newCart);
   };
 
-  const total = cartItems.reduce((sum, item) => sum + (parseFloat(item.price) || 0) * item.quantity, 0);
+  const subtotal = cartItems.reduce((sum, item) => sum + (parseFloat(item.price) || 0) * item.quantity, 0);
+  const discount = coupon ? Math.min(coupon.discount, subtotal) : 0;
+  const total = Math.max(0, Math.round((subtotal - discount) * 100) / 100);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -79,6 +83,7 @@ export default function CheckoutPage() {
         body: JSON.stringify({
           email: formData.email,
           customerName: formData.name,
+          couponCode: coupon?.code || undefined,
           items: cartItems.map(item => ({
             productId: item.id,
             title: item.title,
@@ -96,6 +101,7 @@ export default function CheckoutPage() {
         setOrderComplete(true);
         // Clear cart
         localStorage.removeItem('cart');
+        localStorage.removeItem('appliedCoupon');
         window.dispatchEvent(new Event('cartUpdated'));
       } else {
         setError(data.error || 'Failed to process order');
@@ -290,7 +296,20 @@ export default function CheckoutPage() {
                   </div>
                 ))}
 
-                <div className="border-t pt-4 mt-4">
+                <div className="border-t pt-4 mt-4 space-y-3">
+                  <CouponBox items={cartItems} email={formData.email} onChange={setCoupon} />
+                  {discount > 0 && (
+                    <>
+                      <div className="flex justify-between text-sm">
+                        <span>Subtotal</span>
+                        <span>${subtotal.toFixed(2)}</span>
+                      </div>
+                      <div className="flex justify-between text-sm text-green-700">
+                        <span>Coupon ({coupon.code})</span>
+                        <span>-${discount.toFixed(2)}</span>
+                      </div>
+                    </>
+                  )}
                   <div className="flex justify-between font-bold text-lg">
                     <span>Total</span>
                     <span>{total === 0 ? 'FREE' : `$${total.toFixed(2)}`}</span>

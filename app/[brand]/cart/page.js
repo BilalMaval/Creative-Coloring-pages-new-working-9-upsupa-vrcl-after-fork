@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import CouponBox from '@/components/CouponBox';
 import ThumbImage from '@/components/ThumbImage';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,6 +11,7 @@ import { Trash2, ShoppingBag, ArrowRight, Minus, Plus } from 'lucide-react';
 export default function CartPage() {
   const [cartItems, setCartItems] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [coupon, setCoupon] = useState(null);
 
   useEffect(() => {
     // Load cart from localStorage
@@ -48,7 +50,8 @@ export default function CartPage() {
   };
 
   const subtotal = cartItems.reduce((sum, item) => sum + (parseFloat(item.price) || 0) * item.quantity, 0);
-  const total = subtotal; // No tax for digital products
+  const discount = coupon ? Math.min(coupon.discount, subtotal) : 0;
+  const total = Math.max(0, Math.round((subtotal - discount) * 100) / 100); // No tax for digital products
 
   if (loading) {
     return (
@@ -160,6 +163,13 @@ export default function CartPage() {
                   <span>Subtotal ({cartItems.reduce((sum, item) => sum + item.quantity, 0)} items)</span>
                   <span>{subtotal === 0 ? 'FREE' : `$${subtotal.toFixed(2)}`}</span>
                 </div>
+                <CouponBox items={cartItems} onChange={setCoupon} />
+                {discount > 0 && (
+                  <div className="flex justify-between text-green-700">
+                    <span>Coupon ({coupon.code})</span>
+                    <span>-${discount.toFixed(2)}</span>
+                  </div>
+                )}
                 <div className="border-t pt-4">
                   <div className="flex justify-between font-bold text-lg">
                     <span>Total</span>

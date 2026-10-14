@@ -3,6 +3,7 @@ import prisma from '@/lib/prisma';
 import { v4 as uuidv4 } from 'uuid';
 import { sendOrderConfirmationEmail } from '@/lib/email';
 import { requireAdmin } from '@/lib/adminAuth';
+import { priceItems, evaluateCoupon, claimCoupon, releaseCoupon, recordRedemption } from '@/lib/coupons';
 
 // GET all orders (for admin)
 export async function GET(request) {
@@ -53,7 +54,8 @@ export async function GET(request) {
 export async function POST(request) {
   try {
     const body = await request.json();
-    const { email, customerName, items } = body;
+    const { email, customerName, couponCode } = body;
+    let items = body.items;
 
     if (!email || !customerName || !items || items.length === 0) {
       return NextResponse.json(
@@ -62,9 +64,15 @@ export async function POST(request) {
       );
     }
 
-    // Calculate totals
-    const amount = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-    const total = amount; // No tax for digital products
+    // Prices come from the database (sale price if set), never from the browser
+    let priced;
+    try {
+      priced = await priceItems(items);
+    } catch (e) {
+      return NextResponse.json({ success: false, error: e.message }, { status: 400 });
+    }
+    items = priced.lines;
+    const amount = priced.subtotal;
 
     // Generate order number
     const orderNumber = `CCP-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
@@ -85,8 +93,24 @@ export async function POST(request) {
       });
     }
 
+    // Optional coupon: validated again here, then one use is claimed atomically
+    let discount = 0;
+    let appliedCoupon = null;
+    if (couponCode && String(couponCode).trim()) {
+      const r = await evaluateCoupon(couponCode, amount, email);
+      if (!r.ok) return NextResponse.json({ success: false, error: r.error }, { status: 400 });
+      if (!(await claimCoupon(r.coupon.id))) {
+        return NextResponse.json({ success: false, error: 'This coupon has reached its usage limit' }, { status: 400 });
+      }
+      discount = r.discount;
+      appliedCoupon = r.coupon;
+    }
+    const total = Math.round((amount - discount) * 100) / 100; // No tax for digital products
+
     // Create order with items
-    const order = await prisma.order.create({
+    let order;
+    try {
+    order = await prisma.order.create({
       data: {
         id: uuidv4(),
         orderNumber,
@@ -95,7 +119,8 @@ export async function POST(request) {
         total,
         status: amount === 0 ? 'COMPLETED' : 'COMPLETED', // Mock checkout always completes
         paymentStatus: amount === 0 ? 'PAID' : 'PAID', // Mock payment
-        paymentMethod: amount === 0 ? 'FREE' : 'MOCK_PAYMENT',
+        paymentMethod: total === 0 ? 'FREE' : 'MOCK_PAYMENT',
+        ...(appliedCoupon ? { metadata: { coupon: { code: appliedCoupon.code, discount, subtotal: amount } } } : {}),
         email,
         customerName,
         items: {
@@ -113,6 +138,15 @@ export async function POST(request) {
         items: true
       }
     });
+    } catch (e) {
+      if (appliedCoupon) await releaseCoupon(appliedCoupon.id).catch(() => {});
+      throw e;
+    }
+
+    if (appliedCoupon) {
+      await recordRedemption({ couponId: appliedCoupon.id, orderId: order.id, orderNumber, email, discount })
+        .catch(err => console.error('Failed to record coupon redemption:', err));
+    }
 
     // Increment download counts for products
     for (const item of items) {

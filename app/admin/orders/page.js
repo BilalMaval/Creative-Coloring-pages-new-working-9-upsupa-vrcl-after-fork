@@ -198,6 +198,11 @@ export default function AdminOrdersPage() {
                     <TableCell>{order.items?.length || 0} item(s)</TableCell>
                     <TableCell className="font-semibold">
                       {parseFloat(order.total) === 0 ? 'FREE' : `$${parseFloat(order.total).toFixed(2)}`}
+                      {order.metadata?.coupon && (
+                        <div className="text-xs font-normal text-green-700">
+                          {order.metadata.coupon.code} (-${Number(order.metadata.coupon.discount).toFixed(2)})
+                        </div>
+                      )}
                     </TableCell>
                     <TableCell>{getStatusBadge(order.status)}</TableCell>
                     <TableCell>{getPaymentBadge(order.paymentStatus)}</TableCell>
