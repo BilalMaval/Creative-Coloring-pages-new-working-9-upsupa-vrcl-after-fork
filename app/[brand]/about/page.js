@@ -1,6 +1,7 @@
 import { getPageBySlug } from '@/lib/db';
 import { generateMetadata as genMeta, generateOrganizationSchema } from '@/lib/seo';
 import { getBrandByKey } from '@/config/brands';
+import { getVisibleTeam, GRADIENTS } from '@/lib/team';
 
 export async function generateMetadata({ params }) {
   const { brand: brandKey } = await params;
@@ -15,6 +16,58 @@ export async function generateMetadata({ params }) {
   });
 }
 
+// Used only until the team_members table exists; after that the Team page in the admin dashboard controls this section.
+const FALLBACK_TEAM = [
+                      {
+                        avatar: '🎨',
+                        bg: 'from-purple-400 to-pink-400',
+                        name: 'Sarah M.',
+                        role: 'Creative Director & Co-founder',
+                        bio: "Former art teacher with 10+ years in children's education. Sarah hand-picks every design and makes sure it's perfect for little hands.",
+                        badge: '🖌️ Art & Design',
+                      },
+                      {
+                        avatar: '💻',
+                        bg: 'from-blue-400 to-cyan-400',
+                        name: 'James K.',
+                        role: 'Lead Developer & Co-founder',
+                        bio: 'Full-stack developer passionate about making free resources accessible to every family, anywhere in the world.',
+                        badge: '⚙️ Tech & Platform',
+                      },
+                      {
+                        avatar: '✍️',
+                        bg: 'from-green-400 to-teal-400',
+                        name: 'Priya L.',
+                        role: 'Content & SEO Lead',
+                        bio: 'Writer and parent of two who researches every coloring theme to make sure our guides and descriptions actually help families.',
+                        badge: '📝 Content',
+                      },
+                      {
+                        avatar: '🌈',
+                        bg: 'from-orange-400 to-yellow-400',
+                        name: 'Lily T.',
+                        role: 'Illustrator',
+                        bio: 'Freelance illustrator specialising in bold, child-friendly linework. Lily creates our exclusive original coloring pages.',
+                        badge: '🖊️ Illustration',
+                      },
+                      {
+                        avatar: '📬',
+                        bg: 'from-pink-400 to-rose-400',
+                        name: 'Marco R.',
+                        role: 'Community Manager',
+                        bio: 'Responds to every email, gathers parent feedback, and champions user ideas that make the site better every month.',
+                        badge: '💬 Support',
+                      },
+                      {
+                        avatar: '🔒',
+                        bg: 'from-indigo-400 to-purple-400',
+                        name: 'Chen W.',
+                        role: 'Security & Privacy',
+                        bio: 'Keeps the site safe and family-friendly. No trackers, no ads targeting kids, no data ever sold — Chen makes sure of it.',
+                        badge: '🛡️ Safety',
+                      },
+];
+
 export const revalidate = 3600; // Cache for 1 hour
 
 async function getPageContent() {
@@ -28,6 +81,10 @@ async function getPageContent() {
 
 export default async function AboutPage({ params }) {
   const pageContent = await getPageContent();
+  const dbTeam = await getVisibleTeam();
+  const team = dbTeam === null
+    ? FALLBACK_TEAM
+    : dbTeam.map((m) => ({ ...m, bg: GRADIENTS[m.gradient] || GRADIENTS.purple, photo: m.photo_url }));
   const { brand: brandKey } = await params;
   const brand = getBrandByKey(brandKey);
   const orgSchema = await generateOrganizationSchema(brand);
@@ -130,7 +187,8 @@ export default async function AboutPage({ params }) {
                   </div>
                 </div>
 
-                {/* ── Meet the Team ───────────────────────────────────────── */}
+                {/* ── Meet the Team (managed in Admin → Team) ─────────────── */}
+                {team.length > 0 && (
                 <div className="bg-white rounded-3xl p-8 md:p-12 shadow-xl border-4 border-yellow-200">
                   <h2 className="text-3xl font-black text-yellow-600 mb-2 flex items-center gap-3">
                     <span className="text-4xl">👋</span> Meet the Team
@@ -140,70 +198,28 @@ export default async function AboutPage({ params }) {
                   </p>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-                    {[
-                      {
-                        avatar: '🎨',
-                        bg: 'from-purple-400 to-pink-400',
-                        name: 'Sarah M.',
-                        role: 'Creative Director & Co-founder',
-                        bio: "Former art teacher with 10+ years in children's education. Sarah hand-picks every design and makes sure it's perfect for little hands.",
-                        badge: '🖌️ Art & Design',
-                      },
-                      {
-                        avatar: '💻',
-                        bg: 'from-blue-400 to-cyan-400',
-                        name: 'James K.',
-                        role: 'Lead Developer & Co-founder',
-                        bio: 'Full-stack developer passionate about making free resources accessible to every family, anywhere in the world.',
-                        badge: '⚙️ Tech & Platform',
-                      },
-                      {
-                        avatar: '✍️',
-                        bg: 'from-green-400 to-teal-400',
-                        name: 'Priya L.',
-                        role: 'Content & SEO Lead',
-                        bio: 'Writer and parent of two who researches every coloring theme to make sure our guides and descriptions actually help families.',
-                        badge: '📝 Content',
-                      },
-                      {
-                        avatar: '🌈',
-                        bg: 'from-orange-400 to-yellow-400',
-                        name: 'Lily T.',
-                        role: 'Illustrator',
-                        bio: 'Freelance illustrator specialising in bold, child-friendly linework. Lily creates our exclusive original coloring pages.',
-                        badge: '🖊️ Illustration',
-                      },
-                      {
-                        avatar: '📬',
-                        bg: 'from-pink-400 to-rose-400',
-                        name: 'Marco R.',
-                        role: 'Community Manager',
-                        bio: 'Responds to every email, gathers parent feedback, and champions user ideas that make the site better every month.',
-                        badge: '💬 Support',
-                      },
-                      {
-                        avatar: '🔒',
-                        bg: 'from-indigo-400 to-purple-400',
-                        name: 'Chen W.',
-                        role: 'Security & Privacy',
-                        bio: 'Keeps the site safe and family-friendly. No trackers, no ads targeting kids, no data ever sold — Chen makes sure of it.',
-                        badge: '🛡️ Safety',
-                      },
-                    ].map((member) => (
+                    {team.map((member) => (
                       <div
-                        key={member.name}
+                        key={member.id || member.name}
                         className="flex flex-col items-center text-center bg-gray-50 rounded-2xl p-6 border-2 border-gray-100 hover:border-yellow-300 hover:shadow-lg transition-all"
                       >
                         {/* Avatar circle */}
-                        <div className={`w-20 h-20 rounded-full bg-gradient-to-br ${member.bg} flex items-center justify-center text-4xl shadow-lg mb-4`}>
-                          {member.avatar}
-                        </div>
+                        {member.photo ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img src={member.photo} alt={member.name} width={80} height={80} loading="lazy" className="w-20 h-20 rounded-full object-cover shadow-lg mb-4" />
+                        ) : (
+                          <div className={`w-20 h-20 rounded-full bg-gradient-to-br ${member.bg} flex items-center justify-center text-4xl shadow-lg mb-4`}>
+                            {member.avatar}
+                          </div>
+                        )}
                         <h3 className="text-xl font-black text-gray-800">{member.name}</h3>
                         <p className="text-sm font-bold text-purple-600 mb-3">{member.role}</p>
-                        <p className="text-gray-600 text-sm leading-relaxed mb-4">{member.bio}</p>
-                        <span className="inline-block bg-yellow-100 text-yellow-700 text-xs font-black px-3 py-1 rounded-full">
-                          {member.badge}
-                        </span>
+                        {member.bio && <p className="text-gray-600 text-sm leading-relaxed mb-4">{member.bio}</p>}
+                        {member.badge && (
+                          <span className="inline-block bg-yellow-100 text-yellow-700 text-xs font-black px-3 py-1 rounded-full">
+                            {member.badge}
+                          </span>
+                        )}
                       </div>
                     ))}
                   </div>
@@ -212,6 +228,7 @@ export default async function AboutPage({ params }) {
                     {"We're a fully remote team spread across 4 countries, united by one goal: making creativity free for every child."}
                   </p>
                 </div>
+                )}
 
                 {/* Contact Section */}
                 <div className="bg-gradient-to-r from-purple-500 to-pink-500 rounded-3xl p-8 md:p-12 shadow-xl text-center text-white">

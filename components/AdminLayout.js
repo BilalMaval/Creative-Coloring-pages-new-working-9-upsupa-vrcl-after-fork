@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { LogOut, LayoutDashboard, FolderOpen, FileText, Settings, Library, Package, Home, BookOpen, Tag } from 'lucide-react';
+import { LogOut, LayoutDashboard, FolderOpen, FileText, Settings, Library, Package, Home, BookOpen, Tag, Users } from 'lucide-react';
 
 export default function AdminLayout({ children }) {
   const router = useRouter();
@@ -83,6 +83,12 @@ export default function AdminLayout({ children }) {
                 <Button variant="ghost" className="w-full justify-start">
                   <Tag className="h-4 w-4 mr-2" />
                   Coupons
+                </Button>
+              </Link>
+              <Link href="/admin/team">
+                <Button variant="ghost" className="w-full justify-start">
+                  <Users className="h-4 w-4 mr-2" />
+                  Team
                 </Button>
               </Link>
               <Link href="/admin/blog">
