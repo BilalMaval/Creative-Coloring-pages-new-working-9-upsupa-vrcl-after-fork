@@ -25,6 +25,8 @@ export default function CheckoutPage() {
   });
   const [error, setError] = useState('');
   const [coupon, setCoupon] = useState(null);
+  const [downloads, setDownloads] = useState([]);
+  const [downloadingId, setDownloadingId] = useState(null);
 
   useEffect(() => {
     const savedCart = localStorage.getItem('cart');
@@ -71,6 +73,28 @@ export default function CheckoutPage() {
   const discount = coupon ? Math.min(coupon.discount, subtotal) : 0;
   const total = Math.max(0, Math.round((subtotal - discount) * 100) / 100);
 
+  // Same signed-link download the product page uses; the order itself already counted the download
+  const downloadPurchased = async (d) => {
+    setDownloadingId(d.productId);
+    try {
+      const fileName = d.title.replace(/[^a-z0-9]/gi, '_') + '.' + d.ext;
+      const res = await fetch(`/api/download?file=${encodeURIComponent(d.key)}&name=${encodeURIComponent(fileName)}&format=json`);
+      const data = await res.json();
+      if (!res.ok || !data.url) throw new Error('Download failed');
+      const link = document.createElement('a');
+      link.href = data.url;
+      link.download = fileName;
+      link.rel = 'noopener';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch {
+      alert('Download failed. Please try again, or contact support with your order number.');
+    } finally {
+      setDownloadingId(null);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setProcessing(true);
@@ -97,6 +121,7 @@ export default function CheckoutPage() {
 
       if (data.success) {
         setOrderNumber(data.orderNumber);
+        setDownloads(Array.isArray(data.downloads) ? data.downloads : []);
         setCompletedItems([...cartItems]);
         setOrderComplete(true);
         // Clear cart
@@ -144,9 +169,20 @@ export default function CheckoutPage() {
                   {completedItems.map(item => (
                     <div key={item.id} className="flex items-center justify-between p-2 bg-white rounded">
                       <span>{item.title}</span>
-                      <Button variant="outline" size="sm" asChild>
-                        <Link href={`/product/${item.slug}`}>Download</Link>
-                      </Button>
+                      {downloads.find(d => d.productId === item.id) ? (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          disabled={downloadingId === item.id}
+                          onClick={() => downloadPurchased(downloads.find(d => d.productId === item.id))}
+                        >
+                          {downloadingId === item.id ? 'Preparing...' : 'Download'}
+                        </Button>
+                      ) : (
+                        <Button variant="outline" size="sm" asChild>
+                          <Link href={`/product/${item.slug}`}>View product</Link>
+                        </Button>
+                      )}
                     </div>
                   ))}
                 </div>

@@ -12,17 +12,20 @@ import { Tag, Plus, Pencil, Trash2, Power, Shuffle } from 'lucide-react';
 
 const EMPTY = {
   code: '', description: '', discountType: 'PERCENT', discountValue: '',
-  minOrderAmount: '', maxDiscountAmount: '', startsAt: '', expiresAt: '',
+  minOrderAmount: '', maxDiscountAmount: '',
+  startDate: '', startTime: '00:01', expiresDate: '', expiresTime: '23:59',
   usageLimit: '', perCustomerLimit: '', isActive: true,
 };
 
-// <input type="datetime-local"> wants local "YYYY-MM-DDTHH:mm"
-const toLocalInput = (iso) => {
-  if (!iso) return '';
+// Dates and times are entered in the admin's own timezone and converted to an exact moment (UTC) before saving,
+// so "00:01" means 00:01 for the admin, not for the server.
+const pad = (n) => String(n).padStart(2, '0');
+const splitLocal = (iso, fallbackTime) => {
+  if (!iso) return { date: '', time: fallbackTime };
   const d = new Date(iso);
-  const p = (n) => String(n).padStart(2, '0');
-  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`;
+  return { date: `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`, time: `${pad(d.getHours())}:${pad(d.getMinutes())}` };
 };
+const joinLocal = (date, time, fallbackTime) => (date ? new Date(`${date}T${time || fallbackTime}`).toISOString() : '');
 
 const randomCode = () => {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
@@ -72,7 +75,8 @@ export default function AdminCouponsPage() {
     setForm({
       code: c.code, description: c.description || '', discountType: c.discount_type, discountValue: c.discount_value,
       minOrderAmount: c.min_order_amount || '', maxDiscountAmount: c.max_discount_amount ?? '',
-      startsAt: toLocalInput(c.starts_at), expiresAt: toLocalInput(c.expires_at),
+      startDate: splitLocal(c.starts_at, '00:01').date, startTime: splitLocal(c.starts_at, '00:01').time,
+      expiresDate: splitLocal(c.expires_at, '23:59').date, expiresTime: splitLocal(c.expires_at, '23:59').time,
       usageLimit: c.usage_limit ?? '', perCustomerLimit: c.per_customer_limit ?? '', isActive: c.is_active,
     });
     setError('');
@@ -86,7 +90,11 @@ export default function AdminCouponsPage() {
       const res = await fetch(editingId ? `/api/admin/coupons/${editingId}` : '/api/admin/coupons', {
         method: editingId ? 'PUT' : 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
+        body: JSON.stringify({
+          ...form,
+          startsAt: joinLocal(form.startDate, form.startTime, '00:01'),
+          expiresAt: joinLocal(form.expiresDate, form.expiresTime, '23:59'),
+        }),
       });
       const data = await res.json();
       if (!data.success) { setError(data.error || 'Failed to save coupon'); return; }
@@ -190,11 +198,19 @@ export default function AdminCouponsPage() {
                 </div>
                 <div>
                   <Label>Starts</Label>
-                  <Input type="datetime-local" value={form.startsAt} onChange={set('startsAt')} />
+                  <div className="flex gap-2">
+                    <Input type="date" value={form.startDate} onChange={set('startDate')} />
+                    <Input type="time" value={form.startTime} onChange={set('startTime')} className="w-32" />
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-1">Leave the date empty to start right away. Default time 00:01.</p>
                 </div>
                 <div>
                   <Label>Expires</Label>
-                  <Input type="datetime-local" value={form.expiresAt} onChange={set('expiresAt')} />
+                  <div className="flex gap-2">
+                    <Input type="date" value={form.expiresDate} onChange={set('expiresDate')} />
+                    <Input type="time" value={form.expiresTime} onChange={set('expiresTime')} className="w-32" />
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-1">Leave the date empty for no expiry. Default time 23:59.</p>
                 </div>
               </div>
 

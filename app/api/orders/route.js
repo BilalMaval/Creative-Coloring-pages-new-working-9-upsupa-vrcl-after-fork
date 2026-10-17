@@ -166,10 +166,30 @@ export async function POST(request) {
       total
     }).catch(err => console.error('Failed to send order email:', err));
 
+    // Files the customer can download right now (free, discounted or fully-couponed orders alike)
+    let downloads = [];
+    try {
+      const prods = await prisma.product.findMany({
+        where: { id: { in: items.map(i => i.productId) } },
+        select: { id: true, title: true, pdfPath: true }
+      });
+      downloads = prods
+        .filter(p => p.pdfPath)
+        .map(p => ({
+          productId: p.id,
+          title: p.title,
+          key: p.pdfPath.replace(/^.*?\/(pdfs\/|images\/)/, '$1'),
+          ext: p.pdfPath.split('.').pop()?.toLowerCase() || 'pdf'
+        }));
+    } catch (err) {
+      console.error('Failed to prepare order downloads:', err);
+    }
+
     return NextResponse.json({
       success: true,
       orderNumber: order.orderNumber,
-      order
+      order,
+      downloads
     });
   } catch (error) {
     console.error('Error creating order:', error);
