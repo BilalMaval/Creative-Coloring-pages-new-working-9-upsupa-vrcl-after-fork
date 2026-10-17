@@ -35,7 +35,10 @@ export async function POST(request) {
       subtotal,
       discount: r.discount,
       total: r.total,
-      coupon: { code: r.coupon.code, description: r.coupon.description, type: r.coupon.type, value: r.coupon.value },
+      coupon: {
+        code: r.coupon.code, description: r.coupon.description, type: r.coupon.type, value: r.coupon.value,
+        expiresAt: r.coupon.expiresAt ? new Date(r.coupon.expiresAt).toISOString() : null, endTimezone: r.coupon.endTimezone,
+      },
     });
   } catch (error) {
     console.error('Coupon validate error:', error);

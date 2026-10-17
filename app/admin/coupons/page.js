@@ -9,23 +9,49 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Tag, Plus, Pencil, Trash2, Power, Shuffle } from 'lucide-react';
+import {
+  ZONES, PRESETS, DEFAULT_START_ZONE, DEFAULT_END_ZONE, DEFAULT_START_TIME, DEFAULT_END_TIME,
+  zonedToUtcIso, utcIsoToZoned, formatInZone,
+} from '@/lib/timezones';
 
 const EMPTY = {
   code: '', description: '', discountType: 'PERCENT', discountValue: '',
   minOrderAmount: '', maxDiscountAmount: '',
-  startDate: '', startTime: '00:01', expiresDate: '', expiresTime: '23:59',
+  startDate: '', startTime: DEFAULT_START_TIME, startTimezone: DEFAULT_START_ZONE,
+  expiresDate: '', expiresTime: DEFAULT_END_TIME, endTimezone: DEFAULT_END_ZONE,
   usageLimit: '', perCustomerLimit: '', isActive: true,
 };
 
-// Dates and times are entered in the admin's own timezone and converted to an exact moment (UTC) before saving,
-// so "00:01" means 00:01 for the admin, not for the server.
-const pad = (n) => String(n).padStart(2, '0');
-const splitLocal = (iso, fallbackTime) => {
-  if (!iso) return { date: '', time: fallbackTime };
-  const d = new Date(iso);
-  return { date: `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`, time: `${pad(d.getHours())}:${pad(d.getMinutes())}` };
-};
-const joinLocal = (date, time, fallbackTime) => (date ? new Date(`${date}T${time || fallbackTime}`).toISOString() : '');
+// The admin chooses the date, time and region (time zone) for the start and the end. The server converts it to an exact
+// UTC moment, so a coupon starts at the same instant for every customer, and daylight saving is handled automatically.
+const localZone = () => { try { return Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC'; } catch { return 'UTC'; } };
+const previewZones = () => [
+  { id: 'America/New_York', label: 'New York' },
+  { id: 'America/Los_Angeles', label: 'Los Angeles' },
+  { id: 'Europe/London', label: 'London' },
+  { id: localZone(), label: 'Your local time' },
+];
+
+function previewLine(date, time, zone) {
+  if (!date) return null;
+  try {
+    const iso = zonedToUtcIso(date, time, zone);
+    return previewZones().map((z) => `${z.label}: ${formatInZone(iso, z.id, false)}`);
+  } catch {
+    return null;
+  }
+}
+
+function ZonePreview({ title, date, time, zone }) {
+  const lines = previewLine(date, time, zone);
+  if (!lines) return null;
+  return (
+    <div className="text-xs text-muted-foreground bg-muted/50 rounded-md px-3 py-2">
+      <div className="font-semibold text-foreground mb-1">{title} - the same moment everywhere</div>
+      {lines.map((l) => <div key={l}>{l}</div>)}
+    </div>
+  );
+}
 
 const randomCode = () => {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
@@ -75,8 +101,13 @@ export default function AdminCouponsPage() {
     setForm({
       code: c.code, description: c.description || '', discountType: c.discount_type, discountValue: c.discount_value,
       minOrderAmount: c.min_order_amount || '', maxDiscountAmount: c.max_discount_amount ?? '',
-      startDate: splitLocal(c.starts_at, '00:01').date, startTime: splitLocal(c.starts_at, '00:01').time,
-      expiresDate: splitLocal(c.expires_at, '23:59').date, expiresTime: splitLocal(c.expires_at, '23:59').time,
+      ...(() => {
+        const sz = c.start_timezone || DEFAULT_START_ZONE;
+        const ez = c.end_timezone || DEFAULT_END_ZONE;
+        const st = utcIsoToZoned(c.starts_at, sz, DEFAULT_START_TIME);
+        const en = utcIsoToZoned(c.expires_at, ez, DEFAULT_END_TIME);
+        return { startDate: st.date, startTime: st.time, startTimezone: sz, expiresDate: en.date, expiresTime: en.time, endTimezone: ez };
+      })(),
       usageLimit: c.usage_limit ?? '', perCustomerLimit: c.per_customer_limit ?? '', isActive: c.is_active,
     });
     setError('');
@@ -90,11 +121,7 @@ export default function AdminCouponsPage() {
       const res = await fetch(editingId ? `/api/admin/coupons/${editingId}` : '/api/admin/coupons', {
         method: editingId ? 'PUT' : 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...form,
-          startsAt: joinLocal(form.startDate, form.startTime, '00:01'),
-          expiresAt: joinLocal(form.expiresDate, form.expiresTime, '23:59'),
-        }),
+        body: JSON.stringify(form),
       });
       const data = await res.json();
       if (!data.success) { setError(data.error || 'Failed to save coupon'); return; }
@@ -196,21 +223,47 @@ export default function AdminCouponsPage() {
                   <Label>Uses per customer (email)</Label>
                   <Input type="number" min="1" step="1" value={form.perCustomerLimit} onChange={set('perCustomerLimit')} placeholder="Unlimited" />
                 </div>
-                <div>
-                  <Label>Starts</Label>
-                  <div className="flex gap-2">
-                    <Input type="date" value={form.startDate} onChange={set('startDate')} />
-                    <Input type="time" value={form.startTime} onChange={set('startTime')} className="w-32" />
-                  </div>
-                  <p className="text-xs text-muted-foreground mt-1">Leave the date empty to start right away. Default time 00:01.</p>
+                <div className="md:col-span-3 flex flex-wrap items-center gap-2">
+                  <span className="text-sm font-medium">Quick presets:</span>
+                  {PRESETS.map((pr) => (
+                    <Button
+                      key={pr.id}
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      title={pr.hint}
+                      onClick={() => setForm({ ...form, startTime: DEFAULT_START_TIME, expiresTime: DEFAULT_END_TIME, startTimezone: pr.startZone, endTimezone: pr.endZone })}
+                    >
+                      {pr.label}
+                    </Button>
+                  ))}
+                  <span className="text-xs text-muted-foreground">Sets the times and regions; pick the dates yourself.</span>
                 </div>
-                <div>
-                  <Label>Expires</Label>
-                  <div className="flex gap-2">
-                    <Input type="date" value={form.expiresDate} onChange={set('expiresDate')} />
-                    <Input type="time" value={form.expiresTime} onChange={set('expiresTime')} className="w-32" />
+                <div className="md:col-span-3 grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Starts</Label>
+                    <div className="flex gap-2">
+                      <Input type="date" value={form.startDate} onChange={set('startDate')} />
+                      <Input type="time" value={form.startTime} onChange={set('startTime')} className="w-32" />
+                    </div>
+                    <select value={form.startTimezone} onChange={set('startTimezone')} className="w-full h-10 rounded-md border bg-background px-3 text-sm">
+                      {ZONES.map((z) => <option key={z.id} value={z.id}>{z.label}</option>)}
+                    </select>
+                    <p className="text-xs text-muted-foreground">Leave the date empty to start right away. Default 00:01.</p>
+                    <ZonePreview title="Starts" date={form.startDate} time={form.startTime} zone={form.startTimezone} />
                   </div>
-                  <p className="text-xs text-muted-foreground mt-1">Leave the date empty for no expiry. Default time 23:59.</p>
+                  <div className="space-y-2">
+                    <Label>Expires</Label>
+                    <div className="flex gap-2">
+                      <Input type="date" value={form.expiresDate} onChange={set('expiresDate')} />
+                      <Input type="time" value={form.expiresTime} onChange={set('expiresTime')} className="w-32" />
+                    </div>
+                    <select value={form.endTimezone} onChange={set('endTimezone')} className="w-full h-10 rounded-md border bg-background px-3 text-sm">
+                      {ZONES.map((z) => <option key={z.id} value={z.id}>{z.label}</option>)}
+                    </select>
+                    <p className="text-xs text-muted-foreground">Leave the date empty for no expiry. Default 23:59.</p>
+                    <ZonePreview title="Ends" date={form.expiresDate} time={form.expiresTime} zone={form.endTimezone} />
+                  </div>
                 </div>
               </div>
 
@@ -267,8 +320,8 @@ export default function AdminCouponsPage() {
                           {c.min_order_amount > 0 && <div>Min order ${Number(c.min_order_amount).toFixed(2)}</div>}
                           {c.max_discount_amount > 0 && <div>Max discount ${Number(c.max_discount_amount).toFixed(2)}</div>}
                           {c.per_customer_limit != null && <div>{c.per_customer_limit} per customer</div>}
-                          {c.starts_at && <div>From {new Date(c.starts_at).toLocaleString()}</div>}
-                          {c.expires_at && <div>Until {new Date(c.expires_at).toLocaleString()}</div>}
+                          {c.starts_at && <div>From {formatInZone(c.starts_at, c.start_timezone || DEFAULT_START_ZONE)}</div>}
+                          {c.expires_at && <div>Until {formatInZone(c.expires_at, c.end_timezone || DEFAULT_END_ZONE)}</div>}
                           {!(c.min_order_amount > 0 || c.max_discount_amount > 0 || c.per_customer_limit != null || c.starts_at || c.expires_at) && '—'}
                         </TableCell>
                         <TableCell className="text-sm">

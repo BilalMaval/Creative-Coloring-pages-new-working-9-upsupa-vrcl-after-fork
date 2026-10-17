@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Tag, X, CheckCircle } from 'lucide-react';
+import { formatInZone } from '@/lib/timezones';
 
 const STORAGE_KEY = 'appliedCoupon';
 const readSaved = () => { try { return localStorage.getItem(STORAGE_KEY) || ''; } catch { return ''; } };
@@ -37,7 +38,7 @@ export default function CouponBox({ items, email = '', onChange }) {
       });
       const data = await res.json();
       if (data.success) {
-        const a = { code: data.coupon.code, description: data.coupon.description, discount: data.discount, total: data.total, subtotal: data.subtotal };
+        const a = { code: data.coupon.code, description: data.coupon.description, discount: data.discount, total: data.total, subtotal: data.subtotal, endsAt: data.coupon.expiresAt, endZone: data.coupon.endTimezone };
         setApplied(a);
         writeSaved(a.code);
         onChangeRef.current?.(a);
@@ -78,6 +79,7 @@ export default function CouponBox({ items, email = '', onChange }) {
           <div className="min-w-0">
             <p className="font-semibold text-green-800 truncate">{applied.code} applied</p>
             <p className="text-xs text-green-700">You save ${applied.discount.toFixed(2)}</p>
+            {applied.endsAt && <p className="text-xs text-green-700">Ends {formatInZone(applied.endsAt, applied.endZone)}</p>}
           </div>
         </div>
         <button type="button" onClick={remove} className="text-green-800 hover:text-green-950 p-1" aria-label="Remove coupon">

@@ -30,10 +30,10 @@ export async function POST(request) {
   try {
     const c = parseCouponInput(await request.json());
     const rows = await prisma.$queryRawUnsafe(
-      `INSERT INTO coupons (code, description, discount_type, discount_value, min_order_amount, max_discount_amount, starts_at, expires_at, usage_limit, per_customer_limit, is_active)
-       VALUES ($1, $2, $3, $4::numeric, $5::numeric, $6::numeric, $7::timestamptz, $8::timestamptz, $9::int, $10::int, $11)
+      `INSERT INTO coupons (code, description, discount_type, discount_value, min_order_amount, max_discount_amount, starts_at, expires_at, usage_limit, per_customer_limit, is_active, start_timezone, end_timezone)
+       VALUES ($1, $2, $3, $4::numeric, $5::numeric, $6::numeric, $7::timestamptz, $8::timestamptz, $9::int, $10::int, $11, $12, $13)
        RETURNING ${COUPON_COLUMNS}`,
-      c.code, c.description, c.type, c.value, c.minOrder, c.maxDiscount, c.startsAt, c.expiresAt, c.usageLimit, c.perCustomer, c.isActive
+      c.code, c.description, c.type, c.value, c.minOrder, c.maxDiscount, c.startsAt, c.expiresAt, c.usageLimit, c.perCustomer, c.isActive, c.startTimezone, c.endTimezone
     );
     return NextResponse.json({ success: true, data: rows[0] });
   } catch (err) {

@@ -30,9 +30,9 @@ export async function PUT(request, { params }) {
       `UPDATE coupons SET code = $2, description = $3, discount_type = $4, discount_value = $5::numeric,
          min_order_amount = $6::numeric, max_discount_amount = $7::numeric, starts_at = $8::timestamptz,
          expires_at = $9::timestamptz, usage_limit = $10::int, per_customer_limit = $11::int, is_active = $12,
-         updated_at = now()
+         start_timezone = $13, end_timezone = $14, updated_at = now()
        WHERE id = $1::uuid RETURNING ${COUPON_COLUMNS}`,
-      id, c.code, c.description, c.type, c.value, c.minOrder, c.maxDiscount, c.startsAt, c.expiresAt, c.usageLimit, c.perCustomer, c.isActive
+      id, c.code, c.description, c.type, c.value, c.minOrder, c.maxDiscount, c.startsAt, c.expiresAt, c.usageLimit, c.perCustomer, c.isActive, c.startTimezone, c.endTimezone
     );
     if (!rows[0]) return NextResponse.json({ success: false, error: 'Coupon not found' }, { status: 404 });
     return NextResponse.json({ success: true, data: rows[0] });
