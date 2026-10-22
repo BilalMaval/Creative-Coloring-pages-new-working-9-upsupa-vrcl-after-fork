@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabaseClients';
+import { supabase, admin } from '@/lib/supabaseClients';
 
 export async function GET(request, { params }) {
   try {
@@ -37,7 +37,7 @@ export async function GET(request, { params }) {
     }
 
     // Increment views in background
-    supabase.from('products').update({ views: (product.views || 0) + 1 }).eq('id', product.id).then(() => {});
+    admin.from('products').update({ views: (product.views || 0) + 1 }).eq('id', product.id).then(() => {});
 
     return NextResponse.json({
       success: true,

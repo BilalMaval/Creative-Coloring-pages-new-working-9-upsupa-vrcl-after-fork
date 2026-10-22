@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { randomUUID } from 'crypto';
-import { supabase } from '@/lib/supabaseClients';
+import { supabase, admin } from '@/lib/supabaseClients';
 import { requireAdmin } from '@/lib/adminAuth';
 
 export async function GET(request) {
@@ -107,7 +107,7 @@ export async function POST(request) {
     }
 
     // Check if slug exists
-    const { data: existing } = await supabase
+    const { data: existing } = await admin
       .from('products')
       .select('id')
       .eq('slug', slug)
@@ -117,7 +117,7 @@ export async function POST(request) {
       return NextResponse.json({ success: false, error: 'Product with this slug already exists' }, { status: 400 });
     }
 
-    const { data: newProduct, error } = await supabase
+    const { data: newProduct, error } = await admin
       .from('products')
       .insert({
         id: randomUUID(),
@@ -185,7 +185,7 @@ export async function PUT(request) {
     if (downloads !== undefined) updateData.downloads = downloads;
     if (views !== undefined) updateData.views = views;
 
-    const { data: updatedProduct, error } = await supabase
+    const { data: updatedProduct, error } = await admin
       .from('products')
       .update(updateData)
       .eq('id', id)
@@ -216,12 +216,12 @@ export async function DELETE(request) {
     }
 
     // Delete related records first
-    await supabase.from('reviews').delete().eq('product_id', id);
-    await supabase.from('bundle_items').delete().eq('product_id', id);
-    await supabase.from('cart_items').delete().eq('product_id', id);
-    await supabase.from('downloads').delete().eq('product_id', id);
+    await admin.from('reviews').delete().eq('product_id', id);
+    await admin.from('bundle_items').delete().eq('product_id', id);
+    await admin.from('cart_items').delete().eq('product_id', id);
+    await admin.from('downloads').delete().eq('product_id', id);
 
-    const { error } = await supabase.from('products').delete().eq('id', id);
+    const { error } = await admin.from('products').delete().eq('id', id);
 
     if (error) {
       console.error('Error deleting product:', error);

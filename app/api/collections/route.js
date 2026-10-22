@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { randomUUID } from 'crypto';
-import { supabase } from '@/lib/supabaseClients';
+import { supabase, admin } from '@/lib/supabaseClients';
 import { requireAdmin } from '@/lib/adminAuth';
 
 // GET all collections (top-level categories where parent_id is null)
@@ -65,7 +65,7 @@ export async function POST(request) {
     }
 
     // Check if slug exists
-    const { data: existing } = await supabase
+    const { data: existing } = await admin
       .from('categories')
       .select('id')
       .eq('slug', slug)
@@ -75,7 +75,7 @@ export async function POST(request) {
       return NextResponse.json({ success: false, error: 'Collection with this slug already exists' }, { status: 400 });
     }
 
-    const { data: newCollection, error } = await supabase
+    const { data: newCollection, error } = await admin
       .from('categories')
       .insert({
         id: randomUUID(),
@@ -122,7 +122,7 @@ export async function PUT(request) {
     if (image !== undefined) updateData.image = image;
     if (order !== undefined) updateData.order = order;
 
-    const { data: updatedCollection, error } = await supabase
+    const { data: updatedCollection, error } = await admin
       .from('categories')
       .update(updateData)
       .eq('id', id)
@@ -154,7 +154,7 @@ export async function DELETE(request) {
     }
 
     // Get all child category IDs
-    const { data: childCategories } = await supabase
+    const { data: childCategories } = await admin
       .from('categories')
       .select('id')
       .eq('parent_id', id);
@@ -164,7 +164,7 @@ export async function DELETE(request) {
     // Count total products in child categories
     let totalProducts = 0;
     if (childIds.length > 0) {
-      const { count } = await supabase
+      const { count } = await admin
         .from('products')
         .select('id', { count: 'exact', head: true })
         .in('category_id', childIds)
@@ -181,11 +181,11 @@ export async function DELETE(request) {
 
     // Delete all child categories first
     if (childIds.length > 0) {
-      await supabase.from('categories').delete().in('id', childIds);
+      await admin.from('categories').delete().in('id', childIds);
     }
 
     // Delete the collection itself
-    const { error } = await supabase.from('categories').delete().eq('id', id);
+    const { error } = await admin.from('categories').delete().eq('id', id);
 
     if (error) {
       console.error('Error deleting collection:', error);

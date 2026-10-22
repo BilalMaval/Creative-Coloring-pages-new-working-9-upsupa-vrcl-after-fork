@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { randomUUID } from 'crypto';
-import { supabase } from '@/lib/supabaseClients';
+import { supabase, admin } from '@/lib/supabaseClients';
 import { requireAdmin } from '@/lib/adminAuth';
 
 export async function GET() {
@@ -85,7 +85,7 @@ export async function POST(request) {
     }
 
     // Check if slug exists
-    const { data: existing } = await supabase
+    const { data: existing } = await admin
       .from('categories')
       .select('id')
       .eq('slug', slug)
@@ -95,7 +95,7 @@ export async function POST(request) {
       return NextResponse.json({ success: false, error: 'Category with this slug already exists' }, { status: 400 });
     }
 
-    const { data: newCategory, error } = await supabase
+    const { data: newCategory, error } = await admin
       .from('categories')
       .insert({
         id: randomUUID(),
@@ -148,7 +148,7 @@ export async function PUT(request) {
     if (showOnHomepage !== undefined) updateData.show_on_homepage = showOnHomepage;
     if (homepageOrder !== undefined) updateData.homepage_order = homepageOrder;
 
-    const { data: updatedCategory, error } = await supabase
+    const { data: updatedCategory, error } = await admin
       .from('categories')
       .update(updateData)
       .eq('id', id)
@@ -179,7 +179,7 @@ export async function DELETE(request) {
     }
 
     // Check if category has products
-    const { count: productsCount } = await supabase
+    const { count: productsCount } = await admin
       .from('products')
       .select('id', { count: 'exact', head: true })
       .eq('category_id', id)
@@ -192,7 +192,7 @@ export async function DELETE(request) {
       );
     }
 
-    const { error } = await supabase.from('categories').delete().eq('id', id);
+    const { error } = await admin.from('categories').delete().eq('id', id);
 
     if (error) {
       console.error('Error deleting category:', error);
