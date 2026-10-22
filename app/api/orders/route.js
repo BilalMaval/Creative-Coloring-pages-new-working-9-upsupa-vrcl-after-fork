@@ -3,6 +3,7 @@ import prisma from '@/lib/prisma';
 import { v4 as uuidv4 } from 'uuid';
 import { sendOrderConfirmationEmail } from '@/lib/email';
 import { requireAdmin } from '@/lib/adminAuth';
+import { getOrderDownloads } from '@/lib/downloadAccess';
 import { priceItems, evaluateCoupon, claimCoupon, releaseCoupon, recordRedemption } from '@/lib/coupons';
 
 // GET all orders (for admin)
@@ -191,24 +192,10 @@ export async function POST(request) {
       total
     }).catch(err => console.error('Failed to send order email:', err));
 
-    // Files the customer can download right now (free, discounted, fully-couponed and bundle orders alike)
+    // Files the customer can download right now, each with its proof-of-purchase token
     let downloads = [];
     try {
-      const toDownload = (p, bundleId) => ({
-        productId: p.id,
-        bundleId,
-        title: p.title,
-        key: p.pdfPath.replace(/^.*?\/(pdfs\/|images\/)/, '$1'),
-        ext: p.pdfPath.split('.').pop()?.toLowerCase() || 'pdf'
-      });
-      const direct = await prisma.product.findMany({
-        where: { id: { in: items.filter(i => i.productId).map(i => i.productId) } },
-        select: { id: true, title: true, pdfPath: true }
-      });
-      downloads = [
-        ...direct.filter(p => p.pdfPath).map(p => toDownload(p, null)),
-        ...bundleMembers.filter(m => m.product.pdfPath).map(m => toDownload(m.product, m.bundleId)),
-      ];
+      downloads = await getOrderDownloads(order.id);
     } catch (err) {
       console.error('Failed to prepare order downloads:', err);
     }

@@ -4,6 +4,7 @@ import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { getR2Client, R2_BUCKET } from '@/lib/r2Client';
 import { DOWNLOAD_MIME } from '@/lib/upload';
 import { admin } from '@/lib/supabaseClients';
+import { authorizeDownload } from '@/lib/downloadAccess';
 
 export const runtime = 'nodejs';
 
@@ -23,8 +24,19 @@ export async function GET(request) {
       return new Response('Invalid file', { status: 400 });
     }
 
-    // Increment download count (Supabase DB only — not storage)
-    if (productId) {
+    // Paid files need proof of a paid order (order number + token from the order); free files do not.
+    const access = await authorizeDownload({
+      key: filePathParam,
+      orderNumber: url.searchParams.get('order'),
+      token: url.searchParams.get('pt'),
+    });
+    if (!access.ok) {
+      return NextResponse.json({ success: false, error: access.error }, { status: access.status });
+    }
+
+    // Increment download count (Supabase DB only — not storage). Only for free-file downloads: purchases are
+    // counted when the order is placed.
+    if (productId && access.productId && productId === access.productId && !url.searchParams.get('order')) {
       try {
         const { data: product } = await admin
           .from('products')

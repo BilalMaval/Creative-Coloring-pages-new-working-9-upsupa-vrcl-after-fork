@@ -1,10 +1,11 @@
 import { NextResponse } from 'next/server';
 import { randomUUID } from 'crypto';
 import { supabase, admin } from '@/lib/supabaseClients';
-import { requireAdmin } from '@/lib/adminAuth';
+import { requireAdmin, isAdminRequest } from '@/lib/adminAuth';
 
 export async function GET(request) {
   try {
+    const isAdmin = await isAdminRequest(request);
     const { searchParams } = new URL(request.url);
     const category = searchParams.get('category');
     const page = parseInt(searchParams.get('page') || '1');
@@ -57,7 +58,7 @@ export async function GET(request) {
         slug: item.slug,
         description: item.description,
         webpPath: item.webp_path,
-        pdfPath: item.pdf_path,
+        pdfPath: (item.is_free || isAdmin) ? item.pdf_path : null, // paid file addresses stay private
         categoryId: item.category_id,
         price: item.price ? Number(item.price) : 0,
         salePrice: item.custom_fields?.salePrice ? Number(item.custom_fields.salePrice) : null,
@@ -77,7 +78,7 @@ export async function GET(request) {
       };
     });
 
-    return NextResponse.json({
+    const res = NextResponse.json({
       success: true,
       data: itemsWithRating,
       pagination: {
@@ -89,6 +90,8 @@ export async function GET(request) {
         hasPrev: page > 1,
       },
     });
+    if (isAdmin) res.headers.set('Cache-Control', 'private, no-store'); // never let a shared cache keep the admin view
+    return res;
   } catch (error) {
     console.error('Error fetching printables:', error);
     return NextResponse.json({ success: false, error: 'Failed to fetch printables' }, { status: 500 });

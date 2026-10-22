@@ -78,7 +78,7 @@ export default function CheckoutPage() {
     if (!keepBusy) setDownloadingId(d.productId);
     try {
       const fileName = d.title.replace(/[^a-z0-9]/gi, '_') + '.' + d.ext;
-      const res = await fetch(`/api/download?file=${encodeURIComponent(d.key)}&name=${encodeURIComponent(fileName)}&format=json`);
+      const res = await fetch(`/api/download?file=${encodeURIComponent(d.key)}&name=${encodeURIComponent(fileName)}&order=${encodeURIComponent(orderNumber)}&pt=${encodeURIComponent(d.token)}&format=json`);
       const data = await res.json();
       if (!res.ok || !data.url) throw new Error('Download failed');
       const link = document.createElement('a');

@@ -94,6 +94,11 @@ export default function Footer() {
                   ✉️ Contact Us
                 </Link>
               </li>
+              <li>
+                <Link href="/my-downloads" className="text-sm font-bold text-gray-700 hover:text-blue-600 transition-colors">
+                  ✉️ My Downloads
+                </Link>
+              </li>
             </ul>
           </div>
 
