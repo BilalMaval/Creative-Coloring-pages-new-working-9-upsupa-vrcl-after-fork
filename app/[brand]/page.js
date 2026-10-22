@@ -6,6 +6,8 @@ import SubscribeButton from '@/components/SubscribeButton';
 import CategoryIcon from '@/components/CategoryIcon';
 import { Sparkles, Star, Heart, Download, Palette, Smile } from 'lucide-react';
 import ProductCard from '@/components/ProductCard';
+import BundleCard from '@/components/BundleCard';
+import { getActiveBundles } from '@/lib/bundles';
 import { getAllActiveCategories, getSettingByKey, getHomeProducts } from '@/lib/db';
 import { generateMetadata as genMeta, generateWebsiteSchema, generateOrganizationSchema, descriptionParagraphs, firstSentence } from '@/lib/seo';
 import { getBrandByKey, getSiteUrl } from '@/config/brands';
@@ -62,6 +64,9 @@ export default async function Home({ params }) {
   const { brand: brandKey } = await params;
   const brand = getBrandByKey(brandKey);
   const { collections, latest, popular } = await getHomeData();
+  // Featured bundles (the section simply doesn't appear when there are none or the lookup fails)
+  let featuredBundles = [];
+  try { featuredBundles = await getActiveBundles({ featuredOnly: true, limit: 4 }); } catch (e) { console.error('Featured bundles error:', e); }
   const baseUrl = getSiteUrl(brand);
   const websiteSchema = await generateWebsiteSchema(brand);
   const orgSchema = await generateOrganizationSchema(brand);
@@ -423,6 +428,24 @@ export default async function Home({ params }) {
             </div>
           </section>
         )
+      )}
+
+      {/* Featured bundles */}
+      {featuredBundles.length > 0 && (
+        <section className="container mx-auto px-4 mb-16">
+          <div className="bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500 rounded-3xl p-6 md:p-8 shadow-2xl mb-8 flex flex-col md:flex-row items-center justify-between gap-4">
+            <div className="text-center md:text-left">
+              <h2 className="text-3xl md:text-4xl font-black text-white">🎁 Save with Bundles</h2>
+              <p className="text-white font-bold opacity-95">Hand-picked sets in one download - more for less</p>
+            </div>
+            <Link href="/bundles">
+              <Button className="bg-white text-purple-700 hover:bg-gray-100 font-black rounded-full h-12 px-8">See all bundles →</Button>
+            </Link>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {featuredBundles.map((b) => <BundleCard key={b.id} bundle={b} />)}
+          </div>
+        </section>
       )}
 
       {/* Features Section */}

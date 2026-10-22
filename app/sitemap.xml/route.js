@@ -36,6 +36,17 @@ export async function GET() {
       c => c.parent_id === null && (categories || []).some(k => k.parent_id === c.id && nonEmpty.has(k.id))
     );
 
+    // Active bundles (a failure here must never break the whole sitemap)
+    let bundleRows = [];
+    try {
+      const { data: bundles } = await supabase
+        .from('bundles')
+        .select('slug, updated_at')
+        .eq('is_active', true)
+        .order('updated_at', { ascending: false });
+      bundleRows = bundles || [];
+    } catch {}
+
     // Blog posts — Supabase blog_posts is the single source of truth
     const blogPosts = await getAllPublishedPosts();
 
@@ -79,6 +90,18 @@ ${(products || []).map(product => `  <url>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>`).join('\n')}
+${bundleRows.length > 0 ? `  <url>
+    <loc>${baseUrl}/bundles</loc>
+    <lastmod>${new Date(bundleRows[0].updated_at).toISOString()}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>` : ''}
+${bundleRows.map(b => `  <url>
+    <loc>${baseUrl}/bundle/${b.slug}</loc>
+    <lastmod>${new Date(b.updated_at).toISOString()}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>`).join(String.fromCharCode(10))}
 ${blogPosts.map(post => `  <url>
     <loc>${baseUrl}/blog/${post.slug}</loc>
     <lastmod>${new Date(post.updatedAt || post.publishedAt || Date.now()).toISOString()}</lastmod>

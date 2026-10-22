@@ -93,6 +93,11 @@ export default function Header() {
                 📚 Book Shop
               </Button>
             </Link>
+            <Link href="/bundles">
+              <Button className="bg-rose-500 hover:bg-rose-600 text-white font-bold text-base rounded-full h-11 px-6 shadow-md">
+                🎁 Bundles
+              </Button>
+            </Link>
             <Link href="/blog">
               <Button className="bg-pink-500 hover:bg-pink-600 text-white font-bold text-base rounded-full h-11 px-6 shadow-md">
                 ✍️ Blog
@@ -180,6 +185,15 @@ export default function Header() {
             >
               <Button className="w-full bg-purple-500 hover:bg-purple-600 text-white font-bold text-lg rounded-full h-14 shadow-md">
                 📚 Book Shop
+              </Button>
+            </Link>
+            <Link
+              href="/bundles"
+              className="block"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              <Button className="w-full bg-rose-500 hover:bg-rose-600 text-white font-bold text-lg rounded-full h-14 shadow-md">
+                🎁 Bundles
               </Button>
             </Link>
             <Link

@@ -74,8 +74,8 @@ export default function CheckoutPage() {
   const total = Math.max(0, Math.round((subtotal - discount) * 100) / 100);
 
   // Same signed-link download the product page uses; the order itself already counted the download
-  const downloadPurchased = async (d) => {
-    setDownloadingId(d.productId);
+  const downloadPurchased = async (d, keepBusy = false) => {
+    if (!keepBusy) setDownloadingId(d.productId);
     try {
       const fileName = d.title.replace(/[^a-z0-9]/gi, '_') + '.' + d.ext;
       const res = await fetch(`/api/download?file=${encodeURIComponent(d.key)}&name=${encodeURIComponent(fileName)}&format=json`);
@@ -91,8 +91,19 @@ export default function CheckoutPage() {
     } catch {
       alert('Download failed. Please try again, or contact support with your order number.');
     } finally {
-      setDownloadingId(null);
+      if (!keepBusy) setDownloadingId(null);
     }
+  };
+
+  // Several files at once: browsers may ask permission for multiple downloads, so they are started one after another
+  const downloadAllInBundle = async (bundleId) => {
+    const files = downloads.filter(d => d.bundleId === bundleId);
+    setDownloadingId(`all-${bundleId}`);
+    for (const d of files) {
+      await downloadPurchased(d, true);
+      await new Promise(r => setTimeout(r, 900));
+    }
+    setDownloadingId(null);
   };
 
   const handleSubmit = async (e) => {
@@ -108,12 +119,11 @@ export default function CheckoutPage() {
           email: formData.email,
           customerName: formData.name,
           couponCode: coupon?.code || undefined,
-          items: cartItems.map(item => ({
-            productId: item.id,
-            title: item.title,
-            price: parseFloat(item.price) || 0,
-            quantity: item.quantity
-          }))
+          items: cartItems.map(item => (
+            item.type === 'bundle'
+              ? { bundleId: item.id, title: item.title, quantity: item.quantity }
+              : { productId: item.id, title: item.title, price: parseFloat(item.price) || 0, quantity: item.quantity }
+          ))
         })
       });
 
@@ -166,15 +176,39 @@ export default function CheckoutPage() {
               <div className="bg-green-50 rounded-lg p-6 mb-6">
                 <h3 className="font-semibold mb-3">Your Downloads:</h3>
                 <div className="space-y-2">
-                  {completedItems.map(item => (
+                  {completedItems.map(item => item.type === 'bundle' ? (
+                    <div key={item.id} className="p-3 bg-white rounded text-left">
+                      <div className="flex items-center justify-between gap-2 mb-2">
+                        <span className="font-semibold">🎁 {item.title}</span>
+                        {downloads.filter(d => d.bundleId === item.id).length > 1 && (
+                          <Button variant="outline" size="sm" disabled={!!downloadingId} onClick={() => downloadAllInBundle(item.id)}>
+                            {downloadingId === `all-${item.id}` ? 'Preparing...' : 'Download all'}
+                          </Button>
+                        )}
+                      </div>
+                      <div className="space-y-1">
+                        {downloads.filter(d => d.bundleId === item.id).map(d => (
+                          <div key={d.productId} className="flex items-center justify-between gap-2 text-sm bg-gray-50 rounded px-2 py-1">
+                            <span className="truncate">{d.title}</span>
+                            <Button variant="outline" size="sm" disabled={downloadingId === d.productId || downloadingId === `all-${item.id}`} onClick={() => downloadPurchased(d)}>
+                              {downloadingId === d.productId ? 'Preparing...' : 'Download'}
+                            </Button>
+                          </div>
+                        ))}
+                        {downloads.filter(d => d.bundleId === item.id).length === 0 && (
+                          <p className="text-sm text-muted-foreground">Files for this bundle are not available yet. Please contact support with your order number.</p>
+                        )}
+                      </div>
+                    </div>
+                  ) : (
                     <div key={item.id} className="flex items-center justify-between p-2 bg-white rounded">
                       <span>{item.title}</span>
-                      {downloads.find(d => d.productId === item.id) ? (
+                      {downloads.find(d => d.productId === item.id && !d.bundleId) ? (
                         <Button
                           variant="outline"
                           size="sm"
                           disabled={downloadingId === item.id}
-                          onClick={() => downloadPurchased(downloads.find(d => d.productId === item.id))}
+                          onClick={() => downloadPurchased(downloads.find(d => d.productId === item.id && !d.bundleId))}
                         >
                           {downloadingId === item.id ? 'Preparing...' : 'Download'}
                         </Button>

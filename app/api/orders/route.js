@@ -127,7 +127,8 @@ export async function POST(request) {
           create: items.map(item => ({
             id: uuidv4(),
             productId: item.productId,
-            itemType: 'PRODUCT',
+            bundleId: item.bundleId,
+            itemType: item.itemType,
             title: item.title,
             price: item.price,
             quantity: item.quantity
@@ -148,13 +149,37 @@ export async function POST(request) {
         .catch(err => console.error('Failed to record coupon redemption:', err));
     }
 
-    // Increment download counts for products
+    // Members of every purchased bundle (so their files can be delivered and their download counts kept)
+    const bundleLines = items.filter(i => i.bundleId);
+    let bundleMembers = [];
+    if (bundleLines.length > 0) {
+      try {
+        const rows = await prisma.bundleItem.findMany({
+          where: { bundleId: { in: bundleLines.map(i => i.bundleId) } },
+          orderBy: { order: 'asc' },
+          select: { bundleId: true, product: { select: { id: true, title: true, pdfPath: true, isActive: true } } }
+        });
+        bundleMembers = rows.filter(r => r.product);
+      } catch (err) {
+        console.error('Failed to load bundle contents:', err);
+      }
+    }
+
+    // Increment download counts for products (a bundle counts once for each product inside it)
     for (const item of items) {
       if (item.productId) {
         await prisma.product.update({
           where: { id: item.productId },
           data: { downloads: { increment: item.quantity } }
         }).catch(() => {}); // Ignore if product not found
+      }
+    }
+    for (const line of bundleLines) {
+      for (const m of bundleMembers.filter(r => r.bundleId === line.bundleId)) {
+        await prisma.product.update({
+          where: { id: m.product.id },
+          data: { downloads: { increment: line.quantity } }
+        }).catch(() => {});
       }
     }
 
@@ -166,21 +191,24 @@ export async function POST(request) {
       total
     }).catch(err => console.error('Failed to send order email:', err));
 
-    // Files the customer can download right now (free, discounted or fully-couponed orders alike)
+    // Files the customer can download right now (free, discounted, fully-couponed and bundle orders alike)
     let downloads = [];
     try {
-      const prods = await prisma.product.findMany({
-        where: { id: { in: items.map(i => i.productId) } },
+      const toDownload = (p, bundleId) => ({
+        productId: p.id,
+        bundleId,
+        title: p.title,
+        key: p.pdfPath.replace(/^.*?\/(pdfs\/|images\/)/, '$1'),
+        ext: p.pdfPath.split('.').pop()?.toLowerCase() || 'pdf'
+      });
+      const direct = await prisma.product.findMany({
+        where: { id: { in: items.filter(i => i.productId).map(i => i.productId) } },
         select: { id: true, title: true, pdfPath: true }
       });
-      downloads = prods
-        .filter(p => p.pdfPath)
-        .map(p => ({
-          productId: p.id,
-          title: p.title,
-          key: p.pdfPath.replace(/^.*?\/(pdfs\/|images\/)/, '$1'),
-          ext: p.pdfPath.split('.').pop()?.toLowerCase() || 'pdf'
-        }));
+      downloads = [
+        ...direct.filter(p => p.pdfPath).map(p => toDownload(p, null)),
+        ...bundleMembers.filter(m => m.product.pdfPath).map(m => toDownload(m.product, m.bundleId)),
+      ];
     } catch (err) {
       console.error('Failed to prepare order downloads:', err);
     }

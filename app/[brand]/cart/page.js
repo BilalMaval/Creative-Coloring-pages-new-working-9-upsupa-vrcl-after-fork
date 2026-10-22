@@ -104,7 +104,7 @@ export default function CartPage() {
                       />
                     </div>
                     <div className="flex-1">
-                      <Link href={`/product/${item.slug}`} className="font-semibold hover:text-primary">
+                      <Link href={`/${item.type === 'bundle' ? 'bundle' : 'product'}/${item.slug}`} className="font-semibold hover:text-primary">
                         {item.title}
                       </Link>
                       <p className="text-sm text-muted-foreground">{item.category}</p>

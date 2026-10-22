@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation';
 import { getProductBySlug } from '@/lib/db';
+import { getBundlesForProduct } from '@/lib/bundles';
 import ProductPageClient from './ProductPageClient';
 import { generateMetadata as genMeta, generateProductSchema, generateBreadcrumbSchema } from '@/lib/seo';
 import { getBrandByKey, getSiteUrl } from '@/config/brands';
@@ -75,6 +76,8 @@ export default async function ProductPage({ params }) {
   }
   
   const { product, relatedProducts } = data;
+  let bundles = [];
+  try { bundles = await getBundlesForProduct(product.id); } catch (e) { console.error('Bundles for product error:', e); }
   const gradient = getGradient(product);
   const baseUrl = getSiteUrl(brand);
   
@@ -122,6 +125,7 @@ export default async function ProductPage({ params }) {
       <ProductPageClient 
         product={product}
         relatedProducts={relatedProducts}
+        bundles={bundles}
         gradient={gradient}
       />
     </>

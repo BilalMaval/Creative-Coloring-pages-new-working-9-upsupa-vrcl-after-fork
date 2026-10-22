@@ -33,7 +33,7 @@ export default function CouponBox({ items, email = '', onChange }) {
         body: JSON.stringify({
           code,
           email,
-          items: (items || []).map((i) => ({ productId: i.id, quantity: i.quantity })),
+          items: (items || []).map((i) => (i.type === 'bundle' ? { bundleId: i.id, quantity: i.quantity } : { productId: i.id, quantity: i.quantity })),
         }),
       });
       const data = await res.json();

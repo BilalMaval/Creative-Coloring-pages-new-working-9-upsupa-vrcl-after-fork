@@ -11,7 +11,7 @@ import ReviewSection from '@/components/ReviewSection';
 import PhotoGallery from '@/components/PhotoGallery';
 import BookParameters from '@/components/BookParameters';
 
-export default function ProductPageClient({ product, relatedProducts, gradient }) {
+export default function ProductPageClient({ product, relatedProducts, bundles = [], gradient }) {
   // Reviews submitted via the prompt are added here and passed directly to ReviewSection
   const [pendingReviews, setPendingReviews] = useState([]);
 
@@ -179,6 +179,26 @@ export default function ProductPageClient({ product, relatedProducts, gradient }
                 </div>
               </div>
             </div>
+
+            {/* Also available in a bundle */}
+            {bundles.length > 0 && (
+              <Card className="shadow-xl border-2 border-pink-200 bg-pink-50">
+                <CardContent className="p-6">
+                  <h3 className="font-black text-xl mb-3 text-gray-800">🎁 Also available in a bundle</h3>
+                  <div className="space-y-2">
+                    {bundles.map((b) => (
+                      <Link key={b.id} href={`/bundle/${b.slug}`} className="flex items-center justify-between gap-3 bg-white rounded-xl px-4 py-3 border border-pink-200 hover:border-pink-400 transition-colors">
+                        <div className="min-w-0">
+                          <p className="font-bold text-gray-800 truncate">{b.title}</p>
+                          <p className="text-xs text-gray-600">{b.items.length} printables{b.percentOff > 0 ? ` · save ${b.percentOff}%` : ''}</p>
+                        </div>
+                        <span className="font-black text-pink-600 whitespace-nowrap">${b.price.toFixed(2)}</span>
+                      </Link>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
 
             {/* Book Parameters for Bookshop products */}
             {showBookParams && <BookParameters product={product} />}
