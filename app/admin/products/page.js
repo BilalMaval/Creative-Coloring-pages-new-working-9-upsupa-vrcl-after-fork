@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useDeferredValue } from 'react';
+import { variantUrl } from '@/lib/images';
 import AdminLayout from '@/components/AdminLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -27,6 +28,11 @@ export default function AdminProductsPage() {
   const [filterCollection, setFilterCollection] = useState('all');
   const [filterCategory, setFilterCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
+  // Only a page of cards is drawn at a time (the catalogue has ~760 products). The deferred copy of the search text lets the
+  // input stay responsive while the list catches up.
+  const PAGE_SIZE = 24;
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+  const deferredSearch = useDeferredValue(searchQuery);
   
   // Form states - Single collection, multiple categories
   const [selectedCollection, setSelectedCollection] = useState('');
@@ -458,8 +464,8 @@ export default function AdminProductsPage() {
   
   const filteredProducts = products.filter(product => {
     // Search filter
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
+    if (deferredSearch) {
+      const query = deferredSearch.toLowerCase();
       const matchesSearch = 
         product.title?.toLowerCase().includes(query) ||
         product.slug?.toLowerCase().includes(query) ||
@@ -475,6 +481,8 @@ export default function AdminProductsPage() {
     if (filterCategory !== 'all' && product.categoryId !== filterCategory) return false;
     return true;
   });
+
+  useEffect(() => { setVisibleCount(PAGE_SIZE); }, [deferredSearch, filterCollection, filterCategory]);
 
   const getCategoryName = (categoryId) => {
     const category = allCategories.find(c => c.id === categoryId);
@@ -925,13 +933,24 @@ export default function AdminProductsPage() {
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
       ) : filteredProducts.length > 0 ? (
+        <>
+        <p className="text-sm text-muted-foreground mb-3">
+          Showing {Math.min(visibleCount, filteredProducts.length)} of {filteredProducts.length} products
+        </p>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filteredProducts.map((product) => (
+          {filteredProducts.slice(0, visibleCount).map((product) => (
             <Card key={product.id}>
               <CardHeader>
                 {product.webpPath && (
                   <div className="mb-2 aspect-[3/4] relative rounded overflow-hidden bg-muted">
-                    <img src={product.webpPath} alt={product.title} className="object-cover w-full h-full" />
+                    <img
+                      src={variantUrl(product.webpPath, 'thumb')}
+                      alt={product.title}
+                      className="object-cover w-full h-full"
+                      loading="lazy"
+                      decoding="async"
+                      onError={(e) => { if (e.currentTarget.src !== product.webpPath) e.currentTarget.src = product.webpPath; }}
+                    />
                   </div>
                 )}
                 <CardTitle className="line-clamp-1 flex items-center gap-2">
@@ -978,6 +997,14 @@ export default function AdminProductsPage() {
             </Card>
           ))}
         </div>
+        {visibleCount < filteredProducts.length && (
+          <div className="flex justify-center mt-6">
+            <Button variant="outline" size="lg" onClick={() => setVisibleCount((n) => n + PAGE_SIZE)}>
+              Show {Math.min(PAGE_SIZE, filteredProducts.length - visibleCount)} more ({filteredProducts.length - visibleCount} left)
+            </Button>
+          </div>
+        )}
+        </>
       ) : (
         <Card>
           <CardContent className="text-center py-20">
