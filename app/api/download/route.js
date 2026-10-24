@@ -7,6 +7,8 @@ import { admin } from '@/lib/supabaseClients';
 import { authorizeDownload } from '@/lib/downloadAccess';
 
 export const runtime = 'nodejs';
+// Reads the request URL on every call, so it can never be prerendered; saying so stops the build logging an error for it
+export const dynamic = 'force-dynamic';
 
 export async function GET(request) {
   try {

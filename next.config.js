@@ -71,6 +71,12 @@ const nextConfig = {
       { source: '/category/solor-system/page/:n', destination: '/category/solar-system/page/:n', permanent: true },
       { source: '/category/tridional-clothes', destination: '/category/traditional-clothes', permanent: true },
       { source: '/category/tridional-clothes/page/:n', destination: '/category/traditional-clothes/page/:n', permanent: true },
+      // Dead links found by crawling the live site (blog posts still link to these): send them to the closest living page
+      { source: '/category/printable-stickers', destination: '/category/stickers', permanent: true },
+      { source: '/category/space-and-soler-system', destination: '/category/solar-system', permanent: true },
+      { source: '/category/unicorns', destination: '/category/fantasy-magic', permanent: true },
+      { source: '/product/cute-cat-sticker-pack-10-printable-kitten-designs-for-journals', destination: '/product/kawaii-cat-sticker-vault-100-printable-cute-cat-designs', permanent: true },
+      { source: '/product/christmas-sticker-pack-20-cute-holiday-animal-santa-stickers', destination: '/product/christmas-sticker-vault-100-printable-holiday-designs-bundle', permanent: true },
       // Renamed to remove third-party character names
       { source: '/category/disney-characters', destination: '/category/cartoon-animal-friends', permanent: true },
       { source: '/category/disney-characters/page/:n', destination: '/category/cartoon-animal-friends/page/:n', permanent: true },
