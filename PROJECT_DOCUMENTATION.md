@@ -17,8 +17,8 @@ Set these in Vercel → Project → Settings → Environment Variables (values l
 
 | Variable | Purpose |
 |---|---|
-| `DATABASE_URL` | Supabase Postgres pooler connection string (Prisma) |
-| `DIRECT_URL` | Supabase Postgres direct connection string (Prisma migrations) |
+| `DATABASE_URL` | Runtime database connection (Prisma). Use the Supabase **transaction pooler**: same host and login as the Supabase "Transaction pooler" string, **port `6543`**, with `?pgbouncer=true&connection_limit=5&pool_timeout=20` appended (see "Database connection" below) |
+| `DIRECT_URL` | Used only by Prisma CLI commands (migrations, `db push`). Supabase "Session pooler" or direct string, **port `5432`** |
 | `NEXT_PUBLIC_BASE_URL` | Fallback base URL when request headers are unavailable (build time) |
 | `NEXT_PUBLIC_SUPABASE_URL` | Supabase project URL |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Public anon key — safe for browser, used for read-only REST calls |
@@ -26,6 +26,23 @@ Set these in Vercel → Project → Settings → Environment Variables (values l
 | `SUPABASE_SERVICE_ROLE_KEY` | **Server-only.** Used for writes (reviews, downloads, views). Never expose to the client. |
 | `JWT_SECRET` | Admin auth token signing |
 | `STRIPE_SECRET_KEY` / `STRIPE_WEBHOOK_SECRET` / `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` | Currently commented out / disabled until Stripe checkout is wired up |
+
+### Database connection (Prisma)
+
+Serverless functions start and stop constantly, and each one opens its own database connections. Through Supabase's *session*
+pooler (port 5432) those connections are held one-to-one, so a burst of bot traffic can use them all up and requests then fail
+or time out. The *transaction* pooler (port 6543) shares a small set of real connections between all instances.
+
+Format of the runtime URL (placeholders, not real values):
+
+    DATABASE_URL = postgresql://postgres.<project-ref>:<password>@<pooler-host>:6543/postgres?pgbouncer=true&connection_limit=5&pool_timeout=20
+    DIRECT_URL   = postgresql://postgres.<project-ref>:<password>@<pooler-host>:5432/postgres
+
+- `pgbouncer=true` is required in transaction mode (it turns off prepared statements, which a transaction pooler cannot keep).
+- `connection_limit=5`: Vercel runs several requests at the same time inside one instance, so one connection would make them
+  queue behind each other. Five is a small pool per instance; the pooler multiplexes them.
+- `lib/prisma.js` keeps a single client per process and connects on first use.
+- Roll back by putting the old `DATABASE_URL` back (session pooler, port 5432); no code change is needed.
 
 ## 3. Database access pattern
 
