@@ -17,8 +17,8 @@ Set these in Vercel → Project → Settings → Environment Variables (values l
 
 | Variable | Purpose |
 |---|---|
-| `DATABASE_URL` | Runtime database connection (Prisma). Use the Supabase **transaction pooler**: same host and login as the Supabase "Transaction pooler" string, **port `6543`**, with `?pgbouncer=true&connection_limit=5&pool_timeout=20` appended (see "Database connection" below) |
-| `DIRECT_URL` | Used only by Prisma CLI commands (migrations, `db push`). Supabase "Session pooler" or direct string, **port `5432`** |
+| `DATABASE_URL` | Runtime database connection (Prisma) through the Supabase **transaction pooler**: port **`6543`** and it **must end with `?pgbouncer=true`** (see "Database connection" below) |
+| `DIRECT_URL` | Optional. Only used by Prisma command-line tools (migrations, `db push`) on a developer machine, with the Supabase session pooler or direct string on port `5432`. **Not set in Vercel and not needed there**: the running site never uses it. |
 | `NEXT_PUBLIC_BASE_URL` | Fallback base URL when request headers are unavailable (build time) |
 | `NEXT_PUBLIC_SUPABASE_URL` | Supabase project URL |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Public anon key — safe for browser, used for read-only REST calls |
@@ -29,20 +29,30 @@ Set these in Vercel → Project → Settings → Environment Variables (values l
 
 ### Database connection (Prisma)
 
-Serverless functions start and stop constantly, and each one opens its own database connections. Through Supabase's *session*
-pooler (port 5432) those connections are held one-to-one, so a burst of bot traffic can use them all up and requests then fail
-or time out. The *transaction* pooler (port 6543) shares a small set of real connections between all instances.
+Serverless functions start and stop constantly, so the site connects to the database through Supabase's **transaction pooler**
+(port `6543`), which shares a small set of real connections between all running instances.
 
-Format of the runtime URL (placeholders, not real values):
+Runtime URL format (placeholders, not real values):
 
-    DATABASE_URL = postgresql://postgres.<project-ref>:<password>@<pooler-host>:6543/postgres?pgbouncer=true&connection_limit=5&pool_timeout=20
-    DIRECT_URL   = postgresql://postgres.<project-ref>:<password>@<pooler-host>:5432/postgres
+    DATABASE_URL = postgresql://postgres.<project-ref>:<password>@<pooler-host>:6543/postgres?pgbouncer=true
 
-- `pgbouncer=true` is required in transaction mode (it turns off prepared statements, which a transaction pooler cannot keep).
-- `connection_limit=5`: Vercel runs several requests at the same time inside one instance, so one connection would make them
-  queue behind each other. Five is a small pool per instance; the pooler multiplexes them.
-- `lib/prisma.js` keeps a single client per process and connects on first use.
-- Roll back by putting the old `DATABASE_URL` back (session pooler, port 5432); no code change is needed.
+**`?pgbouncer=true` is required.** In transaction mode each query can run on a different real connection, so Prisma must not use
+prepared statements. Measured against this project's database with 24 queries in flight across 3 simulated server instances
+(read-only test, 144 queries):
+
+| URL | Result |
+|---|---|
+| port 6543, no suffix | **60 of 144 succeeded**; the rest failed with `prepared statement "sNN" does not exist` (Postgres error 26000) |
+| port 6543, `?pgbouncer=true` (the current Production value) | 144 of 144 succeeded |
+| port 6543, `?pgbouncer=true&connection_limit=5&pool_timeout=20` | 144 of 144 succeeded, same speed |
+
+`connection_limit` (connections per instance) and `pool_timeout` (seconds to wait for a free one) are **optional tuning**: no
+measurable difference was found, so they are not needed. Add them only if a problem shows up under load.
+
+Notes:
+- `lib/prisma.js` keeps a single client per process and connects on first use (it no longer connects when imported).
+- `DIRECT_URL` is not needed on Vercel (the production site runs without it).
+- If the connection ever misbehaves, check first that the value still ends with `?pgbouncer=true`.
 
 ## 3. Database access pattern
 
