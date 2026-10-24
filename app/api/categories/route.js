@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { randomUUID } from 'crypto';
 import { supabase, admin } from '@/lib/supabaseClients';
 import { requireAdmin } from '@/lib/adminAuth';
+import { revalidateCategoryById, revalidateStructure } from '@/lib/revalidate';
 
 export async function GET() {
   try {
@@ -119,6 +120,8 @@ export async function POST(request) {
       return NextResponse.json({ success: false, error: 'Failed to create category' }, { status: 500 });
     }
 
+    await revalidateCategoryById(newCategory.id);
+    await revalidateStructure();
     return NextResponse.json({ success: true, data: newCategory });
   } catch (error) {
     console.error('Error creating category:', error);
@@ -160,6 +163,9 @@ export async function PUT(request) {
       return NextResponse.json({ success: false, error: 'Failed to update category' }, { status: 500 });
     }
 
+    // Renames / moves change names and breadcrumbs on many pages; other edits (homepage toggle, image) only touch this category
+    await revalidateCategoryById(updatedCategory.id);
+    await revalidateStructure({ broad: name !== undefined || slug !== undefined || parentId !== undefined });
     return NextResponse.json({ success: true, message: 'Category updated successfully', data: updatedCategory });
   } catch (error) {
     console.error('Error updating category:', error);
@@ -192,6 +198,8 @@ export async function DELETE(request) {
       );
     }
 
+    const { data: before } = await admin.from('categories').select('slug, parent:parent_id(slug)').eq('id', id).single();
+
     const { error } = await admin.from('categories').delete().eq('id', id);
 
     if (error) {
@@ -199,6 +207,7 @@ export async function DELETE(request) {
       return NextResponse.json({ success: false, error: 'Failed to delete category' }, { status: 500 });
     }
 
+    await revalidateStructure({ slug: before?.slug, parentSlug: before?.parent?.slug, broad: true });
     return NextResponse.json({ success: true, message: 'Category deleted successfully' });
   } catch (error) {
     console.error('Error deleting category:', error);

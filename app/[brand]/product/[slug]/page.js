@@ -5,12 +5,13 @@ import ProductPageClient from './ProductPageClient';
 import { generateMetadata as genMeta, generateProductSchema, generateBreadcrumbSchema } from '@/lib/seo';
 import { getBrandByKey, getSiteUrl } from '@/config/brands';
 
+import { productStaticParams } from '@/lib/staticParams';
 // Cache for 2 minutes - ISR for fast page loads
-export const revalidate = 120;
+export const revalidate = 86400; // 24h; admin edits refresh the affected pages immediately (lib/revalidate.js)
 
-// Empty list: pages are built on first request, then cached and revalidated (ISR).
+// Most visited pages are built at deploy time; the rest on first request, then cached (see lib/staticParams.js).
 export async function generateStaticParams() {
-  return [];
+  return productStaticParams();
 }
 
 export async function generateMetadata({ params }) {

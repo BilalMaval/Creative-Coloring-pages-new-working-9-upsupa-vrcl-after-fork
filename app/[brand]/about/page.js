@@ -68,7 +68,7 @@ const FALLBACK_TEAM = [
                       },
 ];
 
-export const revalidate = 3600; // Cache for 1 hour
+export const revalidate = 86400; // 24h; admin edits refresh the affected pages immediately (lib/revalidate.js)
 
 async function getPageContent() {
   try {

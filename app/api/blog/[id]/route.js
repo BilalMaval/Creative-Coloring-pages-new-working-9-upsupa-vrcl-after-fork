@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { admin } from '@/lib/supabaseClients';
 import { requireAdmin } from '@/lib/adminAuth';
 
+import { revalidateBlog } from '@/lib/revalidate';
 // GET /api/blog/[id]
 export async function GET(request, { params }) {
   const { id } = await params;
@@ -24,6 +25,7 @@ export async function PUT(request, { params }) {
       .select()
       .single();
     if (error) return NextResponse.json({ success: false, error: error.message }, { status: 400 });
+    revalidateBlog(data.slug);
     return NextResponse.json({ success: true, data });
   } catch (e) {
     return NextResponse.json({ success: false, error: e.message }, { status: 500 });
@@ -35,8 +37,10 @@ export async function DELETE(request, { params }) {
   const denied = await requireAdmin(request);
   if (denied) return denied;
   const { id } = await params;
+  const { data: before } = await admin.from('blog_posts').select('slug').eq('id', id).single();
   const { error } = await admin.from('blog_posts').delete().eq('id', id);
   if (error) return NextResponse.json({ success: false, error: error.message }, { status: 400 });
+  revalidateBlog(before?.slug);
   return NextResponse.json({ success: true });
 }
 

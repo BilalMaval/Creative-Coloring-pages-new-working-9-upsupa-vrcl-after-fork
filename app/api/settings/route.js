@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { requireAdmin } from '@/lib/adminAuth';
 
+import { revalidateHome } from '@/lib/revalidate';
 // Without this Next prerenders GET at build time, which also makes PUT answer 405 and freezes the values
 export const dynamic = 'force-dynamic';
 
@@ -48,6 +49,7 @@ export async function PUT(request) {
       create: { key, value: String(value) }
     });
     
+    revalidateHome();
     return NextResponse.json({
       success: true,
       message: 'Setting updated successfully',

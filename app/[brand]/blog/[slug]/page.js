@@ -5,7 +5,7 @@ import { getAllPublishedPosts, getPostBySlug, formatDate } from '@/lib/blog-db';
 import { getBrandByKey, getSiteUrl } from '@/config/brands';
 import { cleanDescription } from '@/lib/seo';
 
-export const revalidate = 300;
+export const revalidate = 86400; // 24h; admin edits refresh the affected pages immediately (lib/revalidate.js)
 
 export async function generateStaticParams() {
   const posts = await getAllPublishedPosts();

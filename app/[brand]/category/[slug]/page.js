@@ -1,11 +1,12 @@
 import CategoryContent, { buildCategoryMetadata } from './CategoryContent';
 import { getBrandByKey } from '@/config/brands';
 
-export const revalidate = 120;
+import { categoryStaticParams } from '@/lib/staticParams';
+export const revalidate = 86400; // 24h; admin edits refresh the affected pages immediately (lib/revalidate.js)
 
-// Empty list: pages are built on first request, then cached and revalidated (ISR).
+// Most visited pages are built at deploy time; the rest on first request, then cached (see lib/staticParams.js).
 export async function generateStaticParams() {
-  return [];
+  return categoryStaticParams();
 }
 
 export async function generateMetadata({ params }) {

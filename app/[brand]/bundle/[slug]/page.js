@@ -4,11 +4,12 @@ import BundlePageClient from './BundlePageClient';
 import { generateMetadata as genMeta, generateBreadcrumbSchema } from '@/lib/seo';
 import { getBrandByKey, getSiteUrl } from '@/config/brands';
 
-export const revalidate = 120;
+import { bundleStaticParams } from '@/lib/staticParams';
+export const revalidate = 86400; // 24h; admin edits refresh the affected pages immediately (lib/revalidate.js)
 
 // Pages are built on first request, then cached (ISR), like product pages
 export async function generateStaticParams() {
-  return [];
+  return bundleStaticParams();
 }
 
 export async function generateMetadata({ params }) {

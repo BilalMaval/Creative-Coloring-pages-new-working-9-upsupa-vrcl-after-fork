@@ -28,7 +28,7 @@ export async function generateMetadata({ params }) {
 }
 
 // Cache for 1 hour - collections change infrequently; use on-demand revalidation from admin for updates
-export const revalidate = 3600;
+export const revalidate = 86400; // 24h; admin edits refresh the affected pages immediately (lib/revalidate.js)
 
 async function getHomeData() {
   try {

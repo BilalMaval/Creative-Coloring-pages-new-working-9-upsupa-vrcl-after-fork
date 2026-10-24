@@ -5,7 +5,7 @@ import { generateMetadata as genMeta } from '@/lib/seo';
 import { getBrandByKey } from '@/config/brands';
 
 // Revalidate every 5 minutes — new posts appear quickly after admin publishes
-export const revalidate = 300;
+export const revalidate = 86400; // 24h; admin edits refresh the affected pages immediately (lib/revalidate.js)
 
 export async function generateMetadata({ params }) {
   const { brand: brandKey } = await params;

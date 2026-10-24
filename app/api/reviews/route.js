@@ -3,6 +3,7 @@ import { randomUUID } from 'crypto';
 import { supabase, admin } from '@/lib/supabaseClients';
 import { requireAdmin } from '@/lib/adminAuth';
 
+import { revalidateProductById } from '@/lib/revalidate';
 // Map snake_case DB row → camelCase for the frontend
 function mapReview(row) {
   return {
@@ -124,6 +125,7 @@ export async function POST(request) {
 
     if (error) throw error;
 
+    await revalidateProductById(finalProductId);
     return NextResponse.json({ success: true, data: mapReview(data) }, { status: 201 });
   } catch (error) {
     console.error('Error creating review:', error);
@@ -142,9 +144,11 @@ export async function DELETE(request) {
       return NextResponse.json({ success: false, error: 'Review ID is required' }, { status: 400 });
     }
 
+    const { data: review } = await admin.from('reviews').select('product_id').eq('id', id).single();
     const { error } = await admin.from('reviews').delete().eq('id', id);
     if (error) throw error;
 
+    await revalidateProductById(review?.product_id);
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Error deleting review:', error);

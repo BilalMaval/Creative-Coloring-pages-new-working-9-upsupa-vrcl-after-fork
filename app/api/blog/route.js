@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { supabase, admin } from '@/lib/supabaseClients';
 import { requireAdmin, isAdminRequest } from '@/lib/adminAuth';
 
+import { revalidateBlog } from '@/lib/revalidate';
 // GET /api/blog?admin=1  — all posts for admin panel
 // GET /api/blog          — published only for public blog
 export async function GET(request) {
@@ -33,6 +34,7 @@ export async function POST(request) {
       .single();
 
     if (error) return NextResponse.json({ success: false, error: error.message }, { status: 400 });
+    revalidateBlog(data.slug);
     return NextResponse.json({ success: true, data }, { status: 201 });
   } catch (e) {
     return NextResponse.json({ success: false, error: e.message }, { status: 500 });

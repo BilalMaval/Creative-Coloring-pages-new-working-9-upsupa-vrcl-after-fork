@@ -64,6 +64,8 @@ const nextConfig = {
     }));
     return [
       ...renamedProducts,
+      // Old /printable/<slug> URLs: answered by the platform with a permanent redirect (no page render, no function call)
+      { source: '/printable/:slug', destination: '/product/:slug', permanent: true },
       // Category renamed (typo fix): keep old URLs and their link equity
       { source: '/category/solor-system', destination: '/category/solar-system', permanent: true },
       { source: '/category/solor-system/page/:n', destination: '/category/solar-system/page/:n', permanent: true },

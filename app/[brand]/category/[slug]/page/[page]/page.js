@@ -2,7 +2,7 @@ import { notFound, permanentRedirect } from 'next/navigation';
 import CategoryContent, { buildCategoryMetadata } from '../../CategoryContent';
 import { getBrandByKey } from '@/config/brands';
 
-export const revalidate = 120;
+export const revalidate = 86400; // 24h; admin edits refresh the affected pages immediately (lib/revalidate.js)
 
 export async function generateStaticParams() {
   return [];

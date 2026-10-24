@@ -5,7 +5,7 @@ import { generateMetadata as genMeta, generateBreadcrumbSchema } from '@/lib/seo
 import { getBrandByKey, getSiteUrl } from '@/config/brands';
 
 // ISR: cached for 2 minutes, and refreshed immediately when the admin edits a bundle
-export const revalidate = 120;
+export const revalidate = 86400; // 24h; admin edits refresh the affected pages immediately (lib/revalidate.js)
 
 export async function generateMetadata({ params }) {
   const { brand: brandKey } = await params;

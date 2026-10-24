@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { requireAdmin } from '@/lib/adminAuth';
 
+import { revalidateAbout } from '@/lib/revalidate';
 export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url);
@@ -66,6 +67,7 @@ export async function POST(request) {
       });
     }
     
+    revalidateAbout();
     return NextResponse.json({
       success: true,
       message: 'Page saved successfully'

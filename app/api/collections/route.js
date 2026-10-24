@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { randomUUID } from 'crypto';
 import { supabase, admin } from '@/lib/supabaseClients';
 import { requireAdmin } from '@/lib/adminAuth';
+import { revalidateStructure } from '@/lib/revalidate';
 
 // GET all collections (top-level categories where parent_id is null)
 export async function GET() {
@@ -96,6 +97,7 @@ export async function POST(request) {
       return NextResponse.json({ success: false, error: 'Failed to create collection' }, { status: 500 });
     }
 
+    await revalidateStructure({ slug: newCollection.slug });
     return NextResponse.json({ success: true, data: newCollection });
   } catch (error) {
     console.error('Error creating collection:', error);
@@ -134,6 +136,7 @@ export async function PUT(request) {
       return NextResponse.json({ success: false, error: 'Failed to update collection' }, { status: 500 });
     }
 
+    await revalidateStructure({ slug: updatedCollection.slug, broad: name !== undefined || slug !== undefined });
     return NextResponse.json({ success: true, message: 'Collection updated successfully', data: updatedCollection });
   } catch (error) {
     console.error('Error updating collection:', error);
@@ -179,6 +182,8 @@ export async function DELETE(request) {
       );
     }
 
+    const { data: collectionBefore } = await admin.from('categories').select('slug').eq('id', id).single();
+
     // Delete all child categories first
     if (childIds.length > 0) {
       await admin.from('categories').delete().in('id', childIds);
@@ -192,6 +197,7 @@ export async function DELETE(request) {
       return NextResponse.json({ success: false, error: 'Failed to delete collection' }, { status: 500 });
     }
 
+    await revalidateStructure({ slug: collectionBefore?.slug, broad: true });
     return NextResponse.json({ success: true, message: 'Collection deleted successfully' });
   } catch (error) {
     console.error('Error deleting collection:', error);

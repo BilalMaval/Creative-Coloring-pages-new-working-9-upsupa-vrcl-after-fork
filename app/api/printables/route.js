@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { randomUUID } from 'crypto';
 import { supabase, admin } from '@/lib/supabaseClients';
 import { requireAdmin, isAdminRequest } from '@/lib/adminAuth';
+import { revalidateProduct } from '@/lib/revalidate';
 
 export async function GET(request) {
   try {
@@ -151,6 +152,7 @@ export async function POST(request) {
       return NextResponse.json({ success: false, error: 'Failed to create printable' }, { status: 500 });
     }
 
+    await revalidateProduct({ slug: newProduct.slug, categoryId: newProduct.category_id });
     return NextResponse.json({ success: true, data: newProduct });
   } catch (error) {
     console.error('Error creating printable:', error);
@@ -200,6 +202,7 @@ export async function PUT(request) {
       return NextResponse.json({ success: false, error: 'Failed to update printable' }, { status: 500 });
     }
 
+    await revalidateProduct({ slug: updatedProduct.slug, categoryId: updatedProduct.category_id });
     return NextResponse.json({ success: true, message: 'Product updated successfully', data: updatedProduct });
   } catch (error) {
     console.error('Error updating printable:', error);
@@ -218,6 +221,9 @@ export async function DELETE(request) {
       return NextResponse.json({ success: false, error: 'Product ID is required' }, { status: 400 });
     }
 
+    // Remember where the product lived so those pages can be refreshed after it is gone
+    const { data: before } = await admin.from('products').select('slug, category_id').eq('id', id).single();
+
     // Delete related records first
     await admin.from('reviews').delete().eq('product_id', id);
     await admin.from('bundle_items').delete().eq('product_id', id);
@@ -231,6 +237,7 @@ export async function DELETE(request) {
       return NextResponse.json({ success: false, error: 'Failed to delete product: ' + error.message }, { status: 500 });
     }
 
+    if (before) await revalidateProduct({ slug: before.slug, categoryId: before.category_id });
     return NextResponse.json({ success: true, message: 'Product deleted successfully' });
   } catch (error) {
     console.error('Error deleting printable:', error);
