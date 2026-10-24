@@ -15,15 +15,23 @@ export default function ProductPageClient({ product, relatedProducts, bundles = 
   // Reviews submitted via the prompt are added here and passed directly to ReviewSection
   const [pendingReviews, setPendingReviews] = useState([]);
 
-  // Track page view once on mount
+  // Count a view only for a real visitor: the tab must be visible after 3 seconds, and each product counts once per browser
+  // session. Automated visitors are ignored on the server as well (lib/bots.js), so this is also a cheap first filter.
   useEffect(() => {
-    if (product?.id) {
+    if (!product?.id || navigator.webdriver) return undefined;
+    const key = `viewed:${product.id}`;
+    try { if (sessionStorage.getItem(key)) return undefined; } catch {}
+    const timer = setTimeout(() => {
+      if (document.visibilityState !== 'visible') return;
+      try { sessionStorage.setItem(key, '1'); } catch {}
       fetch('/api/views', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ productId: product.id }),
+        keepalive: true,
       }).catch(() => {});
-    }
+    }, 3000);
+    return () => clearTimeout(timer);
   }, [product?.id]);
   const formattedDate = new Date(product.createdAt).toLocaleDateString('en-US', {
     year: 'numeric',

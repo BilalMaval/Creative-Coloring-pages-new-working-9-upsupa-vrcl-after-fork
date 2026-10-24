@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { supabase, admin } from '@/lib/supabaseClients';
+import { supabase } from '@/lib/supabaseClients';
 import { isAdminRequest } from '@/lib/adminAuth';
 
 export async function GET(request, { params }) {
@@ -38,8 +38,7 @@ export async function GET(request, { params }) {
       categoryWithParent = { id: category.id, name: category.name, slug: category.slug, parent };
     }
 
-    // Increment views in background
-    admin.from('products').update({ views: (product.views || 0) + 1 }).eq('id', product.id).then(() => {});
+    // Views are counted only by /api/views (real browser visits); a plain API read must not write to the database
 
     // Paid file addresses stay private; the raw database column is removed so it cannot leak through the spread
     const { pdf_path: filePath, ...publicFields } = product;
