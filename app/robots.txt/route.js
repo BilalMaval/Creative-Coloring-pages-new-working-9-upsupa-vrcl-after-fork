@@ -31,7 +31,8 @@ Sitemap: ${baseUrl}/sitemap.xml`;
     status: 200,
     headers: {
       'Content-Type': 'text/plain',
-      'Cache-Control': 'public, max-age=3600, s-maxage=3600'
+      // Same host-dependent reasoning as the sitemap: cached per host by the CDN; the file almost never changes
+      'Cache-Control': 'public, max-age=3600, s-maxage=86400, stale-while-revalidate=604800'
     }
   });
 }

@@ -2,6 +2,7 @@ import { headers } from 'next/headers';
 import { getBrandByDomain, getSiteUrl } from '@/config/brands';
 import { getAllPublishedPosts } from '@/lib/blog-db';
 import { supabase } from '@/lib/supabaseClients';
+import { isCleanSlug } from '@/lib/slugs';
 
 export const dynamic = 'force-dynamic';
 
@@ -22,6 +23,9 @@ export async function GET() {
       .eq('is_active', true)
       .order('updated_at', { ascending: false });
 
+    // Only URLs that the site can actually serve (a slug with spaces or capitals would 404 and must never be listed)
+    const listedProducts = (products || []).filter((p) => isCleanSlug(p.slug));
+
     // Fetch all active categories (both collections and subcategories)
     const { data: categories } = await supabase
       .from('categories')
@@ -31,9 +35,9 @@ export async function GET() {
 
     // Empty categories/collections are noindexed on-page, so keep them out of the sitemap too
     const nonEmpty = new Set((products || []).map(p => p.category_id));
-    const listedCategories = (categories || []).filter(c => c.parent_id !== null && nonEmpty.has(c.id));
+    const listedCategories = (categories || []).filter(c => c.parent_id !== null && nonEmpty.has(c.id) && isCleanSlug(c.slug));
     const listedCollections = (categories || []).filter(
-      c => c.parent_id === null && (categories || []).some(k => k.parent_id === c.id && nonEmpty.has(k.id))
+      c => c.parent_id === null && isCleanSlug(c.slug) && (categories || []).some(k => k.parent_id === c.id && nonEmpty.has(k.id))
     );
 
     // Active bundles (a failure here must never break the whole sitemap)
@@ -44,11 +48,11 @@ export async function GET() {
         .select('slug, updated_at')
         .eq('is_active', true)
         .order('updated_at', { ascending: false });
-      bundleRows = bundles || [];
+      bundleRows = (bundles || []).filter((b) => isCleanSlug(b.slug));
     } catch {}
 
     // Blog posts — Supabase blog_posts is the single source of truth
-    const blogPosts = await getAllPublishedPosts();
+    const blogPosts = (await getAllPublishedPosts()).filter((p) => isCleanSlug(p.slug));
 
     // Static pages
     const staticPages = [
@@ -66,7 +70,7 @@ export async function GET() {
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <!-- Sitemap for ${brand.name} (${brand.domain}) -->
   <!-- Generated: ${currentDate} -->
-  <!-- Products: ${(products || []).length} | Categories: ${listedCategories.length} | Blog: ${blogPosts.length} -->
+  <!-- Products: ${listedProducts.length} | Categories: ${listedCategories.length} | Blog: ${blogPosts.length} -->
 ${staticPages.map(page => `  <url>
     <loc>${baseUrl}${page.url}</loc>
     <changefreq>${page.changefreq}</changefreq>
@@ -84,7 +88,7 @@ ${listedCategories.map(cat => `  <url>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>`).join('\n')}
-${(products || []).map(product => `  <url>
+${listedProducts.map(product => `  <url>
     <loc>${baseUrl}/product/${product.slug}</loc>
     <lastmod>${new Date(product.updated_at).toISOString()}</lastmod>
     <changefreq>monthly</changefreq>
@@ -113,7 +117,10 @@ ${blogPosts.map(post => `  <url>
     return new Response(sitemap, {
       headers: {
         'Content-Type': 'application/xml',
-        'Cache-Control': 'public, max-age=3600, s-maxage=3600',
+        // The page body depends on the requesting host (one sitemap per brand), so it cannot be a build-time static file.
+        // Instead the CDN keeps each host's copy for 6 hours (then serves it while refreshing in the background), so
+        // crawler fetches no longer run database queries every time. New pages appear in the sitemap within hours.
+        'Cache-Control': 'public, max-age=3600, s-maxage=21600, stale-while-revalidate=86400',
       },
     });
   } catch (error) {
