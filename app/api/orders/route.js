@@ -3,6 +3,7 @@ import prisma from '@/lib/prisma';
 import { v4 as uuidv4 } from 'uuid';
 import { sendOrderConfirmationEmail } from '@/lib/email';
 import { requireAdmin } from '@/lib/adminAuth';
+import { brandFromRequest, stripeSettings } from '@/lib/stripe';
 import { getOrderDownloads } from '@/lib/downloadAccess';
 import { priceItems, evaluateCoupon, claimCoupon, releaseCoupon, recordRedemption } from '@/lib/coupons';
 
@@ -34,6 +35,7 @@ export async function GET(request) {
 
     return NextResponse.json({
       success: true,
+      stripeMode: stripeSettings(brandFromRequest(request)).mode, // 'test' | 'live' | null
       data: orders,
       pagination: {
         page,
@@ -53,6 +55,12 @@ export async function GET(request) {
 
 // POST create new order
 export async function POST(request) {
+  // The old "demo" checkout created a PAID order for anyone, with no payment. Real orders now go through
+  // /api/stripe/create-checkout (Stripe for paid carts, instant completion for free carts). This endpoint stays only for local
+  // development and tests, and only when ALLOW_DEMO_CHECKOUT=true is set explicitly. Never set it on the live site.
+  if (process.env.ALLOW_DEMO_CHECKOUT !== 'true') {
+    return NextResponse.json({ success: false, error: 'Please use the secure checkout.' }, { status: 410 });
+  }
   try {
     const body = await request.json();
     const { email, customerName, couponCode } = body;

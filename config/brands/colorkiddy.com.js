@@ -56,6 +56,7 @@ const brand = {
     // Payment
     stripePublicKey: 'COLORKIDDY_STRIPE_PUBLIC_KEY',
     stripeSecretKey: 'COLORKIDDY_STRIPE_SECRET_KEY',
+    stripeWebhookSecret: 'COLORKIDDY_STRIPE_WEBHOOK_SECRET',
     paypalClientId: 'COLORKIDDY_PAYPAL_CLIENT_ID',
     paypalSecret: 'COLORKIDDY_PAYPAL_SECRET',
     

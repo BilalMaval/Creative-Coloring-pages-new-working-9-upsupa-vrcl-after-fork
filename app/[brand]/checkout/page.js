@@ -26,6 +26,8 @@ export default function CheckoutPage() {
   const [error, setError] = useState('');
   const [coupon, setCoupon] = useState(null);
   const [downloads, setDownloads] = useState([]);
+  const [redirecting, setRedirecting] = useState(false);
+  const [canceled, setCanceled] = useState(false);
   const [downloadingId, setDownloadingId] = useState(null);
 
   useEffect(() => {
@@ -112,29 +114,37 @@ export default function CheckoutPage() {
     setError('');
 
     try {
-      const res = await fetch('/api/orders', {
+      const res = await fetch('/api/stripe/create-checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           email: formData.email,
           customerName: formData.name,
           couponCode: coupon?.code || undefined,
+          // Only WHAT is in the cart is sent; the server works out every price itself
           items: cartItems.map(item => (
             item.type === 'bundle'
-              ? { bundleId: item.id, title: item.title, quantity: item.quantity }
-              : { productId: item.id, title: item.title, price: parseFloat(item.price) || 0, quantity: item.quantity }
+              ? { bundleId: item.id, quantity: item.quantity }
+              : { productId: item.id, quantity: item.quantity }
           ))
         })
       });
 
       const data = await res.json();
 
-      if (data.success) {
+      if (data.success && data.url) {
+        // Paid order: continue on Stripe's secure payment page (the cart stays saved until payment is confirmed)
+        setRedirecting(true);
+        window.location.assign(data.url);
+        return;
+      }
+
+      if (data.success && data.free) {
+        // Nothing to pay (free items or a 100% coupon): the order is complete right away
         setOrderNumber(data.orderNumber);
         setDownloads(Array.isArray(data.downloads) ? data.downloads : []);
         setCompletedItems([...cartItems]);
         setOrderComplete(true);
-        // Clear cart
         localStorage.removeItem('cart');
         localStorage.removeItem('appliedCoupon');
         window.dispatchEvent(new Event('cartUpdated'));
@@ -147,6 +157,14 @@ export default function CheckoutPage() {
       setProcessing(false);
     }
   };
+
+  // Coming back from Stripe with the browser's Back button must not leave the button stuck on "Redirecting..."
+  useEffect(() => {
+    const onShow = (e) => { if (e.persisted) { setRedirecting(false); setProcessing(false); } };
+    window.addEventListener('pageshow', onShow);
+    if (new URLSearchParams(window.location.search).get('canceled') === '1') setCanceled(true);
+    return () => window.removeEventListener('pageshow', onShow);
+  }, []);
 
   if (loading) {
     return (
@@ -280,10 +298,16 @@ export default function CheckoutPage() {
                   />
                 </div>
 
+                {canceled && (
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <p className="text-sm text-blue-900">Your payment was not completed and you have not been charged. Your cart is saved, so you can try again whenever you are ready.</p>
+                  </div>
+                )}
+
                 {total > 0 && (
-                  <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                    <p className="text-sm text-yellow-800">
-                      <strong>Demo Mode:</strong> This is a mock checkout. No real payment will be processed.
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                    <p className="text-sm text-green-900">
+                      <strong>Secure payment by Stripe.</strong> After you click the button you will pay on Stripe&apos;s own page with a card, Apple Pay or Google Pay. Your card details never touch our website, and your downloads unlock the moment the payment succeeds.
                     </p>
                   </div>
                 )}
@@ -294,8 +318,8 @@ export default function CheckoutPage() {
                   </div>
                 )}
 
-                <Button type="submit" className="w-full" size="lg" disabled={processing || cartItems.length === 0}>
-                  {processing ? 'Processing...' : total === 0 ? 'Complete Free Order' : `Pay $${total.toFixed(2)}`}
+                <Button type="submit" className="w-full" size="lg" disabled={processing || redirecting || cartItems.length === 0}>
+                  {redirecting ? 'Opening secure payment...' : processing ? 'Processing...' : total === 0 ? 'Complete Free Order' : `Pay $${total.toFixed(2)} securely`}
                 </Button>
 
                 <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">

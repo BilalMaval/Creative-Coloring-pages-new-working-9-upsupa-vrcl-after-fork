@@ -20,7 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Package, Eye, RefreshCw, Search } from 'lucide-react';
+import { Package, Eye, RefreshCw, Search, ExternalLink, Undo2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
@@ -30,6 +30,8 @@ export default function AdminOrdersPage() {
   const [statusFilter, setStatusFilter] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [pagination, setPagination] = useState({ page: 1, pages: 1, total: 0 });
+  const [stripeMode, setStripeMode] = useState(null);
+  const [refunding, setRefunding] = useState(null);
 
   const fetchOrders = async (page = 1, status = null) => {
     setLoading(true);
@@ -44,6 +46,7 @@ export default function AdminOrdersPage() {
       
       if (data.success) {
         setOrders(data.data);
+        setStripeMode(data.stripeMode || null);
         setPagination(data.pagination);
       }
     } catch (error) {
@@ -73,6 +76,33 @@ export default function AdminOrdersPage() {
       }
     } catch (error) {
       console.error('Error updating order:', error);
+    }
+  };
+
+  const refundOrder = async (order) => {
+    const total = parseFloat(order.total).toFixed(2);
+    const already = Number(order.metadata?.refundedCents || 0) / 100;
+    const answer = window.prompt(
+      `Refund order ${order.orderNumber} (total $${total}${already ? `, already refunded $${already.toFixed(2)}` : ''}).
+
+Type an amount in dollars for a partial refund, or leave empty for a FULL refund.
+A full refund also removes the customer's access to the downloads.`,
+      ''
+    );
+    if (answer === null) return; // cancelled
+    const amount = answer.trim() === '' ? undefined : Number(answer);
+    if (amount !== undefined && !(amount > 0)) { alert('Enter a valid amount, or leave it empty for a full refund.'); return; }
+    if (!window.confirm(amount === undefined ? `Refund the FULL remaining amount of order ${order.orderNumber} on the customer's card?` : `Refund $${amount.toFixed(2)} of order ${order.orderNumber}?`)) return;
+    setRefunding(order.id);
+    try {
+      const res = await fetch(`/api/admin/orders/${order.id}/refund`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(amount === undefined ? {} : { amount }) });
+      const data = await res.json();
+      if (!data.success) alert(data.error || 'The refund failed');
+      await fetchOrders(pagination.page, statusFilter === 'all' ? null : statusFilter);
+    } catch {
+      alert('The refund failed. Please try again.');
+    } finally {
+      setRefunding(null);
     }
   };
 
@@ -205,7 +235,25 @@ export default function AdminOrdersPage() {
                       )}
                     </TableCell>
                     <TableCell>{getStatusBadge(order.status)}</TableCell>
-                    <TableCell>{getPaymentBadge(order.paymentStatus)}</TableCell>
+                    <TableCell>
+                      {getPaymentBadge(order.paymentStatus)}
+                      <div className="text-xs text-muted-foreground mt-1">{order.paymentMethod || '-'}</div>
+                      {order.stripePaymentId && (
+                        <a
+                          href={`https://dashboard.stripe.com/${stripeMode === 'live' ? '' : 'test/'}payments/${order.stripePaymentId}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="text-xs text-blue-600 hover:underline inline-flex items-center gap-1"
+                        >
+                          View in Stripe <ExternalLink className="h-3 w-3" />
+                        </a>
+                      )}
+                      {Number(order.metadata?.refundedCents) > 0 && order.paymentStatus !== 'REFUNDED' && (
+                        <div className="text-xs text-orange-600">Refunded ${(Number(order.metadata.refundedCents) / 100).toFixed(2)}</div>
+                      )}
+                      {order.metadata?.dispute && <div className="text-xs font-semibold text-red-600">Dispute opened - answer it in Stripe</div>}
+                      {order.metadata?.paymentIssue && <div className="text-xs font-semibold text-red-600">Check: {order.metadata.paymentIssue}</div>}
+                    </TableCell>
                     <TableCell className="text-sm text-muted-foreground">
                       {new Date(order.createdAt).toLocaleDateString()}
                     </TableCell>
@@ -226,6 +274,11 @@ export default function AdminOrdersPage() {
                             <SelectItem value="REFUNDED">Refunded</SelectItem>
                           </SelectContent>
                         </Select>
+                        {order.stripePaymentId && order.paymentStatus === 'PAID' && (
+                          <Button variant="outline" size="sm" className="h-8" disabled={refunding === order.id} onClick={() => refundOrder(order)}>
+                            <Undo2 className="h-3 w-3 mr-1" /> {refunding === order.id ? 'Refunding...' : 'Refund'}
+                          </Button>
+                        )}
                       </div>
                     </TableCell>
                   </TableRow>

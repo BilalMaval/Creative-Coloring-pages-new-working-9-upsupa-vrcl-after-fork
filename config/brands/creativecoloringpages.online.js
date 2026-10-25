@@ -58,6 +58,7 @@ const brand = {
     // Payment
     stripePublicKey: 'CCP_STRIPE_PUBLIC_KEY',
     stripeSecretKey: 'CCP_STRIPE_SECRET_KEY',
+    stripeWebhookSecret: 'CCP_STRIPE_WEBHOOK_SECRET',
     paypalClientId: 'CCP_PAYPAL_CLIENT_ID',
     paypalSecret: 'CCP_PAYPAL_SECRET',
     
