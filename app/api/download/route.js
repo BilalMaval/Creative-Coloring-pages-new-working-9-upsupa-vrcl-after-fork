@@ -58,7 +58,7 @@ export async function GET(request) {
     }
 
     // Hand the browser a short-lived signed R2 link instead of proxying the bytes through this function:
-    // no 4.5MB response cap, no function time limit, no memory use, works for 50MB files.
+    // no 4.5MB response cap, no function time limit, no memory use, works for 300MB files.
     const ext = filePathParam.split('.').pop()?.toLowerCase();
     const asciiName = fileNameParam.replace(/[^A-Za-z0-9._ -]+/g, '_');
     const signedUrl = await getSignedUrl(

@@ -7,7 +7,7 @@ import { requireAdmin } from '@/lib/adminAuth';
 
 export const runtime = 'nodejs';
 
-// Admin only. Returns a short-lived signed URL so the browser can upload a downloadable file (up to 50MB)
+// Admin only. Returns a short-lived signed URL so the browser can upload a downloadable file (up to 300MB)
 // straight to R2, bypassing Vercel's 4.5MB request limit. The browser must PUT with the returned Content-Type.
 export async function POST(request) {
   const denied = await requireAdmin(request);

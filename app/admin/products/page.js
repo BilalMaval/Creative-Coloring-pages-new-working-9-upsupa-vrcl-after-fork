@@ -135,7 +135,7 @@ export default function AdminProductsPage() {
     });
   };
 
-  // Downloadable files (up to 50MB) go straight from the browser to storage with a signed URL,
+  // Downloadable files (up to 300MB) go straight from the browser to storage with a signed URL,
   // because Vercel rejects request bodies over 4.5MB.
   const putWithProgress = (url, file, contentType, onProgress) =>
     new Promise((resolve, reject) => {
@@ -151,8 +151,8 @@ export default function AdminProductsPage() {
     });
 
   const uploadDownloadableFile = async (file) => {
-    if (file.size > 50 * 1024 * 1024) {
-      alert('File too large. Max size: 50MB');
+    if (file.size > 300 * 1024 * 1024) {
+      alert('File too large. Max size: 300MB');
       return;
     }
     setUploading((prev) => ({ ...prev, pdf: true }));
@@ -831,7 +831,7 @@ export default function AdminProductsPage() {
                 {validationErrors.pdf && (
                   <div className="mt-1 p-2 bg-red-50 border border-red-200 rounded text-xs text-red-700">
                     <strong>⚠️ Required:</strong> This is the file customers will download<br/>
-                    <strong>Accepted formats:</strong> PDF, ZIP, EPUB, JPG, PNG • <strong>Max size:</strong> 50MB
+                    <strong>Accepted formats:</strong> PDF, ZIP, EPUB, JPG, PNG • <strong>Max size:</strong> 300MB
                   </div>
                 )}
                 {formData.pdfPath && (
